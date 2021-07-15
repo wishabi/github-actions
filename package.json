@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
-    "prepare": "ncc build index.js -o dist --source-map --license licenses.txt",
+    "prepare-main": "ncc build index.js -o dist --source-map",
+    "prepare-pre": "ncc build setup.js -o dist --source-map && mv dist/index.js dist/setup.js && mv dist/index.js.map dist/setup.js.map",
+    "prepare-post": "ncc build cleanup.js -o dist --source-map && mv dist/index.js dist/cleanup.js && mv dist/index.js.map dist/cleanup.js.map",
+    "prepare": "npm run prepare-pre && npm run prepare-post && npm run prepare-main",
     "test": "jest",
     "all": "npm run lint && npm run prepare && npm run test"
   },
