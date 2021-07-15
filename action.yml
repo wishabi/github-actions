@@ -1,0 +1,11 @@
+name: 'Flipp Global'
+description: 'Global action for Flipp workflows'
+inputs:
+  slack_channel:
+    description: 'Slack channel if you want to send notifications'
+    required: false
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
+  pre: 'dist/setup.js'
+  post: 'dist/cleanup.js'
