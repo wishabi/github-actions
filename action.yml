@@ -8,7 +8,7 @@ inputs:
     description: 'Set to true if you want to send on success as well'
     required: false
   job_status:
-    description: "Pass ${{job.status}} - REQUIRED if you want to send a Slack message."
+    description: "Pass `job.status` - REQUIRED if you want to send a Slack message."
     required: false
 runs:
   using: 'node12'
