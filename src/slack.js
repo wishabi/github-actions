@@ -24,6 +24,7 @@ const slack = (async () => {
       core.info("Slack only sending on failure and job succeeded - skipping notification")
       return;
     }
+    core.info("Sending Slack message...");
     const color = status === "failure" ? "danger" : "good"
     const text = status === "failure" ? "GitHub Action build failed!" : "GitHub Action build succeeded!"
     const token = process.env.SLACK_BOT_TOKEN;
@@ -44,7 +45,7 @@ const slack = (async () => {
     };
 
     await slack.chat.postMessage(args);
-    core.info(`Sent message: ${JSON.stringify(args)}`)
+    core.info(`Sent message to channel ${channel} (${channelId})`)
   } catch (error) {
     core.setFailed(error);
   }
