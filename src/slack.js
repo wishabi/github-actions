@@ -43,7 +43,7 @@ const slack = (async () => {
     };
 
     await slack.chat.postMessage(args);
-    core.info(`Sent message: ${args}`)
+    core.info(`Sent message: ${JSON.stringify(args)}`)
   } catch (error) {
     core.setFailed(error);
   }
