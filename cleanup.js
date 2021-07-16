@@ -1,8 +1,9 @@
 const core = require('@actions/core');
+const { slack } = require('./src/slack');
 
 async function run() {
   try {
-    core.info(`In post function`);
+    await slack();
   } catch (error) {
     core.setFailed(error.message);
   }

@@ -4,6 +4,12 @@ inputs:
   slack_channel:
     description: 'Slack channel if you want to send notifications'
     required: false
+  slack_always:
+    description: 'Set to true if you want to send on success as well'
+    required: false
+  job_status:
+    description: "Pass ${{job.status}} - REQUIRED if you want to send a Slack message."
+    required: false
 runs:
   using: 'node12'
   main: 'dist/index.js'
