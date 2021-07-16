@@ -22,6 +22,7 @@ const slack = (async () => {
     }
     if (!always && status !== "failure") {
       core.info("Slack only sending on failure and job succeeded - skipping notification")
+      return;
     }
     const color = status === "failure" ? "danger" : "good"
     const text = status === "failure" ? "GitHub Action build failed!" : "GitHub Action build succeeded!"
