@@ -18845,7 +18845,7 @@ async function run() {
     const status = core.getInput("job_status")
     const disableTmate = core.getInput("disable_tmate")
     await slack();
-    if (status === "failure" && !disableTmate && github.context.eventName === "workflow_dispatch") {
+    if (status === "failure" && !disableTmate && context.eventName === "workflow_dispatch") {
       await tmate();
     }
   } catch (error) {
