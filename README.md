@@ -34,7 +34,7 @@ If you need to debug your failed jobs, you can get a free tmate session to SSH i
 
 ![tmate connection info](./tmate1.png)
 
-When you're ready to complete your SSH session, enter the command `touch continue` when you are in your root or home directory. Note that *only the person who kicked off the workflow* will have access. In normal cases this will be the committer. You can re-run the job manually to give access to yourself if you are not the committer.
+Note that *only the person who kicked off the workflow* will have access. In normal cases this will be the committer. You can re-run the job manually to give access to yourself if you are not the committer.
 
 By default tmate sessions are **disabled** because they will cause your jobs to look like they're hanging for 10 minutes after they've failed. You can set the `enable_tmate` parameter to enable them.
 
