@@ -9,7 +9,7 @@ inputs:
     required: false
   job_status:
     description: "Pass `job.status` - REQUIRED if you want to send a Slack message."
-    required: false
+    required: true
 runs:
   using: 'node12'
   main: 'dist/index.js'

@@ -42,16 +42,6 @@ describe('slack', () => {
     expect(core.info).toHaveBeenCalledWith("No Slack channel provided - skipping Slack notification")
   })
 
-  test('does not send a message with no job status', async () => {
-    core.setInputs({
-      slack_channel: 'my-channel',
-      slack_always: false
-    })
-    await slack();
-    expect(postMessage).not.toHaveBeenCalled();
-    expect(core.setFailed).toHaveBeenCalledWith("Slack channel provided but no job status passed in!")
-  })
-
   test('does not send a message on success without slack_always', async() => {
     core.setInputs({
       slack_channel: 'my-channel',

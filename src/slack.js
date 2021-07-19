@@ -17,10 +17,6 @@ const slack = (async () => {
     return;
   }
   try {
-    if (!status) {
-      core.setFailed("Slack channel provided but no job status passed in!")
-      return;
-    }
     if (!always && status !== "failure") {
       core.info("Slack only sending on failure and job succeeded - skipping notification")
       return;
