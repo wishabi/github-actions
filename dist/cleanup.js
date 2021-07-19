@@ -14351,6 +14351,7 @@ const slack = (async () => {
   }
   if (status === "cancelled") {
     core.info("Job cancelled, skipping notification")
+    return;
   }
   try {
     if (!status) {
@@ -14359,17 +14360,19 @@ const slack = (async () => {
     }
     if (!always && status !== "failure") {
       core.info("Slack only sending on failure and job succeeded - skipping notification")
+      return;
     }
+
     const color = status === "failure" ? "danger" : "good"
     const text = status === "failure" ? "GitHub Action build failed!" : "GitHub Action build succeeded!"
     const token = process.env.SLACK_BOT_TOKEN;
     const slack = new WebClient(token);
 
-    const attachments = buildSlackAttachments({ status, color, github });
+    const attachments = buildSlackAttachments({ color, github });
     const channelId = await lookUpChannelId({ slack, channel });
 
     if (!channelId) {
-      core.setFailed(`Slack channel ${channel} could not be found.`);
+      core.setFailed(`Slack channel #${channel} could not be found.`);
       return;
     }
 
@@ -14380,7 +14383,7 @@ const slack = (async () => {
     };
 
     await slack.chat.postMessage(args);
-    core.info(`Sent message: ${JSON.stringify(args)}`)
+    core.info(`Sent message to channel ${channel} (${channelId})`)
   } catch (error) {
     core.setFailed(error);
   }
@@ -14414,7 +14417,7 @@ module.exports.slack = slack;
 
 const { context } = __nccwpck_require__(5438);
 
-function buildSlackAttachments({ status, color, github }) {
+function buildSlackAttachments({ color, github }) {
   const { payload, ref, job, eventName } = github.context;
   const { owner, repo } = context.repo;
   const event = eventName;
