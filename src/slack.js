@@ -14,6 +14,7 @@ const slack = (async () => {
   }
   if (status === "cancelled") {
     core.info("Job cancelled, skipping notification")
+    return;
   }
   try {
     if (!status) {
@@ -30,11 +31,11 @@ const slack = (async () => {
     const token = process.env.SLACK_BOT_TOKEN;
     const slack = new WebClient(token);
 
-    const attachments = buildSlackAttachments({ status, color, github });
+    const attachments = buildSlackAttachments({ color, github });
     const channelId = await lookUpChannelId({ slack, channel });
 
     if (!channelId) {
-      core.setFailed(`Slack channel ${channel} could not be found.`);
+      core.setFailed(`Slack channel #${channel} could not be found.`);
       return;
     }
 
