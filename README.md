@@ -14,13 +14,13 @@ Source code is based on [github-action-slack-notify-build](https://github.com/vo
 
 ## Tmate SSH sessions
 
-If you need to debug your failed jobs, you will get a free tmate session to SSH into the box and root around. The tmate connection info will be printed out in the "Post-Flipp Global" step so you can connect.
-
-Tmate will only be enabled for *manually run workflows*.
+If you need to debug your failed jobs, you can get a free tmate session to SSH into the box and root around. The tmate connection info will be printed out in the "Post-Flipp Global" step so you can connect.
 
 ![tmate connection info](./tmate1.png)
 
 When you're ready to complete your SSH session, enter the command `touch continue` when you are in your root or home directory. Note that *only the person who kicked off the workflow* will have access. In normal cases this will be the committer. You can re-run the job manually to give access to yourself if you are not the committer.
+
+By default tmate sessions are **disabled** because they will cause your jobs to look like they're hanging for 10 minutes after they've failed. You can set the `enable_tmate` parameter to enable them.
 
 Source code has been copied from [action-tmate](https://github.com/mxschmitt/action-tmate).
 
@@ -31,7 +31,7 @@ Configuration|Required?|Description
 job_status|Yes|The value for this should always be `"${{ job.status }}"`. Unfortunately GitHub Actions doesn't have a way for the action itself to figure out if the job failed.
 slack_channel|No|The Slack channel to send updates to. Recommendation is to set a top-level environment variable (`SLACK_CHANNEL`) and pass it in to all calls to this action to avoid having to find/replace things later on. If this value is not provided, Slack notifications won't happen.
 slack_always|No|If set, both success and failure notifications will be sent to Slack.
-disable_tmate|No|If set, tmate sessions will not be created on failure.
+enable_tmate|No|If set, tmate sessions will be created on failure.
 
 ## Contributing
 

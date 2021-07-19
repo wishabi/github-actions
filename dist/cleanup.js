@@ -18838,14 +18838,13 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(2186);
 const { slack } = __nccwpck_require__(9393);
 const { tmate } = __nccwpck_require__(4302);
-const { context } = __nccwpck_require__(5438);
 
 async function run() {
   try {
     const status = core.getInput("job_status")
-    const disableTmate = core.getInput("disable_tmate")
+    const enableTmate = core.getInput("disable_tmate")
     await slack();
-    if (status === "failure" && !disableTmate && context.eventName === "workflow_dispatch") {
+    if (status === "failure" && enableTmate) {
       await tmate();
     }
   } catch (error) {
