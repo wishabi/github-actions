@@ -15,7 +15,7 @@ const TMATE_LINUX_VERSION = "2.4.0"
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function tmate() {
-  const optionalSudoPrefix = core.getInput('sudo') === "true" ? "sudo " : "";
+  const optionalSudoPrefix = "sudo";
   try {
     core.debug("Installing dependencies")
     let tmateExecutable = "tmate"
