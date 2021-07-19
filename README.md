@@ -6,6 +6,22 @@ This is a GitHub Action to be used in workflows at Flipp.
 
 This action should be included in every job in every workflow. It provides tools that should be useful across all workflows, particularly in the pre/post steps. Having all this in one action should reduce noise in your config files and allow you to get new updates "for free" in the future.
 
+A sample configuration may look like this:
+
+```yaml
+    - name: Flipp global
+      uses: wishabi/github-actions@v0.3.6
+      timeout-minutes: 10
+      env:
+        SLACK_BOT_TOKEN: "${{ secrets.SLACK_BOT_TOKEN }}"
+      with:
+        slack_channel: "${{env.SLACK_CHANNEL }}"
+        job_status: "${{ job.status }}"
+        enable_tmate: true
+```
+
+It doesn't matter where in the job this step appears, as only the pre/post steps are used.
+
 ## Slack Notifications
 
 GitHub Actions does not have a native Slack integration, so this action will send a notification when your job fails. By default, only failed jobs will get a notification. 
