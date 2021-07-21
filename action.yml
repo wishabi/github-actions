@@ -10,8 +10,8 @@ inputs:
   job_status:
     description: "Pass `job.status` - REQUIRED if you want to send a Slack message."
     required: true
-  enable_tmate:
-    description: "If set, create tmate debug sessions on job failure."
+  enable_ssh:
+    description: "If set, create SSH debug sessions on job failure."
     required: false
 runs:
   using: 'node12'

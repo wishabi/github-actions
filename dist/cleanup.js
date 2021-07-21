@@ -18842,7 +18842,7 @@ const { tmate } = __nccwpck_require__(4302);
 async function run() {
   try {
     const status = core.getInput("job_status")
-    const enableTmate = core.getInput("enable_tmate")
+    const enableSSH = core.getInput("enable_ssh")
     await slack();
     if (status === "failure" && enableTmate) {
       await tmate();
