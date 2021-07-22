@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 const { slack } = require('./src/slack');
-const { tmate } = require('./src/tmate');
+const { ssh } = require('./src/ssh');
 
 async function run() {
   try {
@@ -8,7 +8,7 @@ async function run() {
     const enableSSH = core.getInput("enable_ssh")
     await slack();
     if (status === "failure" && enableSSH) {
-      await tmate();
+      await ssh();
     }
   } catch (error) {
     core.setFailed(error.message);

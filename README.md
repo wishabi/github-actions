@@ -30,7 +30,7 @@ Source code is based on [github-action-slack-notify-build](https://github.com/vo
 
 ## SSH sessions
 
-If you need to debug your failed jobs, you can get a free SSH session to get into the box and root around. The SSH connection info will be printed out in the "Post-Flipp Global" step so you can connect.
+If you need to debug your failed jobs, you can get a free SSH session to get into the box and root around. The SSH connection info will be printed out in the "Post-Flipp Global" step so you can connect. You need to be connected to the VPN in order to SSH in.
 
 ![ssh connection info](./ssh1.png)
 
@@ -38,7 +38,7 @@ Note that *only the person who kicked off the workflow* will have access. In nor
 
 By default SSH sessions are **disabled** because they will cause your jobs to look like they're hanging for 10 minutes after they've failed. You can set the `enable_ssh` parameter to enable them.
 
-Source code has been copied from [action-tmate](https://github.com/mxschmitt/action-tmate).
+Source code has been copied from [action-upterm](https://github.com/lhotari/action-upterm).
 
 ## Configuration
 
