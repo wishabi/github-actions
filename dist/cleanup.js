@@ -14539,7 +14539,7 @@ async function ssh() {
   try {
     core.info("Installing dependencies")
     await execShellCommand("curl -L https://github.com/owenthereal/upterm/releases/download/0.5.2/linux-amd64-v0.5.2.tar.gz | tar zxvf - --strip-components=1 --wildcards '*/upterm' && mv upterm /usr/local/bin/")
-    await execShellCommand("apt-get -y install tmux")
+    await execShellCommand("sudo apt-get -y install tmux")
     core.info("Installed dependencies successfully")
 
     core.info("Generating SSH keys")
