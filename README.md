@@ -30,7 +30,7 @@ Source code is based on [github-action-slack-notify-build](https://github.com/vo
 
 ## SSH sessions
 
-If you need to debug your failed jobs, you can get a free SSH session to get into the box and root around. The SSH connection info will be printed out in the "Post-Flipp Global" step so you can connect.
+If you need to debug your failed jobs, you can get a free SSH session to get into the box and root around. The SSH connection info will be printed out in the "Post-Flipp Global" step so you can connect. You need to be connected to the VPN in order to SSH in.
 
 ![ssh connection info](./ssh1.png)
 

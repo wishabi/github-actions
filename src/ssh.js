@@ -34,9 +34,9 @@ export async function ssh() {
       await execShellCommand('cat <(cat ~/.ssh/known_hosts | awk \'{ print "@cert-authority * " $2 " " $3 }\') >> ~/.ssh/known_hosts')
     } catch { }
     core.debug("Creating new session")
-    await execShellCommand("tmux new -d -s upterm-wrapper -x 132 -y 43 \"upterm host --force-command 'tmux attach -t upterm' -- tmux new -s upterm -x 132 -y 43\"")
+    await execShellCommand("sudo tmux new -d -s upterm-wrapper -x 132 -y 43 \"upterm host --force-command 'tmux attach -t upterm' -- tmux new -s upterm -x 132 -y 43\"")
     await new Promise(r => setTimeout(r, 2000))
-    await execShellCommand("tmux send-keys -t upterm-wrapper q C-m")
+    await execShellCommand("sudo tmux send-keys -t upterm-wrapper q C-m")
     console.debug("Created new session successfully")
 
     core.debug("Fetching connection strings")
