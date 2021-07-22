@@ -11,8 +11,8 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 export async function ssh() {
   try {
     core.info("Installing dependencies")
-    await execShellCommand("curl -L https://github.com/owenthereal/upterm/releases/download/0.5.2/linux-amd64-v0.5.2.tar.gz | tar zxvf - --strip-components=1 --wildcards '*/upterm' && sudo mv upterm /usr/local/bin/")
-    await execShellCommand("sudo apt-get -y install tmux")
+    await execShellCommand("curl -L https://github.com/owenthereal/upterm/releases/download/0.5.2/linux-amd64-v0.5.2.tar.gz | tar zxvf - --strip-components=1 --wildcards '*/upterm' && mv upterm /usr/local/bin/")
+    await execShellCommand("apt-get -y install tmux")
     core.info("Installed dependencies successfully")
 
     core.info("Generating SSH keys")
@@ -27,16 +27,16 @@ export async function ssh() {
     // entry in known hosts file in mandatory in upterm. attempt ssh connection to upterm server
     // to get the host key added to ~/.ssh/known_hosts
     try {
-      await execShellCommand("sudo ssh -i ~/.ssh/id_ed25519 upterm.flippback.com")
+      await execShellCommand("ssh -i ~/.ssh/id_ed25519 upterm.flippback.com")
     } catch { }
     // @cert-authority entry is the mandatory entry. generate the entry based on the known_hosts entry key
     try {
       await execShellCommand('cat <(cat ~/.ssh/known_hosts | awk \'{ print "@cert-authority * " $2 " " $3 }\') >> ~/.ssh/known_hosts')
     } catch { }
     core.info("Creating new session")
-    await execShellCommand("sudo tmux new -d -s upterm-wrapper -x 132 -y 43 \"upterm host --force-command 'tmux attach -t upterm' -- tmux new -s upterm -x 132 -y 43\"")
+    await execShellCommand("tmux new -d -s upterm-wrapper -x 132 -y 43 \"upterm host --force-command 'tmux attach -t upterm' -- tmux new -s upterm -x 132 -y 43\"")
     await new Promise(r => setTimeout(r, 2000))
-    await execShellCommand("sudo tmux send-keys -t upterm-wrapper q C-m")
+    await execShellCommand("tmux send-keys -t upterm-wrapper q C-m")
     console.debug("Created new session successfully")
 
     core.info("Fetching connection strings")
