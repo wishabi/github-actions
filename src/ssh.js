@@ -6,7 +6,6 @@ import * as core from "@actions/core"
 
 import { execShellCommand } from "./sshUtils"
 
-/** @param {number} ms */
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function ssh() {
@@ -14,8 +13,7 @@ export async function ssh() {
     core.debug("Installing dependencies")
     await execShellCommand("curl -L https://github.com/owenthereal/upterm/releases/download/0.5.2/linux-amd64-v0.5.2.tar.gz | tar zxvf - --strip-components=1 --wildcards '*/upterm' && sudo mv upterm /usr/local/bin/")
     await execShellCommand("sudo apt-get -y install tmux")
-
-    core.debug("Installed dependencies successfully");
+    core.debug("Installed dependencies successfully")
 
     core.debug("Generating SSH keys")
     fs.mkdirSync(path.join(os.homedir(), ".ssh"), { recursive: true })
@@ -24,7 +22,6 @@ export async function ssh() {
     } catch { }
     core.debug("Generated SSH keys successfully")
     core.debug("Configuring ssh client")
-
     fs.appendFileSync(path.join(os.homedir(), ".ssh/config"), "Host *\nStrictHostKeyChecking no\nCheckHostIP no\n" +
       "TCPKeepAlive yes\nServerAliveInterval 30\nServerAliveCountMax 180\nVerifyHostKeyDNS yes\nUpdateHostKeys yes\n")
     // entry in known hosts file in mandatory in upterm. attempt ssh connection to upterm server
@@ -37,7 +34,7 @@ export async function ssh() {
       await execShellCommand('cat <(cat ~/.ssh/known_hosts | awk \'{ print "@cert-authority * " $2 " " $3 }\') >> ~/.ssh/known_hosts')
     } catch { }
     core.debug("Creating new session")
-    await execShellCommand("tmux new -d -s upterm-wrapper -x 132 -y 43 \"upterm host --server ssh://upterm.flippback.com:22 --force-command 'tmux attach -t upterm' -- tmux new -s upterm -x 132 -y 43\"")
+    await execShellCommand("tmux new -d -s upterm-wrapper -x 132 -y 43 \"upterm host --force-command 'tmux attach -t upterm' -- tmux new -s upterm -x 132 -y 43\"")
     await new Promise(r => setTimeout(r, 2000))
     await execShellCommand("tmux send-keys -t upterm-wrapper q C-m")
     console.debug("Created new session successfully")
