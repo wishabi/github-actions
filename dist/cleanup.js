@@ -14554,7 +14554,7 @@ async function ssh() {
     // entry in known hosts file in mandatory in upterm. attempt ssh connection to upterm server
     // to get the host key added to ~/.ssh/known_hosts
     try {
-      await execShellCommand("ssh -i ~/.ssh/id_ed25519 uptermd.upterm.dev")
+      await execShellCommand("sudo ssh -i ~/.ssh/id_ed25519 uptermd.upterm.dev")
     } catch { }
     // @cert-authority entry is the mandatory entry. generate the entry based on the known_hosts entry key
     try {
