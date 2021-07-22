@@ -38,7 +38,7 @@ Note that *only the person who kicked off the workflow* will have access. In nor
 
 By default SSH sessions are **disabled** because they will cause your jobs to look like they're hanging for 10 minutes after they've failed. You can set the `enable_ssh` parameter to enable them.
 
-Source code has been copied from [action-tmate](https://github.com/mxschmitt/action-tmate).
+Source code has been copied from [action-upterm](https://github.com/lhotari/action-upterm).
 
 ## Configuration
 
