@@ -14537,18 +14537,18 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function ssh() {
   try {
-    core.debug("Installing dependencies")
+    core.info("Installing dependencies")
     await execShellCommand("curl -L https://github.com/owenthereal/upterm/releases/download/0.5.2/linux-amd64-v0.5.2.tar.gz | tar zxvf - --strip-components=1 --wildcards '*/upterm' && sudo mv upterm /usr/local/bin/")
     await execShellCommand("sudo apt-get -y install tmux")
-    core.debug("Installed dependencies successfully")
+    core.info("Installed dependencies successfully")
 
-    core.debug("Generating SSH keys")
+    core.info("Generating SSH keys")
     external_fs_default().mkdirSync(external_path_default().join(external_os_default().homedir(), ".ssh"), { recursive: true })
     try {
       await execShellCommand(`ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa; ssh-keygen -q -t ed25519 -N "" -f ~/.ssh/id_ed25519`);
     } catch { }
-    core.debug("Generated SSH keys successfully")
-    core.debug("Configuring ssh client")
+    core.info("Generated SSH keys successfully")
+    core.info("Configuring ssh client")
     external_fs_default().appendFileSync(external_path_default().join(external_os_default().homedir(), ".ssh/config"), "Host *\nStrictHostKeyChecking no\nCheckHostIP no\n" +
       "TCPKeepAlive yes\nServerAliveInterval 30\nServerAliveCountMax 180\nVerifyHostKeyDNS yes\nUpdateHostKeys yes\n")
     // entry in known hosts file in mandatory in upterm. attempt ssh connection to upterm server
@@ -14560,13 +14560,13 @@ async function ssh() {
     try {
       await execShellCommand('cat <(cat ~/.ssh/known_hosts | awk \'{ print "@cert-authority * " $2 " " $3 }\') >> ~/.ssh/known_hosts')
     } catch { }
-    core.debug("Creating new session")
+    core.info("Creating new session")
     await execShellCommand("sudo tmux new -d -s upterm-wrapper -x 132 -y 43 \"upterm host --force-command 'tmux attach -t upterm' -- tmux new -s upterm -x 132 -y 43\"")
     await new Promise(r => setTimeout(r, 2000))
     await execShellCommand("sudo tmux send-keys -t upterm-wrapper q C-m")
     console.debug("Created new session successfully")
 
-    core.debug("Fetching connection strings")
+    core.info("Fetching connection strings")
     await new Promise(r => setTimeout(r, 1000))
 
     console.debug("Entering main loop")
