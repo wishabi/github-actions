@@ -10,7 +10,7 @@ A sample configuration may look like this:
 
 ```yaml
     - name: Flipp global
-      uses: wishabi/github-actions@v0.3.6
+      uses: wishabi/github-actions@v0.4
       timeout-minutes: 10
       env:
         SLACK_BOT_TOKEN: "${{ secrets.SLACK_BOT_TOKEN }}"
