@@ -18844,7 +18844,7 @@ async function run() {
     const status = core.getInput("job_status")
     const enableSSH = core.getInput("enable_ssh")
     await slack();
-    if (status === "failure" && enableTmate) {
+    if (status === "failure" && enableSSH) {
       await tmate();
     }
   } catch (error) {
