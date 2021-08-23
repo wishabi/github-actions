@@ -13,6 +13,9 @@ inputs:
   enable_ssh:
     description: "If set, create SSH debug sessions on job failure."
     required: false
+  ssh_always:
+    description: "If set, always create SSH debug sessions even on success."
+    required: false
 runs:
   using: 'node12'
   main: 'dist/index.js'
