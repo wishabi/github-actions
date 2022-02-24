@@ -48,6 +48,7 @@ job_status|Yes|The value for this should always be `"${{ job.status }}"`. Unfort
 slack_channel|No|The Slack channel to send updates to. Recommendation is to set a top-level environment variable (`SLACK_CHANNEL`) and pass it in to all calls to this action to avoid having to find/replace things later on. If this value is not provided, Slack notifications won't happen.
 slack_always|No|If set, both success and failure notifications will be sent to Slack.
 enable_ssh|No|If set, SSH sessions will be created on failure.
+ssh_always|No|If set, SSH sessions will always be created, even on success.
 
 ## Contributing
 
