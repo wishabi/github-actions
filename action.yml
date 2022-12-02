@@ -17,7 +17,7 @@ inputs:
     description: "If set, always create SSH debug sessions even on success."
     required: false
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'
   pre: 'dist/setup.js'
   post: 'dist/cleanup.js'
