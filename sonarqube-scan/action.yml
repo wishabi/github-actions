@@ -1,23 +1,38 @@
-name: 'Hello World'
-description: 'Greet someone'
+name: 'SonarQube Quality Scan'
+description: 'Runs various quality and security checks against changes'
 inputs:
-  who-to-greet:  # id of input
-    description: 'Who to greet'
+  FLIPPCIRCLECIPULLER_REPO_TOKEN:
+    description: secret value
     required: true
-    default: 'World'
-outputs:
-  random-number:
-    description: "Random number"
-    value: ${{ steps.random-number-generator.outputs.random-number }}
+  SONAR_HOST_URL:
+    description: secret value
+    required: true
+  SONAR_TOKEN:
+    description: secret value
+    required: true
 runs:
   using: "composite"
   steps:
-    - run: echo Hello ${{ inputs.who-to-greet }}.
-      shell: bash
-    - id: random-number-generator
-      run: echo "random-number=$(echo $RANDOM)" >> $GITHUB_OUTPUT
-      shell: bash
-    - run: echo "${{ github.action_path }}" >> $GITHUB_PATH
-      shell: bash
-    - run: goodbye.sh
-      shell: bash
+    - name: Setup private modules access
+      run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v3
+      with:
+        go-version: '1.19'
+        check-latest: true
+        cache: true
+    - name: Download test report
+      uses: actions/download-artifact@v3
+      with:
+        name: "${{ github.sha }}-test-report.out"
+    - name: Download coverage
+      uses: actions/download-artifact@v3
+      with:
+        name: "${{ github.sha }}-coverage.out"
+    - name: SonarQube Scan
+      run: |
+        export PATH=/home/circleci/_work/sonar-scanner/bin:$PATH
+        sonar-scanner \
+        -Dsonar.projectVersion=${GITHUB_SHA::7} \
+        -Dsonar.host.url=${{ inputs.SONAR_HOST_URL }} \
+        -Dsonar.login=${{ inputs.SONAR_TOKEN }}
