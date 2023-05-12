@@ -13,9 +13,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Setup private modules access
-      run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
+    - name: Install dependencies for build and test
       shell: bash
+      run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
