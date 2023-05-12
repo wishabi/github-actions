@@ -27,15 +27,9 @@ runs:
       with:
         name: "${{ github.sha }}-test-report.out"
     - name: Download coverage
-      shell: bash
       uses: actions/download-artifact@v3
       with:
         name: "${{ github.sha }}-coverage.out"
     - name: SonarQube Scan
-      shell: bash
-      run: |
-        export PATH=/home/circleci/_work/sonar-scanner/bin:$PATH
-        sonar-scanner \
-        -Dsonar.projectVersion=${GITHUB_SHA::7} \
-        -Dsonar.host.url=${{ inputs.SONAR_HOST_URL }} \
-        -Dsonar.login=${{ inputs.SONAR_TOKEN }}
+      - run: export PATH=/home/circleci/_work/sonar-scanner/bin:$PATH sonar-scanner -Dsonar.projectVersion=${GITHUB_SHA::7} -Dsonar.host.url=${{ inputs.SONAR_HOST_URL }} -Dsonar.login=${{ inputs.SONAR_TOKEN }} 
+        shell: bash
