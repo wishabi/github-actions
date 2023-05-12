@@ -1,0 +1,20 @@
+name: 'buf-build'
+description: 'TODO'
+inputs:
+  BUF_BUILD_USER:
+    description: buf CI user stored as secret
+    required: true
+  BUF_BUILD_API_TOKEN:
+    description: buf API token stored as secret
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v3
+    - uses: bufbuild/buf-setup-action@v1
+      with:
+        buf_user: ${{ inputs.BUF_BUILD_USER }}
+        buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
+    - name: Generate protobuf code
+      shell: bash
+      run: buf generate buf.build/flipp/platform-protos

@@ -1,28 +1,18 @@
-name: 'Go Test Action'
-description: 'TODO'
+name: 'go-build-test'
+description: 'Go build and test custom github action'
 inputs:
-  BUF_BUILD_USER:
-    description: secret value
+  GO_VERSION:
     required: true
-  BUF_BUILD_API_TOKEN:
-    description: secret value
-    required: true
+
 runs:
   using: 'composite'
   steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
-        go-version: '1.19'    # TODO: make env var?
+        go-version: ${{ inputs.GO_VERSION }}
         check-latest: true
         cache: true
-    - uses: bufbuild/buf-setup-action@v1
-      with:
-        buf_user: ${{ inputs.BUF_BUILD_USER }}
-        buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
-    - name: Generate protobuf code
-      shell: bash
-      run: buf generate buf.build/flipp/platform-protos
     - name: Restore vendor modules from cache
       id: vendor-cache
       uses: actions/cache@v3
@@ -32,7 +22,7 @@ runs:
         restore-keys: vendor-cache-${{ hashFiles('go.sum') }}
     - name: Install dependencies for build and test
       shell: bash
-      if: steps.vendor-cache.outputs.cache-hit != 'true'
+      # if: steps.vendor-cache.outputs.cache-hit != 'true'
       run: go mod vendor
     - name: Validate package and install dependencies
       shell: bash
