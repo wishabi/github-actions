@@ -1,9 +1,6 @@
 name: 'Go Test Action'
 description: 'TODO'
 inputs:
-  FLIPPCIRCLECIPULLER_REPO_TOKEN:
-    description: secret value
-    required: true
   BUF_BUILD_USER:
     description: secret value
     required: true
@@ -13,9 +10,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Setup private modules access
-      shell: bash
-      run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
@@ -39,9 +33,7 @@ runs:
     - name: Install dependencies for build and test
       shell: bash
       if: steps.vendor-cache.outputs.cache-hit != 'true'
-      run: |
-        git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
-        go mod vendor
+      run: go mod vendor
     - name: Validate package and install dependencies
       shell: bash
       run: go mod tidy
