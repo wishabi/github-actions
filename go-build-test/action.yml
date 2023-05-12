@@ -5,6 +5,15 @@ inputs:
     required: true
   FLIPPCIRCLECIPULLER_REPO_TOKEN:
     required: true
+  BUF_BUILD_USER:
+    description: buf CI user stored as secret
+    required: true
+  BUF_BUILD_API_TOKEN:
+    description: buf API token stored as secret
+    required: true
+  BUF_REPO_NAME:
+    description: name of the buf repo to be built
+    required: true
 
 runs:
   using: 'composite'
@@ -15,6 +24,13 @@ runs:
         go-version: ${{ inputs.GO_VERSION }}
         check-latest: true
         cache: true
+    - uses: bufbuild/buf-setup-action@v1
+      with:
+        buf_user: ${{ inputs.BUF_BUILD_USER }}
+        buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
+    - name: Generate protobuf code
+      shell: bash
+      run: buf generate ${{ inputs.BUF_REPO_NAME }}
     - name: Restore vendor modules from cache
       id: vendor-cache
       uses: actions/cache@v3
