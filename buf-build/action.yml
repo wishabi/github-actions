@@ -1,11 +1,14 @@
 name: 'buf-build'
-description: 'TODO'
+description: 'BUF build custom github action'
 inputs:
   BUF_BUILD_USER:
     description: buf CI user stored as secret
     required: true
   BUF_BUILD_API_TOKEN:
     description: buf API token stored as secret
+    required: true
+  BUF_REPO_NAME:
+    description: name of the buf repo to be built
     required: true
 runs:
   using: 'composite'
@@ -17,4 +20,4 @@ runs:
         buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
     - name: Generate protobuf code
       shell: bash
-      run: buf generate buf.build/flipp/platform-protos
+      run: buf generate ${{ inputs.BUF_REPO_NAME }}

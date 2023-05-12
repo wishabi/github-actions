@@ -3,6 +3,8 @@ description: 'Go build and test custom github action'
 inputs:
   GO_VERSION:
     required: true
+  FLIPPCIRCLECIPULLER_REPO_TOKEN:
+    required: true
 
 runs:
   using: 'composite'
@@ -23,7 +25,9 @@ runs:
     - name: Install dependencies for build and test
       shell: bash
       # if: steps.vendor-cache.outputs.cache-hit != 'true'
-      run: go mod vendor
+      run: |
+          git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
+          go mod vendor
     - name: Validate package and install dependencies
       shell: bash
       run: go mod tidy
