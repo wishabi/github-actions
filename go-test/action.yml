@@ -1,7 +1,13 @@
 name: 'Go Test Action'
 description: 'TODO'
 inputs:
-  FLIPPCIRCLECIPULLER_REPO_TOKEN:  # id of input
+  FLIPPCIRCLECIPULLER_REPO_TOKEN:
+    description: secret value
+    required: true
+  BUF_BUILD_USER:
+    description: secret value
+    required: true
+  BUF_BUILD_API_TOKEN:
     description: secret value
     required: true
 runs:
@@ -9,7 +15,7 @@ runs:
   steps:
     - name: Setup private modules access
       shell: bash
-      run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN-to-greet }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
+      run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
@@ -18,8 +24,8 @@ runs:
         cache: true
     - uses: bufbuild/buf-setup-action@v1
       with:
-        buf_user: ${{ secrets.BUF_BUILD_USER }}
-        buf_api_token: ${{ secrets.BUF_BUILD_API_TOKEN }}
+        buf_user: ${{ inputs.BUF_BUILD_USER }}
+        buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
     - name: Generate protobuf code
       shell: bash
       run: buf generate buf.build/flipp/platform-protos
@@ -34,7 +40,7 @@ runs:
       shell: bash
       if: steps.vendor-cache.outputs.cache-hit != 'true'
       run: |
-        git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN-to-greet }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
+        git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
         go mod vendor
     - name: Validate package and install dependencies
       shell: bash
