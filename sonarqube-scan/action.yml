@@ -14,8 +14,8 @@ runs:
   using: "composite"
   steps:
     - name: Setup private modules access
-      - run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
-        shell: bash
+      run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
+      shell: bash
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
@@ -31,5 +31,5 @@ runs:
       with:
         name: "${{ github.sha }}-coverage.out"
     - name: SonarQube Scan
-      - run: export PATH=/home/circleci/_work/sonar-scanner/bin:$PATH sonar-scanner -Dsonar.projectVersion=${GITHUB_SHA::7} -Dsonar.host.url=${{ inputs.SONAR_HOST_URL }} -Dsonar.login=${{ inputs.SONAR_TOKEN }} 
-        shell: bash
+      run: export PATH=/home/circleci/_work/sonar-scanner/bin:$PATH sonar-scanner -Dsonar.projectVersion=${GITHUB_SHA::7} -Dsonar.host.url=${{ inputs.SONAR_HOST_URL }} -Dsonar.login=${{ inputs.SONAR_TOKEN }} 
+      shell: bash
