@@ -8,6 +8,7 @@ runs:
   using: "composite"
   steps:
     - name: Execute rspec tests
+      shell: bash
       run: |
            bundle exec rails db:setup db:migrate
            bundle exec rspec --format progress --format RspecJunitFormatter -o result/rspec.xml
@@ -17,6 +18,7 @@ runs:
         DB_HOST: postgres
     - name: Rename code coverage paths to be found by Sonarqube
       working-directory: ./coverage
+      shell: bash
       run: |
         sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' coverage.json
     - name: 'Upload coverage'
