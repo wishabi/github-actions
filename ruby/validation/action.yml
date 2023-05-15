@@ -1,0 +1,79 @@
+name: 'Kafka Topic and Schema validation'
+description: 'custom GitHub action that runs kafka topic and schema validation'
+
+inputs:
+  SLACK_BOT_TOKEN:
+    description: secret value
+    required: true
+  SLACK_CHANNEL:
+    description: secret value
+    required: true
+  VALIDATE_TOPICS:
+    description: bool value whether to validate topics
+    required: true
+    default: false
+  VALIDATE_SCHEMAS:
+    description: bool value whether to validate schemas
+    required: true
+    default: false
+  PRODUCER_SERVICE:
+    description: Name of the producer service - required if VALIDATE_TOPICS == true
+    required: true
+  CONSUMER_SERVICE:
+    description: Name of the producer service - required if VALIDATE_TOPICS == true
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    # shared setup
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Flipp global
+      uses: wishabi/github-actions@v0.5
+      env:
+        SLACK_BOT_TOKEN: "${{ inputs.SLACK_BOT_TOKEN }}"
+      with:
+        slack_channel: "${{inputs.SLACK_CHANNEL }}"
+        job_status: "${{ job.status }}"
+    - name: Bundle cache
+      uses: actions/cache@v3
+      with:
+        path: vendor/bundle
+        key: rails-${{ hashFiles('Gemfile.lock') }}
+        restore-keys: rails-
+    - run: sudo chmod 1777 -R /home/circleci/.bundle /tmp
+      shell: bash
+    - name: Bundle install
+      shell: bash
+      run: |
+        bundle config set --local path 'vendor/bundle'
+        bundle install --jobs=4
+    
+    # topic validation
+    - name: Staging Topic validation
+      if: inputs.VALIDATE_TOPICS == 'true'
+      shell: bash
+      run: |
+        bundle exec rails g flipp_ruby_kafka:topic_config --producer_services=${{ inputs.PRODUCER_SERVICE }} --consumer_services=${{ inputs.CONSUMER_SERVICE }}
+        sudo chown circleci:circleci /var/run/docker.sock
+        chmod +x ./deploy/build.sh && ./deploy/build.sh service topic_validation --env=staging --config-file=./platform.yml --config-file=./topic_validation.yaml
+    
+    # schema validation
+    - name: Generate schema validation json
+      if: inputs.VALIDATE_SCHEMAS == 'true'
+      shell: bash
+      run: |
+        sudo chmod 1777 -R /home/circleci/.bundle && bundle config path 'vendor/bundle'
+        bundle exec rails g flipp_ruby_kafka:schema_validation
+        sudo chown circleci:circleci /var/run/docker.sock
+    - name: Staging Schema validation 
+      if: inputs.VALIDATE_SCHEMAS == 'true'
+      shell: bash
+      run: |
+        chmod +x ./deploy/build.sh && ./deploy/build.sh service schema_validation --env=staging
+    - name: Production Schema validation
+      if: inputs.VALIDATE_SCHEMAS == 'true'
+      shell: bash
+      run: |
+        chmod +x ./deploy/build.sh && ./deploy/build.sh service schema_validation --env=production
