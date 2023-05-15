@@ -21,7 +21,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Setup private modules access
+    - name: Setting up private modules access
       shell: bash
       run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
     - uses: actions/checkout@v3
@@ -30,17 +30,17 @@ runs:
         go-version: ${{ inputs.GO_VERSION }}
         check-latest: true
         cache: true
-    - name: Setup buf
+    - name: Setting up buf
       uses: bufbuild/buf-setup-action@v1
       if: "${{ inputs.BUF_BUILD_API_TOKEN != '' }}"
       with:
         buf_user: ${{ inputs.BUF_BUILD_USER }}
         buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
-    - name: Generate protobuf code
+    - name: Generating protobuf code
       shell: bash
       if: "${{ inputs.BUF_REPO_NAME != '' }}"
       run: buf generate ${{ inputs.BUF_REPO_NAME }}
-    - name: Restore vendor modules from cache
+    - name: Restoring vendor modules from cache
       id: vendor-cache
       uses: actions/cache@v3
       with:
@@ -51,10 +51,10 @@ runs:
       shell: bash
       if: steps.vendor-cache.outputs.cache-hit != 'true'
       run: go mod vendor
-    - name: Validate Go dependencies
+    - name: Validating Go dependencies
       shell: bash
       run: go mod tidy
-    - name: Cache workspace for deploy jobs
+    - name: Caching workspace for deploy jobs
       uses: actions/cache@v3
       with:
         path: ./*

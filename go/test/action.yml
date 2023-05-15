@@ -4,16 +4,16 @@ description: 'Custom GitHub action that runs all Golang tests within a repositor
 runs:
   using: 'composite'
   steps:
-    - name: Run go tests
+    - name: Running go tests
       shell: bash
       run: go test ./... -coverprofile=coverage.out -json -timeout 30s > test-report.out
-    - name: Upload test report
+    - name: Uploading test report
       uses: actions/upload-artifact@v3
       with:
         name: "${{ github.sha }}-test-report.out"
         path: "./test-report.out"
         retention-days: 1
-    - name: Upload coverage report
+    - name: Uploading coverage report
       uses: actions/upload-artifact@v3
       with:
         name: "${{ github.sha }}-coverage.out"
