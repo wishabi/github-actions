@@ -1,0 +1,61 @@
+name: 'go-build'
+description: 'Custom GitHub action that builds the Golang application. Optionally runs "buf build" steps when required BUF inputs are provided'
+
+inputs:
+  GO_VERSION:
+    description: Golang version to be used for CI build
+    required: true
+  FLIPPCIRCLECIPULLER_REPO_TOKEN:
+    description: Flipp circleci repo token
+    required: true
+  BUF_BUILD_USER:
+    description: Buf CI user stored as secret
+    required: false
+  BUF_BUILD_API_TOKEN:
+    description: Buf API token stored as secret
+    required: false
+  BUF_REPO_NAME:
+    description: Name of the buf repo to be built
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setting up private modules access
+      shell: bash
+      run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v3
+      with:
+        go-version: ${{ inputs.GO_VERSION }}
+        check-latest: true
+        cache: true
+    - name: Setting up buf
+      uses: bufbuild/buf-setup-action@v1
+      if: "${{ inputs.BUF_BUILD_API_TOKEN != '' }}"
+      with:
+        buf_user: ${{ inputs.BUF_BUILD_USER }}
+        buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
+    - name: Generating protobuf code
+      shell: bash
+      if: "${{ inputs.BUF_REPO_NAME != '' }}"
+      run: buf generate ${{ inputs.BUF_REPO_NAME }}
+    - name: Restoring vendor modules from cache
+      id: vendor-cache
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
+        restore-keys: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
+    - name: Vendorizing Go dependencies
+      shell: bash
+      if: steps.vendor-cache.outputs.cache-hit != 'true'
+      run: go mod vendor
+    - name: Validating Go dependencies
+      shell: bash
+      run: go mod tidy
+    - name: Caching workspace for deploy jobs
+      uses: actions/cache@v3
+      with:
+        path: ./*
+        key: workspace-cache-${{ github.run_id }}

@@ -1,0 +1,21 @@
+name: 'go-test'
+description: 'Custom GitHub action that runs all Golang tests within a repository and saves the test + coverage reports as artifacts'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Running go tests
+      shell: bash
+      run: go test ./... -coverprofile=coverage.out -json -timeout 30s > test-report.out
+    - name: Uploading test report
+      uses: actions/upload-artifact@v3
+      with:
+        name: "${{ github.sha }}-test-report.out"
+        path: "./test-report.out"
+        retention-days: 1
+    - name: Uploading coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: "${{ github.sha }}-coverage.out"
+        path: "./coverage.out"
+        retention-days: 1

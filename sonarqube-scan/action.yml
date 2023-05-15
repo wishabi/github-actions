@@ -1,0 +1,31 @@
+name: 'SonarQube Quality Scan'
+description: 'Runs various quality and security checks against changes'
+inputs:
+  SONAR_HOST_URL:
+    description: secret value
+    required: true
+  SONAR_TOKEN:
+    description: secret value
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+    - name: Setting up sonarqube
+      uses: warchant/setup-sonar-scanner@v3
+    - name: Downloading test report
+      uses: actions/download-artifact@v3
+      with:
+        name: "${{ github.sha }}-test-report.out"
+    - name: Downloading coverage
+      uses: actions/download-artifact@v3
+      with:
+        name: "${{ github.sha }}-coverage.out"
+    - name: SonarQube Scan
+      shell: bash
+      run: |
+          export PATH=/home/circleci/_work/sonar-scanner/bin:$PATH
+          sonar-scanner \
+           -Dsonar.projectVersion=${GITHUB_SHA::7} \
+           -Dsonar.host.url=${{ inputs.SONAR_HOST_URL }} \
+           -Dsonar.login=${{ inputs.SONAR_TOKEN }}

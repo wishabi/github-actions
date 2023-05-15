@@ -1,0 +1,40 @@
+name: 'eks-deploy'
+description: 'Custom GitHub action that deploys the repository to EKS using its "/deploy/build.sh" script'
+
+inputs:
+  ENV:
+    description: Application environment (staging or production)
+    required: true
+  AWS_ACCESS_KEY_ID:
+    description: AWS access key id stored as secret
+    required: true
+  AWS_SECRET_ACCESS_KEY:
+    description: AWS secret access key stored as secret
+    required: true
+  AWS_REGION:
+    description: AWS region to deploy to stored as secret
+    required: true
+
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configuring AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ inputs.AWS_REGION }}
+    - uses: actions/checkout@v3
+    - name: Cleaning workspace
+      shell: bash
+      run: shopt -s dotglob && rm -rf "${{ github.workspace }}"/*
+    - name: Restoring workspace from cache
+      uses: actions/cache@v3
+      with:
+        path: ./*
+        key: workspace-cache-${{ github.run_id }}
+    - name: Deploying to EKS via Helm release
+      shell: bash
+      run: |
+        chmod +x ./deploy/build.sh && ./deploy/build.sh service deploy_eks --env=${{ inputs.ENV }}
