@@ -1,5 +1,6 @@
 name: 'Kafka Topic and Schema validation'
 description: 'custom GitHub action that runs kafka topic and schema validation'
+
 inputs:
   SLACK_BOT_TOKEN:
     description: secret value
@@ -15,6 +16,13 @@ inputs:
     description: bool value whether to validate schemas
     required: true
     default: false
+  PRODUCER_SERVICE:
+    description: Name of the producer service - required if VALIDATE_TOPICS == true
+    required: true
+  CONSUMER_SERVICE:
+    description: Name of the producer service - required if VALIDATE_TOPICS == true
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -24,10 +32,10 @@ runs:
     - name: Flipp global
       uses: wishabi/github-actions@v0.5
       env:
-        SLACK_BOT_TOKEN: "${{ secrets.SLACK_BOT_TOKEN }}"
+        SLACK_BOT_TOKEN: "${{ inputs.SLACK_BOT_TOKEN }}"
       timeout-minutes: 10
       with:
-        slack_channel: "${{env.SLACK_CHANNEL }}"
+        slack_channel: "${{inputs.SLACK_CHANNEL }}"
         job_status: "${{ job.status }}"
     - name: Bundle cache
       uses: actions/cache@v2
@@ -45,7 +53,7 @@ runs:
     - name: Staging Topic validation
       if: inputs.VALIDATE_TOPICS == 'true'
       run: |
-        bundle exec rails g flipp_ruby_kafka:topic_config --producer_services=distribution-admin --consumer_services=distribution-admin
+        bundle exec rails g flipp_ruby_kafka:topic_config --producer_services=${{ inputs.PRODUCER_SERVICE }} --consumer_services=${{ inputs.CONSUMER_SERVICE }}
         sudo chown circleci:circleci /var/run/docker.sock
         chmod +x ./deploy/build.sh && ./deploy/build.sh service topic_validation --env=staging --config-file=./platform.yml --config-file=./topic_validation.yaml
     
