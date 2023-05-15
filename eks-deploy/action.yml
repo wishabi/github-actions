@@ -22,6 +22,7 @@ runs:
         aws-region: ${{ inputs.AWS_REGION }}
     - uses: actions/checkout@v3
     - name: Clean workspace
+      shell: bash
       run: shopt -s dotglob && rm -rf "${{ github.workspace }}"/*
     - name: Restore workspace
       uses: actions/cache@v3
@@ -29,5 +30,6 @@ runs:
         path: ./*
         key: workspace-cache-${{ github.run_id }}
     - name: Helm release
+      shell: bash
       run: |
         chmod +x ./deploy/build.sh && ./deploy/build.sh service deploy_eks --env=${{ inputs.ENV }}
