@@ -7,6 +7,9 @@ inputs:
   SONAR_TOKEN:
     description: secret value
     required: true
+  CHECK_RUBOCOP:
+    description: whether to download and analyze rubocop results
+    default: false
 runs:
   using: "composite"
   steps:
@@ -21,6 +24,11 @@ runs:
       uses: actions/download-artifact@v3
       with:
         name: "${{ github.sha }}-coverage.out"
+    - name: Download rubocop results
+      if: ${{ inputs.CHECK_RUBOCOP == 'true' }}
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ github.sha }}-rubocop-results
     - name: SonarQube Scan
       shell: bash
       run: |
