@@ -13,13 +13,6 @@ inputs:
   SONAR_TOKEN:
     description: secret value
     required: true
-container:
-  image: ghcr.io/wishabi/ci-build-environment:golang-1.19
-  credentials:
-    username: ${{ github.repository_owner }}
-    password: ${{ inputs.GHCR_TOKEN }}
-  volumes:
-    - /home/circleci/SonarScanner/sonar-scanner-4.6.2.2472-linux:/home/circleci/_work/sonar-scanner/
 runs:
   using: "composite"
   steps:
@@ -32,6 +25,8 @@ runs:
         go-version: '1.19'
         check-latest: true
         cache: true
+    - name: Setup sonarqube
+      uses: warchant/setup-sonar-scanner@v3
     - name: Download test report
       uses: actions/download-artifact@v3
       with:
