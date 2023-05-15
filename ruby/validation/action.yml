@@ -33,7 +33,6 @@ runs:
       uses: wishabi/github-actions@v0.5
       env:
         SLACK_BOT_TOKEN: "${{ inputs.SLACK_BOT_TOKEN }}"
-      timeout-minutes: 10
       with:
         slack_channel: "${{inputs.SLACK_CHANNEL }}"
         job_status: "${{ job.status }}"
