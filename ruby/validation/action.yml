@@ -38,7 +38,7 @@ runs:
         slack_channel: "${{inputs.SLACK_CHANNEL }}"
         job_status: "${{ job.status }}"
     - name: Bundle cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: vendor/bundle
         key: rails-${{ hashFiles('Gemfile.lock') }}
