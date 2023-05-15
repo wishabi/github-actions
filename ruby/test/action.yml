@@ -24,7 +24,7 @@ runs:
     - name: 'Upload coverage'
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ github.sha }}-coverage
+        name: ${{ github.sha }}-coverage.out
         path: ./coverage/coverage.json
         retention-days: 1
     - name: 'Upload test results'
