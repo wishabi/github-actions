@@ -1,9 +1,6 @@
 name: 'SonarQube Quality Scan'
 description: 'Runs various quality and security checks against changes'
 inputs:
-  GHCR_TOKEN:
-    description: secret value
-    required: true
   FLIPPCIRCLECIPULLER_REPO_TOKEN:
     description: secret value
     required: true
