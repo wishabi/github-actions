@@ -1,9 +1,9 @@
 name: 'Tests - rspec'
 description: 'Runs tests using rspec'
 inputs:
-  FLIPPCIRCLECIPULLER_REPO_TOKEN:
-    description: secret value
-    required: true
+    DB_PORT:
+      description: Database port
+      default: 5432
 runs:
   using: "composite"
   steps:
@@ -14,7 +14,7 @@ runs:
            bundle exec rspec --format progress --format RspecJunitFormatter -o result/rspec.xml
       env:
         RAILS_ENV: test
-        DB_PORT: ${{ job.services.postgres.ports[5432] }}
+        DB_PORT: ${{inputs.DB_PORT}}
         DB_HOST: postgres
     - name: Rename code coverage paths to be found by Sonarqube
       working-directory: ./coverage
