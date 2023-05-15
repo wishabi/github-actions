@@ -1,0 +1,33 @@
+name: 'eks-deploy'
+description: 'Go build custom github action'
+inputs:
+  ENV:
+    required: true
+  AWS_ACCESS_KEY_ID:
+    required: true
+  AWS_SECRET_ACCESS_KEY:
+    required: true
+  AWS_REGION:
+    required: true
+
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ inputs.AWS_REGION }}
+    - uses: actions/checkout@v3
+    - name: Clean workspace
+      run: shopt -s dotglob && rm -rf "${{ github.workspace }}"/*
+    - name: Restore workspace
+      uses: actions/cache@v3
+      with:
+        path: ./*
+        key: workspace-cache-${{ github.run_id }}
+    - name: Helm release
+      run: |
+        chmod +x ./deploy/build.sh && ./deploy/build.sh service deploy_eks --env=${{ inputs.ENV }}
