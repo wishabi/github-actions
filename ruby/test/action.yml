@@ -30,6 +30,5 @@ runs:
     - name: 'Upload test results'
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ github.sha }}-test-report
-        path: ./result/rspec.xml
+        name: ${{ github.sha }}-test-report.out
         retention-days: 1

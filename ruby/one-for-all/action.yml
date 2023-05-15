@@ -7,7 +7,7 @@ runs:
     - name: Download test result
       uses: actions/download-artifact@v3
       with:
-        name: ${{ github.sha }}-test-results
+        name: ${{ github.sha }}-test-report.out
         path: ./result/
     - name: execute one-for-all
       shell: bash
