@@ -15,11 +15,11 @@ inputs:
     required: true
 container:
   image: ghcr.io/wishabi/ci-build-environment:golang-1.19
-    credentials:
-      username: ${{ github.repository_owner }}
-      password: ${{ inputs.GHCR_TOKEN }}
-    volumes:
-      - /home/circleci/SonarScanner/sonar-scanner-4.6.2.2472-linux:/home/circleci/_work/sonar-scanner/
+  credentials:
+    username: ${{ github.repository_owner }}
+     password: ${{ inputs.GHCR_TOKEN }}
+  volumes:
+    - /home/circleci/SonarScanner/sonar-scanner-4.6.2.2472-linux:/home/circleci/_work/sonar-scanner/
 runs:
   using: "composite"
   steps:
