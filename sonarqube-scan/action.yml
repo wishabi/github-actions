@@ -1,9 +1,6 @@
 name: 'SonarQube Quality Scan'
 description: 'Runs various quality and security checks against changes'
 inputs:
-  FLIPPCIRCLECIPULLER_REPO_TOKEN:
-    description: secret value
-    required: true
   SONAR_HOST_URL:
     description: secret value
     required: true
