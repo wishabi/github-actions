@@ -1,10 +1,10 @@
 name: 'go-test'
-description: 'Go test custom github action'
+description: 'Custom GitHub action that runs all Golang tests within a repository and saves the test + coverage reports as artifacts'
 
 runs:
   using: 'composite'
   steps:
-    - name: Run tests
+    - name: Run go tests
       shell: bash
       run: go test ./... -coverprofile=coverage.out -json -timeout 30s > test-report.out
     - name: Upload test report

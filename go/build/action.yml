@@ -1,18 +1,21 @@
 name: 'go-build'
-description: 'Go build custom github action'
+description: 'Custom GitHub action that builds the Golang application. Optionally runs "buf build" steps when required BUF inputs are provided'
+
 inputs:
   GO_VERSION:
+    description: Golang version to be used for CI build
     required: true
   FLIPPCIRCLECIPULLER_REPO_TOKEN:
+    description: Flipp circleci repo token
     required: true
   BUF_BUILD_USER:
-    description: buf CI user stored as secret
+    description: Buf CI user stored as secret
     required: false
   BUF_BUILD_API_TOKEN:
-    description: buf API token stored as secret
+    description: Buf API token stored as secret
     required: false
   BUF_REPO_NAME:
-    description: name of the buf repo to be built
+    description: Name of the buf repo to be built
     required: false
 
 runs:
@@ -27,7 +30,8 @@ runs:
         go-version: ${{ inputs.GO_VERSION }}
         check-latest: true
         cache: true
-    - uses: bufbuild/buf-setup-action@v1
+    - name: Setup buf
+      uses: bufbuild/buf-setup-action@v1
       if: "${{ inputs.BUF_BUILD_API_TOKEN != '' }}"
       with:
         buf_user: ${{ inputs.BUF_BUILD_USER }}
@@ -43,14 +47,14 @@ runs:
         path: vendor
         key: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
         restore-keys: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
-    - name: Install dependencies for build and test
+    - name: Vendorizing Go dependencies
       shell: bash
       if: steps.vendor-cache.outputs.cache-hit != 'true'
       run: go mod vendor
-    - name: Validate package and install dependencies
+    - name: Validate Go dependencies
       shell: bash
       run: go mod tidy
-    - name: Save workspace (for deploy jobs)
+    - name: Cache workspace for deploy jobs
       uses: actions/cache@v3
       with:
         path: ./*
