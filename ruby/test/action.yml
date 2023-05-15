@@ -7,7 +7,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - _setup_
     - name: Execute rspec tests
       run: |
            bundle exec rails db:setup db:migrate
