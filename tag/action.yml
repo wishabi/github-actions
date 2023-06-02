@@ -20,5 +20,5 @@ runs:
             owner: context.repo.owner,
             repo: context.repo.repo,
             ref: 'refs/tags/${{ inputs.TAG_NAME }}',
-            sha: '${{ github.sha }}''
+            sha: ${{ github.sha }}
           })
