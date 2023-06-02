@@ -8,6 +8,17 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: SonarQube Scan
+      shell: bash
+      run: |
+        export PATH=/home/circleci/_work/sonar-scanner/bin:$PATH
+        echo \
+          github.rest.git.createRef({ \
+            owner: context.repo.owner, \
+            repo: context.repo.repo, \
+            ref: 'refs/tags/${{ inputs.TAG_NAME }}', \
+            sha: '${{ github.sha }}'' \
+          })
     - name: Create tag
       uses: actions/github-script@v5
       with:
