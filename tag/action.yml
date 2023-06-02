@@ -12,6 +12,9 @@ runs:
         incrementPerCommit: false
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Next Release Number
+      run: echo ${{ steps.versioning.outputs.version }}
+
     - name: Create tag
       uses: actions/github-script@v5
       with:
