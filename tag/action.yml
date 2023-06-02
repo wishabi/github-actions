@@ -1,5 +1,9 @@
 name: 'tag'
 description: 'Creates a tag with the provided name on the provided commit hash'
+inputs:
+  GITHUB_TOKEN:
+    description: token used to check for existing tags
+    required: true
 
 runs:
   using: 'composite'
@@ -10,9 +14,10 @@ runs:
       with:
         releaseType: patch
         incrementPerCommit: false
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ inputs.GITHUB_TOKEN }}
 
     - name: Next Release Number
+      shell: bash
       run: echo ${{ steps.versioning.outputs.version }}
 
     - name: Create tag
