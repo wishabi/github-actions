@@ -11,7 +11,7 @@ runs:
     - name: SonarQube Scan
       shell: bash
       run: |
-        echo "github.rest.git.createRef({owner: context.repo.owner, repo: context.repo.repo, ref: 'refs/tags/${{ inputs.TAG_NAME }}', sha: '${{ github.sha }}' })
+        echo "github.rest.git.createRef({owner: context.repo.owner, repo: context.repo.repo, ref: 'refs/tags/${{ inputs.TAG_NAME }}', sha: '${{ github.sha }}' })"
     - name: Create tag
       uses: actions/github-script@v5
       with:
