@@ -8,8 +8,11 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Compute short SHA
+      id: short-sha
+      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
     - name: Create tag
       uses: actions/github-script@v5
       with:
         script: |
-          github.rest.git.createRef({ owner: context.repo.owner, repo: context.repo.repo, ref: 'refs/tags/${{ github.sha }}', sha: '${{ github.sha }}' })
+          github.rest.git.createRef({ owner: context.repo.owner, repo: context.repo.repo, ref: 'refs/tags/${{ steps.short-sha.outputs.sha_short }}', sha: '${{ github.sha }}' })
