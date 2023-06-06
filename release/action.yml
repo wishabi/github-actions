@@ -21,11 +21,10 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
-        ref: ${{ github.event.push.ref }}
-        run: |
-          tag=${{ steps.get_next_version.outputs.version }}
+      run: |
+        tag=${{ steps.get_next_version.outputs.version }}
 
-          gh release create "$tag" \
-              --repo="$GITHUB_REPOSITORY" \
-              --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
-              --generate-notes
+        gh release create "$tag" \
+            --repo="$GITHUB_REPOSITORY" \
+            --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
+            --generate-notes
