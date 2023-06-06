@@ -18,6 +18,7 @@ runs:
       with:
         token: ${{ inputs.GITHUB_TOKEN }}
         projects: 'Single'
+        prefix: ''
 
     #- name: Create release
     #  shell: bash
