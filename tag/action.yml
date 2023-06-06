@@ -13,6 +13,10 @@ runs:
       shell: bash
       run: echo "SHORT_SHA=`echo ${{ github.sha }} | cut -c1-8`" >> $GITHUB_ENV
 
+    - name: tst
+      shell: bash
+      run: echo $SHORT_SHA
+
     - name: Create tag
       uses: actions/github-script@v5
       with:
