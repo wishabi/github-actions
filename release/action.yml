@@ -1,0 +1,30 @@
+name: 'release'
+description: 'Creates a Github Release numbered with the latest and the provided commit hash'
+inputs:
+  GITHUB_TOKEN:
+    description: token used to check for existing tags
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Get next version
+      id: get_next_version
+      uses: thenativeweb/get-next-version@main
+    - name: Show the next version
+      run: |
+        echo ${{ steps.get_next_version.outputs.version }}
+        echo ${{ steps.get_next_version.outputs.hasNextVersion }}
+
+    # - name: Create release
+    #  shell: bash
+    #  env:
+    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #    ref: ${{ github.event.push.ref }}
+    #    run: |
+    #      tag=${ref##*/}
+
+    #      gh release create "$tag" \
+    #          --repo="$GITHUB_REPOSITORY" \
+    #          --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
+    #          --generate-notes
