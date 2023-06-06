@@ -19,14 +19,14 @@ runs:
         token: ${{ inputs.GITHUB_TOKEN }}
         projects: 'Single'
 
-    - name: Create release
-      shell: bash
-      env:
-        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
-      run: |
-        tag=${{ steps.release-version.outputs.next-version }}
+    #- name: Create release
+    #  shell: bash
+    #  env:
+    #    GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+    #  run: |
+    #    tag=${{ steps.release-version.outputs.next-version }}
 
-        gh release create "$tag" \
-            --repo="$GITHUB_REPOSITORY" \
-            --title="v${tag#v}" \
-            --generate-notes
+    #    gh release create "$tag" \
+    #        --repo="$GITHUB_REPOSITORY" \
+    #        --title="${{steps.release-version.outputs.next-version-name}}" \
+    #        --generate-notes
