@@ -8,20 +8,8 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Auto Increment Semver Action
-      uses: MCKanpolat/auto-semver-action@v1
-      id: versioning
-      with:
-        releaseType: patch
-        incrementPerCommit: false
-        github_token: ${{ inputs.GITHUB_TOKEN }}
-
-    - name: Next Release Number
-      shell: bash
-      run: echo ${{ steps.versioning.outputs.version }}
-
     - name: Create tag
       uses: actions/github-script@v5
       with:
         script: |
-          github.rest.git.createRef({ owner: context.repo.owner, repo: context.repo.repo, ref: 'refs/tags/${{ steps.versioning.outputs.version }}', sha: '${{ github.sha }}' })
+          github.rest.git.createRef({ owner: context.repo.owner, repo: context.repo.repo, ref: 'refs/tags/${{ github.sha }}', sha: '${{ github.sha }}' })
