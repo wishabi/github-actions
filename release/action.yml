@@ -20,18 +20,29 @@ runs:
         repository: 'wishabi/${{ github.event.repository.name }}'
         token: ${{ inputs.GITHUB_TOKEN }}
 
+    - name: Bump release version
+      id: bump_version
+      uses: christian-draeger/increment-semantic-version@1.1.0
+      with:
+        current-version: ${{ steps.latest-release.outputs.release }}
+        version-fragment: 'bug'
+
     - name: show latest
       shell: bash
       run: echo ${{ steps.latest-release.outputs.release }}
 
-    #- name: Create release
-    #  shell: bash
-    #  env:
-    #    GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
-    #  run: |
-    #    tag=${{ steps.release-version.outputs.next-version }}
+    - name: show next
+      shell: bash
+      run: echo ${{ steps.bump_version.outputs.next-version }}
 
-    #    gh release create "$tag" \
-    #        --repo="$GITHUB_REPOSITORY" \
-    #        --title="${{steps.release-version.outputs.next-version-name}}" \
-    #        --generate-notes
+    - name: Create release
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+      run: |
+        tag=${{ steps.bump_version.outputs.next-version }}
+
+        gh release create "$tag" \
+            --repo="$GITHUB_REPOSITORY" \
+            --title="v$tag" \
+            --generate-notes
