@@ -12,6 +12,7 @@ runs:
       id: get_next_version
       uses: thenativeweb/get-next-version@main
     - name: Show the next version
+      shell: bash
       run: |
         echo ${{ steps.get_next_version.outputs.version }}
         echo ${{ steps.get_next_version.outputs.hasNextVersion }}
