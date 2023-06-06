@@ -18,6 +18,7 @@ runs:
       uses: pozetroninc/github-action-get-latest-release@master
       with:
         repository: 'wishabi/${{ github.event.repository.name }}'
+        token: ${GITHUB_TOKEN}
 
     - name: show latest
       shell: bash
