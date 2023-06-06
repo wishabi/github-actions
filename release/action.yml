@@ -13,18 +13,20 @@ runs:
       with:
         fetch-depth: 0
 
-    - name: Get next version
-      id: get_next_version
-      uses: thenativeweb/get-next-version@main
+    - uses: wemogy/next-version-action@2.0.2
+      id: release-version
+      with:
+        token: ${{ inputs.GITHUB_TOKEN }}
+        projects: 'Single'
 
     - name: Create release
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       run: |
-        tag=${{ steps.get_next_version.outputs.version }}
+        tag=${{ steps.release-version.outputs.next-version }}
 
         gh release create "$tag" \
             --repo="$GITHUB_REPOSITORY" \
-            --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
+            --title="v${tag#v}" \
             --generate-notes
