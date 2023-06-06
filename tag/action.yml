@@ -11,14 +11,10 @@ runs:
     - name: Compute short SHA
       id: vars
       shell: bash
-      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-    - name: Check outputs
-      shell: bash
-      run: echo ${{ steps.vars.outputs.sha_short }}
+      run: echo "SHORT_SHA=`echo ${{ github.sha }} | cut -c1-8`" >> $GITHUB_ENV\
 
     - name: Create tag
       uses: actions/github-script@v5
       with:
         script: |
-          github.rest.git.createRef({ owner: context.repo.owner, repo: context.repo.repo, ref: 'refs/tags/${{ steps.vars.outputs.sha_short }}', sha: '${{ github.sha }}' })
+          github.rest.git.createRef({ owner: context.repo.owner, repo: context.repo.repo, ref: 'refs/tags/${SHORT_SHA}', sha: '${{ github.sha }}' })
