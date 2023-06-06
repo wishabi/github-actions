@@ -13,12 +13,15 @@ runs:
       with:
         fetch-depth: 0
 
-    - uses: wemogy/next-version-action@2.0.3
-      id: release-version
+    - name: Get latest release
+      id: latest-release
+      uses: pozetroninc/github-action-get-latest-release@master
       with:
-        token: ${{ inputs.GITHUB_TOKEN }}
-        projects: 'Single'
-        prefix: ''
+        repository: 'wishabi/${{ github.event.repository.name }}'
+
+    - name: show latest
+      shell: bash
+      run: echo ${{ steps.latest-release.outputs.release }}
 
     #- name: Create release
     #  shell: bash
