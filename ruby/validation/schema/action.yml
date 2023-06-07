@@ -1,0 +1,33 @@
+name: 'Kafka Schema validation'
+description: 'custom GitHub action that runs kafka schema validation'
+
+inputs:
+  SLACK_BOT_TOKEN:
+    description: secret value
+    required: true
+  SLACK_CHANNEL:
+    description: secret value
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup
+      uses: wishabi/github-actions/ruby/validation/setup/@pda-15-percent-ruby
+      with:
+        SLACK_BOT_TOKEN: "${{inputs.SLACK_BOT_TOKEN }}"
+        SLACK_CHANNEL: "${{inputs.SLACK_CHANNEL }}"
+    - name: Generate schema validation json
+      shell: bash
+      run: |
+        sudo chmod 1777 -R /home/circleci/.bundle && bundle config path 'vendor/bundle'
+        bundle exec rails g flipp_ruby_kafka:schema_validation
+        sudo chown circleci:circleci /var/run/docker.sock
+    - name: Staging Schema validation 
+      shell: bash
+      run: |
+        chmod +x ./deploy/build.sh && ./deploy/build.sh service schema_validation --env=staging
+    - name: Production Schema validation
+      shell: bash
+      run: |
+        chmod +x ./deploy/build.sh && ./deploy/build.sh service schema_validation --env=production

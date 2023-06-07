@@ -1,0 +1,32 @@
+name: 'Kafka Topic validation'
+description: 'custom GitHub action that runs kafka topic validation'
+
+inputs:
+  SLACK_BOT_TOKEN:
+    description: secret value
+    required: true
+  SLACK_CHANNEL:
+    description: secret value
+    required: true
+  PRODUCER_SERVICE:
+    description: Name of the producer service
+    required: true
+  CONSUMER_SERVICE:
+    description: Name of the producer service
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup
+      uses: wishabi/github-actions/ruby/validation/setup/@pda-15-percent-ruby
+      with:
+        SLACK_BOT_TOKEN: "${{inputs.SLACK_BOT_TOKEN }}"
+        SLACK_CHANNEL: "${{inputs.SLACK_CHANNEL }}"
+    - name: Staging Topic validation
+      shell: bash
+      run: |
+        bundle exec rails g flipp_ruby_kafka:topic_config --producer_services=${{ inputs.PRODUCER_SERVICE }} --consumer_services=${{ inputs.CONSUMER_SERVICE }}
+        sudo chown circleci:circleci /var/run/docker.sock
+        chmod +x ./deploy/build.sh && ./deploy/build.sh service topic_validation --env=staging --config-file=./platform.yml --config-file=./topic_validation.yaml
+    
