@@ -1,12 +1,24 @@
 name: 'Tests - rspec'
 description: 'Runs tests using rspec'
 inputs:
-    DB_PORT:
-      description: Database port
-      default: 5432
+  DB_PORT:
+    description: Database port
+    default: 3306
+  SLACK_BOT_TOKEN:
+    description: secret value
+    required: true
+  SLACK_CHANNEL:
+    description: secret value
+    required: true
+  
 runs:
   using: "composite"
   steps:
+    - name: Setup
+      uses: wishabi/github-actions/ruby/setup/@pda-15-percent-ruby
+      with:
+        SLACK_BOT_TOKEN: "${{inputs.SLACK_BOT_TOKEN }}"
+        SLACK_CHANNEL: "${{inputs.SLACK_CHANNEL }}"
     - name: Execute rspec tests
       shell: bash
       run: |
