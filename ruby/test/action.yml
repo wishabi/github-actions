@@ -4,6 +4,9 @@ inputs:
   DB_PORT:
     description: Database port
     default: 3306
+  DB_HOST:
+    description: Database host
+    default: mysql
   SLACK_BOT_TOKEN:
     description: secret value
     required: true
@@ -27,7 +30,7 @@ runs:
       env:
         RAILS_ENV: test
         DB_PORT: ${{inputs.DB_PORT}}
-        DB_HOST: postgres
+        DB_HOST: ${{inputs.DB_HOST}}
     - name: Rename code coverage paths to be found by Sonarqube
       working-directory: ./coverage
       shell: bash
