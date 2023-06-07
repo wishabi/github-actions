@@ -1,0 +1,15 @@
+name: 'Lint - rubocop'
+description: 'Lints using rubcop'
+runs:
+  using: "composite"
+  steps:
+    - name: Execute rubocop
+      continue-on-error: true
+      shell: bash
+      run: bundle exec rubocop --format progress --format json --out rubocop/rubocop.json
+    - name: 'Upload rubocop results'
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ github.sha }}-rubocop-results
+        path: ./rubocop/rubocop.json
+        retention-days: 1
