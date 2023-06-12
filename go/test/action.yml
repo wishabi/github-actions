@@ -15,7 +15,7 @@ runs:
   steps:
     - name: Running go tests
       shell: bash
-      run: ${{ github.action_path }}/test.sh "${{ inputs.SHORT }}" "${{ inputs.TIMEOUT }}"
+      run: ${GITHUB_ACTION_PATH}/test.sh "${{ inputs.SHORT }}" "${{ inputs.TIMEOUT }}"
     - name: Uploading test report
       uses: actions/upload-artifact@v3
       with:
