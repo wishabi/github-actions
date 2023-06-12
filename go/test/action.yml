@@ -1,12 +1,21 @@
 name: 'go-test'
 description: 'Custom GitHub action that runs all Golang tests within a repository and saves the test + coverage reports as artifacts'
 
+inputs:
+  SHORT:
+    description: Set to true if you want to run all tests, including long running tests.
+    required: false
+  TIMEOUT:
+    description: A timeout value. If tests take longer than this, they will fail. Set to an empty string to disable.
+    required: false
+    default: "30"
+
 runs:
   using: 'composite'
   steps:
     - name: Running go tests
       shell: bash
-      run: go test ./... -coverprofile=coverage.out -json -timeout 30s > test-report.out
+      run: ./test.sh "${{ inputs.SHORT }}" "${{ inputs.TIMEOUT }}"
     - name: Uploading test report
       uses: actions/upload-artifact@v3
       with:
