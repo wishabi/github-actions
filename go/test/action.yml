@@ -19,8 +19,8 @@ runs:
     - name: Uploading test report
       uses: actions/upload-artifact@v3
       with:
-        name: "${{ github.sha }}-report.xml"
-        path: "./report.xml"
+        name: "${{ github.sha }}-test-report.out"
+        path: "./test-report.out"
         retention-days: 1
     - name: Uploading coverage report
       uses: actions/upload-artifact@v3
