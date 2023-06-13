@@ -15,7 +15,7 @@ if [ -n "$TIMEOUT" ]; then
   cmd="$cmd -timeout ${TIMEOUT}s"
 fi
 
-cmd="${cmd} | go-junit-report -set-exit-code > report.xml"
+cmd="${cmd} | go-junit-report -iocopy -set-exit-code -out report.xml"
 
 echo "$cmd"
 eval "$cmd"
