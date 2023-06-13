@@ -1,6 +1,6 @@
 #! /bin/bash
 
-SHORT=$1
+TAGS=$1
 TIMEOUT=$2
 
 cmd="go test ./... -coverprofile=coverage.out -json"
