@@ -1,7 +1,5 @@
 #! /bin/bash
 
-go install github.com/jstemmer/go-junit-report/v2@latest
-
 TAGS=$1
 TIMEOUT=$2
 
@@ -15,7 +13,7 @@ if [ -n "$TIMEOUT" ]; then
   cmd="$cmd -timeout ${TIMEOUT}s"
 fi
 
-cmd="${cmd} | go-junit-report -iocopy -set-exit-code -out report.xml"
+cmd="${cmd} | tee test-report.out"
 
 echo "$cmd"
 eval "$cmd"
