@@ -5,8 +5,8 @@ TIMEOUT=$2
 
 cmd="go test ./... -coverprofile=coverage.out -json"
 
-if [ -n "$SHORT" ]; then
-  cmd="$cmd -short"
+if [ -n "$TAGS" ]; then
+  cmd="$cmd --tags=${TAGS}"
 fi
 
 if [ -n "$TIMEOUT" ]; then
