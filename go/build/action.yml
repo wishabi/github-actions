@@ -17,6 +17,9 @@ inputs:
   BUF_REPO_NAME:
     description: Name of the buf repo to be built
     required: false
+  BUF_LOCAL:
+    description: Set to true if building local buf repo
+    required: false
 
 runs:
   using: 'composite'
@@ -40,6 +43,10 @@ runs:
       shell: bash
       if: "${{ inputs.BUF_REPO_NAME != '' }}"
       run: buf generate ${{ inputs.BUF_REPO_NAME }}
+    - name: Generating local protobuf code
+      shell: bash
+      if: "${{ inputs.BUF_LOCAL != '' }}"
+      run: buf generate
     - name: Restoring vendor modules from cache
       id: vendor-cache
       uses: actions/cache@v3
