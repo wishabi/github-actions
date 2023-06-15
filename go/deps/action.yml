@@ -1,0 +1,34 @@
+name: 'go-deps'
+description: 'Install dependencies. Optionally runs "buf build" steps when BUF_REPO_NAME is provided'
+
+inputs:
+  BUF_REPO_NAME:
+    description: Name of the buf repo to be built
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Generating protobuf code
+      shell: bash
+      if: "${{ inputs.BUF_REPO_NAME != '' }}"
+      run: buf generate ${{ inputs.BUF_REPO_NAME }}
+    - name: Restoring vendor modules from cache
+      id: vendor-cache
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
+        restore-keys: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
+    - name: Vendorizing Go dependencies
+      shell: bash
+      if: steps.vendor-cache.outputs.cache-hit != 'true'
+      run: go mod vendor
+    - name: Validating Go dependencies
+      shell: bash
+      run: go mod tidy
+    - name: Caching workspace for deploy jobs
+      uses: actions/cache@v3
+      with:
+        path: ./*
+        key: workspace-cache-${{ github.run_id }}
