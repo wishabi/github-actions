@@ -1,4 +1,5 @@
 #! /bin/bash
+set -e
 
 TAGS=$1
 TIMEOUT=$2
