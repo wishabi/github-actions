@@ -14,7 +14,7 @@ if [ -n "$TIMEOUT" ]; then
   cmd="$cmd -timeout ${TIMEOUT}s"
 fi
 
-cmd="${cmd} | tee test-report.out"
+echo "$cmd  | tee test-report.out"
+eval "$cmd" | tee test-report.out
 
-echo "$cmd"
-eval "$cmd"
+exit ${PIPESTATUS[0]}
