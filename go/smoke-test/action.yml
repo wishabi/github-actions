@@ -12,10 +12,11 @@ runs:
   steps:
     - uses: actions/setup-go@v4
       with: 
-          go-version: '>=1.20.4'
+        go-version: '>=1.20.4'
     - name: Run Smoke Tests
       shell: bash
       env:
         API_URL: ${{ inputs.API_URL }}
       run: |
+        go env -w GO111MODULE=off
         go test ./tests/smoke --tags=smoke
