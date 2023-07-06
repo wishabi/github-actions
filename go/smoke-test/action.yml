@@ -18,5 +18,4 @@ runs:
       env:
         API_URL: ${{ inputs.API_URL }}
       run: |
-        go env -w GO111MODULE=off
         go test ./tests/smoke --tags=smoke
