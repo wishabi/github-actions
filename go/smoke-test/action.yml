@@ -14,10 +14,10 @@ runs:
   using: "composite"
   steps:
     - name: Setup Go
-        uses: wishabi/github-actions/go/setup@v0.9
-        with:
-          GO_VERSION: '1.19'
-          FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
+      uses: wishabi/github-actions/go/setup@v0.9
+      with:
+        GO_VERSION: '1.19'
+        FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Run Smoke Tests
       shell: bash
       env:
