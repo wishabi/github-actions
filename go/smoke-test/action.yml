@@ -9,6 +9,9 @@ inputs:
   FLIPPCIRCLECIPULLER_REPO_TOKEN:
     description: Flipp circleci repo token
     required: true
+  GO_VERSION:
+    description: Golang version to be used for CI build
+    required: true
 
 runs:
   using: "composite"
@@ -16,7 +19,7 @@ runs:
     - name: Setup Go
       uses: wishabi/github-actions/go/setup@v0.9
       with:
-        GO_VERSION: '1.19'
+        GO_VERSION: ${{ inputs.GO_VERSION }}
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Run Smoke Tests
       shell: bash
