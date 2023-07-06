@@ -6,13 +6,18 @@ inputs:
   API_URL:
     description: 'Base URL of the API to test against'
     required: false
+  FLIPPCIRCLECIPULLER_REPO_TOKEN:
+    description: Flipp circleci repo token
+    required: true
 
 runs:
   using: "composite"
   steps:
-    - uses: actions/setup-go@v4
-      with: 
-        go-version: '>=1.20.4'
+    - name: Setup Go
+        uses: wishabi/github-actions/go/setup@v0.9
+        with:
+          GO_VERSION: '1.19'
+          FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Run Smoke Tests
       shell: bash
       env:
