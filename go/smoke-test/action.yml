@@ -17,7 +17,7 @@ runs:
   using: "composite"
   steps:
     - name: Setup Go
-      uses: wishabi/github-actions/go/setup@v0.9
+      uses: wishabi/github-actions/go/setup@main
       with:
         GO_VERSION: ${{ inputs.GO_VERSION }}
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
