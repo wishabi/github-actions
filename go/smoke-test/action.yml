@@ -10,12 +10,27 @@ inputs:
     description: Flipp circleci repo token
     required: true
   GO_VERSION:
-    description: Golang version to be used for CI build
+    description: Golang version to be used for smoke test
+    required: true
+  SLACK_BOT_TOKEN:
+    description: Golang version to be used for smoke test
+    required: true
+  SLACK_CHANNEL:
+    description: Golang version to be used for smoke test
     required: true
 
 runs:
   using: "composite"
   steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Run global flipp action to notify slack channel on failure
+      uses: wishabi/github-actions@main
+      env:
+        SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
+      with:
+        slack_channel: ${{ inputs.SLACK_CHANNEL }}
+        job_status: ${{ job.status }}
     - name: Setup Go
       uses: wishabi/github-actions/go/setup@main
       with:
