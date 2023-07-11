@@ -28,7 +28,4 @@ runs:
       shell: bash
       run: go mod tidy
     - name: Caching workspace for deploy jobs
-      uses: actions/cache@v3
-      with:
-        path: ./*
-        key: workspace-cache-${{ github.run_id }}
+      uses: wishabi/github-actions/eks/cache@PDA-325

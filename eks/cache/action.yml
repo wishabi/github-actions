@@ -1,0 +1,21 @@
+name: 'eks-cache'
+description: 'Custom GitHub action that caches the repository for EKS to deploy'
+
+inputs:
+  DEPLOY_CACHE_PATH:
+    description: Path to restore cache
+    required: false
+    default: ./*
+  DEPLOY_CACHE_KEY:
+    description: Cache key
+    required: false
+    default: workspace-cache-${{ github.run_id }}
+
+
+runs:
+  using: 'composite'
+    - name: Restoring workspace from cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ inputs.DEPLOY_CACHE_PATH }}
+        key: ${{ inputs.DEPLOY_CACHE_KEY }}
