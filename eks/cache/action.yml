@@ -14,8 +14,8 @@ inputs:
 
 runs:
   using: 'composite'
-    - name: Restoring workspace from cache
-      uses: actions/cache@v3
+  steps:
+    - uses: actions/cache@v3
       with:
         path: ${{ inputs.DEPLOY_CACHE_PATH }}
         key: ${{ inputs.DEPLOY_CACHE_KEY }}
