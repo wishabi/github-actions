@@ -2,9 +2,6 @@ name: 'go-setup'
 description: 'Set up Go environment for CI build. Sets up Buf if the relevant inputs are provided.'
 
 inputs:
-  GO_VERSION:
-    description: Golang version to be used for CI build
-    required: true
   FLIPPCIRCLECIPULLER_REPO_TOKEN:
     description: Flipp circleci repo token
     required: true
