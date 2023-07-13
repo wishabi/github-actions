@@ -1,0 +1,23 @@
+name: 'eks-deploy'
+description: 'Custom GitHub action that deploys the repository to EKS using its "/deploy/build.sh" script'
+
+inputs:
+  ENV:
+    description: Application environment (staging or production)
+    required: true
+
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v3
+    - name: Cleaning workspace
+      shell: bash
+      run: shopt -s dotglob && rm -rf "${{ github.workspace }}"/*
+    - name: Restoring workspace from cache
+      uses: wishabi/github-actions/cache@PDA-325
+    - name: Deploying to Lambda
+      shell: bash
+      run: |
+        export DEPLOY_ENV=${{ inputs.ENV }}
+        chmod +x ./deploy/build.sh && ./deploy/build.sh service
