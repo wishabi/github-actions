@@ -14,7 +14,7 @@ runs:
       with:
         fetch-depth: 0
     - name: Setting up sonarqube
-      uses: warchant/setup-sonar-scanner@v3
+      uses: warchant/setup-sonar-scanner@v4
     - name: Downloading test report
       uses: actions/download-artifact@v3
       with:
