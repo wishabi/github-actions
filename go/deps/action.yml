@@ -5,10 +5,6 @@ inputs:
   BUF_REPO_NAME:
     description: Name of the buf repo to be built
     required: false
-  CACHE_FOR_DEPLOY:
-    description: Cache for deploy jobs
-    required: false
-    default: true
 
 runs:
   using: 'composite'
@@ -32,5 +28,4 @@ runs:
       shell: bash
       run: go mod tidy
     - name: Caching workspace for deploy jobs
-      if: "${{ inputs.CACHE_FOR_DEPLOY == 'true' }}"
       uses: wishabi/github-actions/cache@PDA-325
