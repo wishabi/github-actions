@@ -24,9 +24,11 @@ runs:
         go-version-file: 'go.mod'
         check-latest: true
         cache: true
+        token: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Setting up buf
       uses: bufbuild/buf-setup-action@v1
       if: "${{ inputs.BUF_BUILD_API_TOKEN != '' }}"
       with:
+        github_token: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         buf_user: ${{ inputs.BUF_BUILD_USER }}
         buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
