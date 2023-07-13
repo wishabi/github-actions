@@ -28,4 +28,4 @@ runs:
       shell: bash
       run: go mod tidy
     - name: Caching workspace for deploy jobs
-      uses: wishabi/github-actions/eks/cache@PDA-325
+      uses: wishabi/github-actions/cache@PDA-325

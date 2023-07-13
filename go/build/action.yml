@@ -21,11 +21,11 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: wishabi/github-actions/go/setup@PD-325
+    - uses: wishabi/github-actions/go/setup@PDA-325
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
         BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
-    - uses: wishabi/github-actions/go/deps@PD-325
+    - uses: wishabi/github-actions/go/deps@PDA-325
       with:
         BUF_REPO_NAME: ${{ inputs.BUF_REPO_NAME }}
