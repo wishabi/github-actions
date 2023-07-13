@@ -1,5 +1,5 @@
 name: 'eks-deploy'
-description: 'Custom GitHub action that deploys the repository to EKS using its "/deploy/build.sh" script'
+description: 'Custom GitHub action that deploys the repository to lambda using its "/deploy/build.sh" script'
 
 inputs:
   ENV:
