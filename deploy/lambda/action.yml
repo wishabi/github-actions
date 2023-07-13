@@ -1,4 +1,4 @@
-name: 'eks-deploy'
+name: 'lambda-deploy'
 description: 'Custom GitHub action that deploys the repository to lambda using its "/deploy/build.sh" script'
 
 inputs:
