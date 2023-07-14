@@ -1,5 +1,5 @@
-name: 'eks-cache'
-description: 'Custom GitHub action that caches the repository for EKS to deploy'
+name: 'cache'
+description: 'Custom GitHub action that caches the workspace code to the default location for deploy'
 
 inputs:
   DEPLOY_CACHE_PATH:
