@@ -3256,126 +3256,6 @@ exports.checkBypass = checkBypass;
 
 /***/ }),
 
-/***/ 20:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-var authToken = __nccwpck_require__(6434);
-
-const createActionAuth = function createActionAuth() {
-  if (!process.env.GITHUB_ACTION) {
-    throw new Error("[@octokit/auth-action] `GITHUB_ACTION` environment variable is not set. @octokit/auth-action is meant to be used in GitHub Actions only.");
-  }
-
-  const definitions = [process.env.GITHUB_TOKEN, process.env.INPUT_GITHUB_TOKEN, process.env.INPUT_TOKEN].filter(Boolean);
-
-  if (definitions.length === 0) {
-    throw new Error("[@octokit/auth-action] `GITHUB_TOKEN` variable is not set. It must be set on either `env:` or `with:`. See https://github.com/octokit/auth-action.js#createactionauth");
-  }
-
-  if (definitions.length > 1) {
-    throw new Error("[@octokit/auth-action] The token variable is specified more than once. Use either `with.token`, `with.GITHUB_TOKEN`, or `env.GITHUB_TOKEN`. See https://github.com/octokit/auth-action.js#createactionauth");
-  }
-
-  const token = definitions.pop();
-  return authToken.createTokenAuth(token);
-};
-
-exports.createActionAuth = createActionAuth;
-//# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 6434:
-/***/ ((module) => {
-
-"use strict";
-
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __export = (target, all) => {
-  for (var name in all)
-    __defProp(target, name, { get: all[name], enumerable: true });
-};
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
-  }
-  return to;
-};
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-
-// pkg/dist-src/index.js
-var dist_src_exports = {};
-__export(dist_src_exports, {
-  createTokenAuth: () => createTokenAuth
-});
-module.exports = __toCommonJS(dist_src_exports);
-
-// pkg/dist-src/auth.js
-var REGEX_IS_INSTALLATION_LEGACY = /^v1\./;
-var REGEX_IS_INSTALLATION = /^ghs_/;
-var REGEX_IS_USER_TO_SERVER = /^ghu_/;
-async function auth(token) {
-  const isApp = token.split(/\./).length === 3;
-  const isInstallation = REGEX_IS_INSTALLATION_LEGACY.test(token) || REGEX_IS_INSTALLATION.test(token);
-  const isUserToServer = REGEX_IS_USER_TO_SERVER.test(token);
-  const tokenType = isApp ? "app" : isInstallation ? "installation" : isUserToServer ? "user-to-server" : "oauth";
-  return {
-    type: "token",
-    token,
-    tokenType
-  };
-}
-
-// pkg/dist-src/with-authorization-prefix.js
-function withAuthorizationPrefix(token) {
-  if (token.split(/\./).length === 3) {
-    return `bearer ${token}`;
-  }
-  return `token ${token}`;
-}
-
-// pkg/dist-src/hook.js
-async function hook(token, request, route, parameters) {
-  const endpoint = request.endpoint.merge(
-    route,
-    parameters
-  );
-  endpoint.headers.authorization = withAuthorizationPrefix(token);
-  return request(endpoint);
-}
-
-// pkg/dist-src/index.js
-var createTokenAuth = function createTokenAuth2(token) {
-  if (!token) {
-    throw new Error("[@octokit/auth-token] No token passed to createTokenAuth");
-  }
-  if (typeof token !== "string") {
-    throw new Error(
-      "[@octokit/auth-token] Token passed to createTokenAuth is not a string"
-    );
-  }
-  token = token.replace(/^(token|bearer) +/i, "");
-  return Object.assign(auth.bind(null, token), {
-    hook: hook.bind(null, token)
-  });
-};
-// Annotate the CommonJS export names for ESM import in node:
-0 && (0);
-
-
-/***/ }),
-
 /***/ 334:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -4347,44 +4227,6 @@ exports.composePaginateRest = composePaginateRest;
 exports.isPaginatingEndpoint = isPaginatingEndpoint;
 exports.paginateRest = paginateRest;
 exports.paginatingEndpoints = paginatingEndpoints;
-//# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 8883:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-const VERSION = "1.0.4";
-
-/**
- * @param octokit Octokit instance
- * @param options Options passed to Octokit constructor
- */
-
-function requestLog(octokit) {
-  octokit.hook.wrap("request", (request, options) => {
-    octokit.log.debug("request", options);
-    const start = Date.now();
-    const requestOptions = octokit.request.endpoint.parse(options);
-    const path = requestOptions.url.replace(options.baseUrl, "");
-    return request(options).then(response => {
-      octokit.log.info(`${requestOptions.method} ${path} - ${response.status} in ${Date.now() - start}ms`);
-      return response;
-    }).catch(error => {
-      octokit.log.info(`${requestOptions.method} ${path} - ${error.status} in ${Date.now() - start}ms`);
-      throw error;
-    });
-  });
-}
-requestLog.VERSION = VERSION;
-
-exports.requestLog = requestLog;
 //# sourceMappingURL=index.js.map
 
 
@@ -5767,32 +5609,6 @@ const request = withDefaults(endpoint.endpoint, {
 });
 
 exports.request = request;
-//# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 5375:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-var __webpack_unused_export__;
-
-
-__webpack_unused_export__ = ({ value: true });
-
-var core = __nccwpck_require__(6762);
-var pluginRequestLog = __nccwpck_require__(8883);
-var pluginPaginateRest = __nccwpck_require__(4193);
-var pluginRestEndpointMethods = __nccwpck_require__(3044);
-
-const VERSION = "18.12.0";
-
-const Octokit = core.Octokit.plugin(pluginRequestLog.requestLog, pluginRestEndpointMethods.legacyRestEndpointMethods, pluginPaginateRest.paginateRest).defaults({
-  userAgent: `octokit-rest.js/${VERSION}`
-});
-
-exports.v = Octokit;
 //# sourceMappingURL=index.js.map
 
 
@@ -16456,10 +16272,6 @@ var external_path_ = __nccwpck_require__(5622);
 var external_path_default = /*#__PURE__*/__nccwpck_require__.n(external_path_);
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __nccwpck_require__(2186);
-// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
-var github = __nccwpck_require__(5438);
-// EXTERNAL MODULE: ./node_modules/@octokit/rest/dist-node/index.js
-var dist_node = __nccwpck_require__(5375);
 ;// CONCATENATED MODULE: external "child_process"
 const external_child_process_namespaceObject = require("child_process");;
 ;// CONCATENATED MODULE: ./src/sshUtils.js
@@ -16488,112 +16300,49 @@ const execShellCommand = (cmd) => {
 }
 
 ;// CONCATENATED MODULE: ./src/ssh.js
+// @ts-check
 
 
 
 
 
 
-const { createActionAuth } = __nccwpck_require__(20);
-
-
-
-const UPTERM_VERSION = "v0.7.6"
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function ssh() {
   try {
-    if (process.platform === "win32") {
-      core.info("Windows is not supported by upterm, skipping...")
-      return
-    }
+    core.info("Installing dependencies")
+    await execShellCommand("curl -L https://github.com/owenthereal/upterm/releases/download/0.5.2/linux-amd64-v0.5.2.tar.gz | tar zxvf - --strip-components=1 --wildcards '*/upterm' && sudo mv upterm /usr/local/bin/")
+    await execShellCommand("apt-get -y install tmux")
+    core.info("Installed dependencies successfully")
 
-    core.debug("Installing dependencies")
-    await execShellCommand(`curl -sL https://github.com/owenthereal/upterm/releases/download/${UPTERM_VERSION}/upterm_linux_amd64.tar.gz | tar zxvf - -C /tmp upterm && sudo install /tmp/upterm /usr/local/bin/`)
-    await execShellCommand("if ! command -v tmux &>/dev/null; then sudo apt-get -y install tmux; fi")
-    core.debug("Installed dependencies successfully")
-
-    const sshPath = external_path_default().join(external_os_default().homedir(), ".ssh")
-    if (!external_fs_default().existsSync(external_path_default().join(sshPath, "id_rsa"))) {
-      core.debug("Generating SSH keys")
-      external_fs_default().mkdirSync(sshPath, { recursive: true })
-      try {
-        await execShellCommand(`ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa; ssh-keygen -q -t ed25519 -N "" -f ~/.ssh/id_ed25519`);
-      } catch { }    
-      core.debug("Generated SSH keys successfully")
-    } else {
-      core.debug("SSH key already exists")
-    }
-
-    core.debug("Configuring ssh client")
-    external_fs_default().appendFileSync(external_path_default().join(sshPath, "config"), "Host *\nStrictHostKeyChecking no\nCheckHostIP no\n" +
+    core.info("Generating SSH keys")
+    external_fs_default().mkdirSync(external_path_default().join(external_os_default().homedir(), ".ssh"), { recursive: true })
+    try {
+      await execShellCommand(`ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa; ssh-keygen -q -t ed25519 -N "" -f ~/.ssh/id_ed25519`);
+    } catch { }
+    core.info("Generated SSH keys successfully")
+    core.info("Configuring ssh client")
+    external_fs_default().appendFileSync(external_path_default().join(external_os_default().homedir(), ".ssh/config"), "Host *\nStrictHostKeyChecking no\nCheckHostIP no\n" +
       "TCPKeepAlive yes\nServerAliveInterval 30\nServerAliveCountMax 180\nVerifyHostKeyDNS yes\nUpdateHostKeys yes\n")
     // entry in known hosts file in mandatory in upterm. attempt ssh connection to upterm server
     // to get the host key added to ~/.ssh/known_hosts
-    if (core.getInput("ssh-known-hosts") && core.getInput("ssh-known-hosts") !== "") {
-      core.info("Appending ssh-known-hosts to ~/.ssh/known_hosts. Contents of ~/.ssh/known_hosts:")
-      external_fs_default().appendFileSync(external_path_default().join(sshPath, "known_hosts"), core.getInput("ssh-known-hosts"))
-      core.info(await execShellCommand('cat ~/.ssh/known_hosts'))
-    } else {
-      core.info("Auto-generating ~/.ssh/known_hosts by attempting connection to uptermd.upterm.dev")
-      try {
-        await execShellCommand("ssh -i ~/.ssh/id_ed25519 uptermd.upterm.dev")
-      } catch { }
-      // @cert-authority entry is the mandatory entry. generate the entry based on the known_hosts entry key
-      try {
-        await execShellCommand('cat <(cat ~/.ssh/known_hosts | awk \'{ print "@cert-authority * " $2 " " $3 }\') >> ~/.ssh/known_hosts')
-      } catch { }
-    }
-
-    let authorizedKeysParameter = ""
-
-    let allowedUsers = core.getInput("limit-access-to-users").split(/[\s\n,]+/).filter(x => x !== "")
-    if (core.getInput("limit-access-to-actor") === "true") {
-      core.info(`Adding actor "${github.context.actor}" to allowed users.`)
-      allowedUsers.push(github.context.actor)
-    }
-    const uniqueAllowedUsers = [...new Set(allowedUsers)]
-    if (uniqueAllowedUsers.length > 0) {
-      core.info(`Fetching SSH keys registered with GitHub profiles: ${uniqueAllowedUsers.join(', ')}`)
-      const octokit = new dist_node/* Octokit */.v({
-        authStrategy: createActionAuth
-      })
-      let allowedKeys = []
-      for (const allowedUser of uniqueAllowedUsers) {
-        if (allowedUser) {
-          try {
-            let keys = await octokit.users.listPublicKeysForUser({
-              username: allowedUser
-            })
-            for (const item of keys.data) {
-              allowedKeys.push(item.key)
-            }
-          } catch (error) {
-            core.info(`Error fetching keys for ${allowedUser}. Error: ${error.message}`)
-          }
-        }
-      }
-      if (allowedKeys.length === 0) {
-        throw new Error(`No public SSH keys registered with GitHub profiles: ${uniqueAllowedUsers.join(', ')}`)
-      }
-      core.info(`Fetched ${allowedKeys.length} ssh public keys`)
-      const authorizedKeysPath = external_path_default().join(sshPath, "authorized_keys")
-      external_fs_default().appendFileSync(authorizedKeysPath, allowedKeys.join('\n'))
-      authorizedKeysParameter = `-a "${authorizedKeysPath}"`
-    }
-
-    const uptermServer = core.getInput("upterm-server")
-    core.info(`Creating a new session. Connecting to upterm server ${uptermServer}`)
-    await execShellCommand(`tmux new -d -s upterm-wrapper -x 132 -y 43 \"upterm host --server '${uptermServer}' ${authorizedKeysParameter} --force-command 'tmux attach -t upterm' -- tmux new -s upterm -x 132 -y 43\"`)
-    await sleep(2000)
+    try {
+      await execShellCommand("ssh -i ~/.ssh/id_ed25519 upterm.flippback.com")
+    } catch { }
+    // @cert-authority entry is the mandatory entry. generate the entry based on the known_hosts entry key
+    try {
+      await execShellCommand('cat <(cat ~/.ssh/known_hosts | awk \'{ print "@cert-authority * " $2 " " $3 }\') >> ~/.ssh/known_hosts')
+    } catch { }
+    core.info("Creating new session")
+    await execShellCommand("tmux new -d -s upterm-wrapper -x 132 -y 43 \"upterm host --server ssh://upterm.flippback.com:22 --force-command 'tmux attach -t upterm' -- tmux new -s upterm -x 132 -y 43\"")
+    await new Promise(r => setTimeout(r, 2000))
     await execShellCommand("tmux send-keys -t upterm-wrapper q C-m")
-    // resize terminal for largest client by default
-    await execShellCommand("tmux set -t upterm-wrapper window-size largest; tmux set -t upterm window-size largest")
     console.debug("Created new session successfully")
 
-    core.debug("Fetching connection strings")
-    await sleep(1000)
+    core.info("Fetching connection strings")
+    await new Promise(r => setTimeout(r, 1000))
 
     console.debug("Entering main loop")
     while (true) {
@@ -16609,7 +16358,7 @@ async function ssh() {
         core.info("Exiting debugging session because '/continue' file was created")
         break
       }
-      await sleep(30000)
+      await sleep(5000)
     }
   } catch (error) {
     core.setFailed(error.message);
