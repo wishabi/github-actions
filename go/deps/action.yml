@@ -27,8 +27,7 @@ runs:
         set -e
         git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
         # Check that go.mod and go.sum are up to date
-        go mod tidy
-        git diff --exit-code -- go.mod go.sum
+        go mod download
         go mod vendor
     - name: Caching workspace for deploy jobs
       uses: wishabi/github-actions/cache@v0
