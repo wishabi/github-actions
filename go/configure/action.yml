@@ -1,4 +1,4 @@
-name: 'go-setup'
+name: 'go-configure'
 description: 'Set up Go environment for CI build. Sets up Buf if the relevant inputs are provided.'
 
 inputs:
@@ -15,16 +15,11 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Checkout code
+        uses: actions/checkout@v3
     - name: Setting up private modules access
       shell: bash
       run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
-    - uses: actions/checkout@v3
-    - uses: actions/setup-go@v4
-      with:
-        go-version-file: 'go.mod'
-        check-latest: true
-        cache: true
-        token: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Setting up buf
       uses: bufbuild/buf-setup-action@v1
       if: "${{ inputs.BUF_BUILD_API_TOKEN != '' }}"
