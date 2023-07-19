@@ -17,12 +17,6 @@ runs:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - name: Setting up sonarqube
-      uses: warchant/setup-sonar-scanner@v4
-    - name: Downloading test report
-      uses: actions/download-artifact@v3
-      with:
-        name: "${{ github.sha }}-test-report.out"
     - name: Downloading coverage
       uses: actions/download-artifact@v3
       with:
@@ -33,10 +27,11 @@ runs:
       with:
         name: ${{ github.sha }}-rubocop-results
     - name: SonarQube Scan
+      uses: sonarsource/sonarqube-scan-action@master
+      env:
+        SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
+    - name: SonarQube Scan
       shell: bash
-      run: |
-          export PATH=/home/circleci/_work/sonar-scanner/bin:$PATH
-          sonar-scanner \
-            -Dsonar.projectVersion=${GITHUB_SHA::7} \
-            -Dsonar.host.url=${{ inputs.SONAR_HOST_URL }} \
-            -Dsonar.token=${{ inputs.SONAR_TOKEN }}
+      args: >
+        -Dsonar.projectVersion=${GITHUB_SHA::7}
