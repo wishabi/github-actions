@@ -19,11 +19,15 @@ runs:
         path: vendor/bundle
         key: rails-${{ hashFiles('Gemfile.lock') }}
         restore-keys: rails-${{ hashFiles('Gemfile.lock') }}
+    - name: Change tmp and .bundle permissions
+      shell: bash
+      run: |
+        chmod 777 -R .bundle
+        chmod 777 -R tmp
     - name: Bundle install
       if: steps.bundle-cache.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        sudo chmod 1777 -R /home/circleci/.bundle /tmp
         bundle package
         bundle install
       env: 
