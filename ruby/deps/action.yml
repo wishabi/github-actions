@@ -23,6 +23,7 @@ runs:
       if: steps.bundle-cache.outputs.cache-hit != 'true'
       shell: bash
       run: |
+        sudo chmod 1777 -R /home/circleci/.bundle /tmp
         bundle package
         bundle install
       env: 
