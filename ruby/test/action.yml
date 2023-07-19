@@ -20,17 +20,17 @@ runs:
     - name: Setup
       uses: wishabi/github-actions/ruby/setup@PDA-325-ruby
       with:
-        SLACK_BOT_TOKEN: "${{inputs.SLACK_BOT_TOKEN }}"
-        SLACK_CHANNEL: "${{inputs.SLACK_CHANNEL }}"
+        SLACK_BOT_TOKEN: "${{ inputs.SLACK_BOT_TOKEN }}"
+        SLACK_CHANNEL: "${{ inputs.SLACK_CHANNEL }}"
     - name: Execute rspec tests
       shell: bash
       run: |
-           bundle exec rails db:setup db:migrate
+           bundle exec rails db:create db:migrate
            bundle exec rspec --format progress --format RspecJunitFormatter -o result/rspec.xml
       env:
         RAILS_ENV: test
-        DB_PORT: ${{inputs.DB_PORT}}
-        DB_HOST: ${{inputs.DB_HOST}}
+        DB_PORT: ${{ inputs.DB_PORT }}
+        DB_HOST: ${{ inputs.DB_HOST }}
     - name: Rename code coverage paths to be found by Sonarqube
       working-directory: ./coverage
       shell: bash
