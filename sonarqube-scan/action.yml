@@ -31,7 +31,5 @@ runs:
       env:
         SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
-    - name: SonarQube Scan
-      shell: bash
       args: >
         -Dsonar.projectVersion=${GITHUB_SHA::7}
