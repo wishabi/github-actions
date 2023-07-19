@@ -3,7 +3,6 @@ description: 'Lints using rubcop'
 runs:
   using: "composite"
   steps:
-    - uses: rlespinasse/github-slug-action@v3.x
     - name: Download test result
       uses: actions/download-artifact@v3
       with:
@@ -16,5 +15,5 @@ runs:
         chmod +x ./start-one-for-all.sh
         ENFORCER_LANGUAGE="ruby" ./start-one-for-all.sh
       env:
-        CIRCLE_BRANCH: ${{ env.GITHUB_REF_SLUG }}
-        CIRCLE_PROJECT_REPONAME: ${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG }}
+        CIRCLE_BRANCH: ${{ github.head_ref || github.ref_name }} 
+        CIRCLE_PROJECT_REPONAME: ${{ github.event.repository.name }}

@@ -7,25 +7,30 @@ inputs:
   SONAR_TOKEN:
     description: secret value
     required: true
-  CHECK_RUBOCOP:
-    description: whether to download and analyze rubocop results
+  CHECK_COVERAGE:
+    description: whether to download and analyze linter results
+  CHECK_LINTER:
+    description: whether to download and analyze linter results
     default: false
 runs:
   using: "composite"
   steps:
-    - uses: rlespinasse/github-slug-action@v3.x
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - name: Downloading coverage
+    - name: Downloading test report
+      uses: actions/download-artifact@v3
+      with:
+        name: "${{ github.sha }}-test-report.out"
+    - name: Downloading coverage report
       uses: actions/download-artifact@v3
       with:
         name: "${{ github.sha }}-coverage.out"
-    - name: Download rubocop results
-      if: ${{ inputs.CHECK_RUBOCOP == 'true' }}
+    - name: Download linter results
+      if: ${{ inputs.CHECK_LINTER == 'true' }}
       uses: actions/download-artifact@v3
       with:
-        name: ${{ github.sha }}-rubocop-results
+        name: ${{ github.sha }}-linter-results.out
     - name: SonarQube Scan
       uses: sonarsource/sonarqube-scan-action@master
       env:

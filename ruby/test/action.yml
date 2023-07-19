@@ -7,21 +7,10 @@ inputs:
   DB_HOST:
     description: Database host
     default: mysql
-  SLACK_BOT_TOKEN:
-    description: secret value
-    required: true
-  SLACK_CHANNEL:
-    description: secret value
-    required: true
   
 runs:
   using: "composite"
   steps:
-    - name: Setup
-      uses: wishabi/github-actions/ruby/setup@PDA-325-ruby
-      with:
-        SLACK_BOT_TOKEN: "${{ inputs.SLACK_BOT_TOKEN }}"
-        SLACK_CHANNEL: "${{ inputs.SLACK_CHANNEL }}"
     - name: Execute rspec tests
       shell: bash
       run: |

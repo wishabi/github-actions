@@ -19,9 +19,9 @@ runs:
   using: "composite"
   steps:
     - name: Setup
-      uses: wishabi/github-actions/ruby/setup/@PDA-325-ruby
+      uses: wishabi/github-actions/ruby/setup@PDA-325-ruby
       with:
-        SLACK_BOT_TOKEN: "${{inputs.SLACK_BOT_TOKEN }}"
+        SLACK_BOT_TOKEN: "${{inputs.SLACK_BOT_TOKEN }}" 
         SLACK_CHANNEL: "${{inputs.SLACK_CHANNEL }}"
     - name: Staging Topic validation
       shell: bash
@@ -29,4 +29,5 @@ runs:
         bundle exec rails g flipp_ruby_kafka:topic_config --producer_services=${{ inputs.PRODUCER_SERVICE }} --consumer_services=${{ inputs.CONSUMER_SERVICE }}
         sudo chown circleci:circleci /var/run/docker.sock
         chmod +x ./deploy/build.sh && ./deploy/build.sh service topic_validation --env=staging --config-file=./platform.yml --config-file=./topic_validation.yaml
-    
+      env: 
+        BUNDLE_DEPLOYMENT: true
