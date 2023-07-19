@@ -12,7 +12,7 @@ runs:
   using: "composite"
   steps:
     - name: Setup
-      uses: wishabi/github-actions/ruby/setup/@pda-15-percent-ruby
+      uses: wishabi/github-actions/ruby/setup/@PDA-325-ruby
       with:
         SLACK_BOT_TOKEN: "${{inputs.SLACK_BOT_TOKEN }}"
         SLACK_CHANNEL: "${{inputs.SLACK_CHANNEL }}"
