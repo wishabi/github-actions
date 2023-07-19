@@ -30,7 +30,7 @@ runs:
       if: ${{ inputs.CHECK_LINTER == 'true' }}
       uses: actions/download-artifact@v3
       with:
-        name: ${{ github.sha }}-linter-results.out
+        name: "${{ github.sha }}-lint-results.out"
     - name: SonarQube Scan
       uses: sonarsource/sonarqube-scan-action@master
       env:

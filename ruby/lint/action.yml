@@ -15,6 +15,6 @@ runs:
     - name: 'Upload rubocop results'
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ github.sha }}-lint-results.out
+        name: "${{ github.sha }}-lint-results.out"
         path: ./rubocop/rubocop.json
         retention-days: 1
