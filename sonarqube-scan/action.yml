@@ -7,9 +7,13 @@ inputs:
   SONAR_TOKEN:
     description: secret value
     required: true
+  CHECK_RUBOCOP:
+    description: whether to download and analyze rubocop results
+    default: false
 runs:
   using: "composite"
   steps:
+    - uses: rlespinasse/github-slug-action@v3.x
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
@@ -23,11 +27,17 @@ runs:
       uses: actions/download-artifact@v3
       with:
         name: "${{ github.sha }}-coverage.out"
+    - name: Download rubocop results
+      if: ${{ inputs.CHECK_RUBOCOP == 'true' }}
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ github.sha }}-rubocop-results
     - name: SonarQube Scan
       shell: bash
       run: |
           export PATH=/home/circleci/_work/sonar-scanner/bin:$PATH
           sonar-scanner \
             -Dsonar.projectVersion=${GITHUB_SHA::7} \
+           -Dsonar.projectKey=${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG }}
             -Dsonar.host.url=${{ inputs.SONAR_HOST_URL }} \
             -Dsonar.token=${{ inputs.SONAR_TOKEN }}
