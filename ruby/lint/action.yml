@@ -10,6 +10,7 @@ runs:
       run: bundle exec rubocop --format progress --format json --out rubocop/rubocop.json
       env: 
         BUNDLE_DEPLOYMENT: true
+        BUNDLE_AUTO_INSTALL: true
     - name: 'Upload rubocop results'
       uses: actions/upload-artifact@v3
       with:
