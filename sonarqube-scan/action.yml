@@ -31,5 +31,6 @@ runs:
       env:
         SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
-      args: >
-        -Dsonar.projectVersion=${GITHUB_SHA::7}
+      with:
+        args: >
+          -Dsonar.projectVersion=${GITHUB_SHA::7}
