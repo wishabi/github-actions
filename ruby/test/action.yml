@@ -11,6 +11,8 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Restoring workspace from cache
+      uses: wishabi/github-actions/cache@v0
     - name: Execute rspec tests
       shell: bash
       run: |
@@ -20,6 +22,7 @@ runs:
         RAILS_ENV: test
         DB_PORT: ${{ inputs.DB_PORT }}
         DB_HOST: ${{ inputs.DB_HOST }}
+        BUNDLE_DEPLOYMENT: true
     - name: Rename code coverage paths to be found by Sonarqube
       working-directory: ./coverage
       shell: bash

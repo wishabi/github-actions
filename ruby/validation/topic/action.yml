@@ -18,11 +18,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Setup
-      uses: wishabi/github-actions/ruby/setup@PDA-325-ruby
-      with:
-        SLACK_BOT_TOKEN: "${{inputs.SLACK_BOT_TOKEN }}" 
-        SLACK_CHANNEL: "${{inputs.SLACK_CHANNEL }}"
+    - name: Restoring workspace from cache
+      uses: wishabi/github-actions/cache@v0
     - name: Staging Topic validation
       shell: bash
       run: |
