@@ -22,8 +22,7 @@ runs:
     - name: Change tmp and .bundle permissions
       shell: bash
       run: |
-        chmod 777 -R .bundle
-        chmod 777 -R tmp
+        sudo chmod 1777 -R /home/circleci/.bundle /tmp
     - name: Bundle install
       if: steps.bundle-cache.outputs.cache-hit != 'true'
       shell: bash
