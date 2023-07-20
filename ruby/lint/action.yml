@@ -12,6 +12,7 @@ runs:
         bundle exec rubocop --format progress --format json --out rubocop/rubocop.json
         EXIT_CODE="$?"
         echo "exit-code=$EXIT_CODE" >> $GITHUB_OUTPUT
+        echo "Exit code was $EXIT_CODE"
       env: 
         BUNDLE_DEPLOYMENT: true
     - name: 'Upload rubocop results'
@@ -22,4 +23,4 @@ runs:
         retention-days: 1
     - name:
       shell: bash
-      run: exit "${{ steps.rubocop.outputs.exit-code }}"
+      run: exit ${{ steps.rubocop.outputs.exit-code }}
