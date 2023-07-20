@@ -16,6 +16,7 @@ runs:
       shell: bash
       run: |
         sudo chmod 1777 -R /home/circleci/.bundle
+        bundle package
         bundle install
       env: 
         BUNDLE_JOBS: 4
