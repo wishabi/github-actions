@@ -14,8 +14,6 @@ runs:
       continue-on-error: ${{ inputs.CONTINUE_ON_ERROR == 'true' || inputs.CONTINUE_ON_ERROR == true }} 
       shell: bash
       run: bundle exec rubocop --format progress --format json --out rubocop/rubocop.json
-      env: 
-        BUNDLE_DEPLOYMENT: true
     - name: 'Upload rubocop results'
       uses: actions/upload-artifact@v3
       with:
