@@ -1,5 +1,5 @@
-name: 'Lint - rubocop'
-description: 'Lints using rubcop'
+name: 'one-for-all'
+description: 'Runs the one-for-all script'
 runs:
   using: "composite"
   steps: 

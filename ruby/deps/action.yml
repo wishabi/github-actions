@@ -1,13 +1,5 @@
-name: 'Kafka Topic and Schema validation shared setup'
-description: 'custom GitHub action that runs the shared setup for kafka topic and schema validation'
-
-inputs:
-  SLACK_BOT_TOKEN:
-    description: secret value
-    required: true
-  SLACK_CHANNEL:
-    description: secret value
-    required: true
+name: 'Ruby bundle install and caching'
+description: 'custom GitHub action that runs to setup ruby bundle install and caching'
 
 runs:
   using: "composite"
@@ -19,15 +11,11 @@ runs:
         path: vendor/bundle
         key: rails-${{ hashFiles('Gemfile.lock') }}
         restore-keys: rails-${{ hashFiles('Gemfile.lock') }}
-    - name: Change tmp and .bundle permissions
-      shell: bash
-      run: |
-        sudo chmod 1777 -R /home/circleci/.bundle /tmp
     - name: Bundle install
       if: steps.bundle-cache.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        bundle package
+        sudo chmod 1777 -R /home/circleci/.bundle
         bundle install
       env: 
         BUNDLE_JOBS: 4

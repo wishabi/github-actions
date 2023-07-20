@@ -1,22 +1,30 @@
 name: 'Tests - rspec'
 description: 'Runs tests using rspec'
 inputs:
+  DB_HOST:
+      description: Database host
+      required: false
   DB_PORT:
     description: Database port
-    default: 3306
-  DB_HOST:
-    description: Database host
-    default: mysql
+    required: false
+ 
   
 runs:
   using: "composite"
   steps:
-    - name: Restoring workspace from cache
-      uses: wishabi/github-actions/cache@v0
     - name: Execute rspec tests
+      if: ${{ inputs.DB_HOST != '' && inputs.DB_PORT != '' }}
       shell: bash
       run: |
            bundle exec rails db:create db:migrate
+      env:
+        RAILS_ENV: test
+        DB_PORT: ${{ inputs.DB_PORT }}
+        DB_HOST: ${{ inputs.DB_HOST }}
+        BUNDLE_DEPLOYMENT: true
+    - name: Execute rspec tests
+      shell: bash
+      run: |
            bundle exec rspec --format progress --format RspecJunitFormatter -o result/rspec.xml
       env:
         RAILS_ENV: test

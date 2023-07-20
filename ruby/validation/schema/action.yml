@@ -2,18 +2,13 @@ name: 'Kafka Schema validation'
 description: 'custom GitHub action that runs kafka schema validation'
 
 inputs:
-  SLACK_BOT_TOKEN:
-    description: secret value
-    required: true
-  SLACK_CHANNEL:
-    description: secret value
+  ENV:
+    description: Application environment (staging or production)
     required: true
 
 runs:
   using: "composite"
   steps:
-    - name: Restoring workspace from cache
-      uses: wishabi/github-actions/cache@v0
     - name: Generate schema validation json
       shell: bash
       run: |
@@ -24,8 +19,4 @@ runs:
     - name: Staging Schema validation 
       shell: bash
       run: |
-        chmod +x ./deploy/build.sh && ./deploy/build.sh service schema_validation --env=staging
-    - name: Production Schema validation
-      shell: bash
-      run: |
-        chmod +x ./deploy/build.sh && ./deploy/build.sh service schema_validation --env=production
+        chmod +x ./deploy/build.sh && ./deploy/build.sh service schema_validation --env=${{ inputs.ENV }}

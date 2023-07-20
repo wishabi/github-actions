@@ -5,9 +5,6 @@ inputs:
   BUF_REPO_NAME:
     description: Name of the buf repo to be built
     required: false
-  FLIPPCIRCLECIPULLER_REPO_TOKEN:
-    description: Flipp circleci repo token
-    required: true
 
 runs:
   using: 'composite'

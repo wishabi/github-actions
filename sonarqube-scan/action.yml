@@ -1,4 +1,4 @@
-name: 'SonarQube Quality Scan'
+name: 'SonarQube Scan'
 description: 'Runs various quality and security checks against changes'
 inputs:
   SONAR_HOST_URL:
