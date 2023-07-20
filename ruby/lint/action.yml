@@ -10,7 +10,8 @@ runs:
   using: "composite"
   steps:
     - name: Execute rubocop
-      continue-on-error: ${{ inputs.CONTINUE_ON_ERROR }}
+      # Currently always string (use or in case this changes) https://github.com/actions/runner/issues/2238
+      continue-on-error: ${{ inputs.CONTINUE_ON_ERROR == 'true' || inputs.CONTINUE_ON_ERROR == true }} 
       shell: bash
       run: bundle exec rubocop --format progress --format json --out rubocop/rubocop.json
       env: 
