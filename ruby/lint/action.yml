@@ -1,10 +1,16 @@
 name: 'Lint - rubocop'
-description: 'Lints using rubcop'
+description: 'Lints using rubocop'
+
+inputs:
+  CONTINUE_ON_ERROR:
+    description: whether to continue on error from linter
+    required: true
 
 runs:
   using: "composite"
   steps:
     - name: Execute rubocop
+      continue-on-error: ${{ inputs.CONTINUE_ON_ERROR }}
       shell: bash
       run: bundle exec rubocop --format progress --format json --out rubocop/rubocop.json
       env: 
