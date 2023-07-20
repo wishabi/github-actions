@@ -15,7 +15,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Staging Topic validation
+    - name: Topic validation
       shell: bash
       run: |
         bundle exec rails g flipp_ruby_kafka:topic_config --producer_services=${{ inputs.PRODUCER_SERVICE }} --consumer_services=${{ inputs.CONSUMER_SERVICE }}

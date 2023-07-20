@@ -16,7 +16,7 @@ runs:
         sudo chown circleci:circleci /var/run/docker.sock
       env: 
         BUNDLE_DEPLOYMENT: true
-    - name: Staging Schema validation 
+    - name: Schema validation 
       shell: bash
       run: |
         chmod +x ./deploy/build.sh && ./deploy/build.sh service schema_validation --env=${{ inputs.ENV }}
