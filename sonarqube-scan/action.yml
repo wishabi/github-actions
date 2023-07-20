@@ -12,6 +12,7 @@ inputs:
   CHECK_LINTER:
     description: whether to download and analyze linter results
     default: false
+
 runs:
   using: "composite"
   steps:
