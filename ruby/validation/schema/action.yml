@@ -12,7 +12,6 @@ runs:
     - name: Generate schema validation json
       shell: bash
       run: |
-        bundle config set --local path 'vendor/bundle'
         bundle exec rails g flipp_ruby_kafka:schema_validation
         sudo chown circleci:circleci /var/run/docker.sock
       env: 

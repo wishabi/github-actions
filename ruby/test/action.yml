@@ -15,18 +15,18 @@ runs:
       if: ${{ inputs.DB_HOST != '' && inputs.DB_PORT != '' }}
       shell: bash
       run: |
-          bundle config set --local path 'vendor/bundle'
-          bundle exec rails db:create db:migrate --trace
+           bundle exec rails db:create db:migrate
       env:
+        BUNDLE_DEPLOYMENT: true
         DB_HOST: ${{ inputs.DB_HOST }}
         DB_PORT: ${{ inputs.DB_PORT }}
         RAILS_ENV: test
     - name: Execute rspec tests
       shell: bash
       run: |
-          bundle config set --local path 'vendor/bundle'
-          bundle exec rspec --format progress --format RspecJunitFormatter -o result/rspec.xml
+           bundle exec rspec --format progress --format RspecJunitFormatter -o result/rspec.xml
       env:
+        BUNDLE_DEPLOYMENT: true
         DB_HOST: ${{ inputs.DB_HOST }}
         DB_PORT: ${{ inputs.DB_PORT }}
         RAILS_ENV: test
