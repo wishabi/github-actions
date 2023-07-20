@@ -3,8 +3,6 @@ description: 'Runs the one-for-all script'
 runs:
   using: "composite"
   steps: 
-    - name: Restoring workspace from cache
-      uses: wishabi/github-actions/cache@v0
     - name: Download test result
       uses: actions/download-artifact@v3
       with:
