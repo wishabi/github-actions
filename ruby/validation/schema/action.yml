@@ -1,5 +1,5 @@
 name: 'Kafka Schema validation'
-description: 'custom GitHub action that runs kafka schema validation'
+description: 'Custom GitHub action that runs kafka schema validation'
 
 inputs:
   ENV:

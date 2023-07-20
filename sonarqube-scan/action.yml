@@ -7,8 +7,6 @@ inputs:
   SONAR_TOKEN:
     description: secret value
     required: true
-  CHECK_COVERAGE:
-    description: whether to download and analyze linter results
   CHECK_LINTER:
     description: whether to download and analyze linter results
     default: false

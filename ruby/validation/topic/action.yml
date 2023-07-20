@@ -3,7 +3,7 @@ description: 'custom GitHub action that runs kafka topic validation'
 
 inputs:
   CONSUMER_SERVICE:
-    description: Name of the producer service
+    description: Name of the consumer service
     required: true
   ENV:
     description: Application environment (staging or production)
