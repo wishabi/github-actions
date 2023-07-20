@@ -10,7 +10,7 @@ runs:
       shell: bash
       run: |
         bundle exec rubocop --format progress --format json --out rubocop/rubocop.json
-        EXIT_CODE="$?"
+        EXIT_CODE=$?
         echo "exit-code=$EXIT_CODE" >> $GITHUB_OUTPUT
         echo "Exit code was $EXIT_CODE"
       env: 
