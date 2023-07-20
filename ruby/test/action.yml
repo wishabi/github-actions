@@ -18,19 +18,19 @@ runs:
       run: |
            bundle exec rails db:create db:migrate
       env:
-        RAILS_ENV: test
-        DB_PORT: ${{ inputs.DB_PORT }}
-        DB_HOST: ${{ inputs.DB_HOST }}
         BUNDLE_DEPLOYMENT: true
+        DB_HOST: ${{ inputs.DB_HOST }}
+        DB_PORT: ${{ inputs.DB_PORT }}
+        RAILS_ENV: test
     - name: Execute rspec tests
       shell: bash
       run: |
            bundle exec rspec --format progress --format RspecJunitFormatter -o result/rspec.xml
       env:
-        RAILS_ENV: test
-        DB_PORT: ${{ inputs.DB_PORT }}
-        DB_HOST: ${{ inputs.DB_HOST }}
         BUNDLE_DEPLOYMENT: true
+        DB_HOST: ${{ inputs.DB_HOST }}
+        DB_PORT: ${{ inputs.DB_PORT }}
+        RAILS_ENV: test
     - name: Rename code coverage paths to be found by Sonarqube
       working-directory: ./coverage
       shell: bash
