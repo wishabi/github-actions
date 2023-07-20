@@ -1,20 +1,17 @@
 name: 'Lint - rubocop'
 description: 'Lints using rubocop'
 
-inputs:
-  CONTINUE_ON_ERROR:
-    description: whether to continue on error from linter
-    required: false
-    default: true
-
 runs:
   using: "composite"
   steps:
     - name: Execute rubocop
-      # Currently always string (use or in case this changes) https://github.com/actions/runner/issues/2238
-      continue-on-error: ${{ inputs.CONTINUE_ON_ERROR == 'true' || inputs.CONTINUE_ON_ERROR == true }} 
+      id: rubocop
+      continue-on-error: true
       shell: bash
-      run: bundle exec rubocop --format progress --format json --out rubocop/rubocop.json
+      run: |
+        bundle exec rubocop --format progress --format json --out rubocop/rubocop.json
+        EXIT_CODE="$?"
+        echo "exit-code=$EXIT_CODE" >> $GITHUB_OUTPUT
       env: 
         BUNDLE_DEPLOYMENT: true
     - name: 'Upload rubocop results'
@@ -23,3 +20,6 @@ runs:
         name: "${{ github.sha }}-lint-results.out"
         path: ./rubocop/rubocop.json
         retention-days: 1
+    - name:
+      shell: bash
+      run: exit "${{ steps.rubocop.outputs.exit-code }}"
