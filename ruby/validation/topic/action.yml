@@ -5,9 +5,6 @@ inputs:
   CONSUMER_SERVICE:
     description: Name of the consumer service
     required: true
-  ENV:
-    description: Application environment (staging or production)
-    required: true
   PRODUCER_SERVICE:
     description: Name of the producer service
     required: true
@@ -20,6 +17,6 @@ runs:
       run: |
         bundle exec rails g flipp_ruby_kafka:topic_config --producer_services=${{ inputs.PRODUCER_SERVICE }} --consumer_services=${{ inputs.CONSUMER_SERVICE }}
         sudo chown circleci:circleci /var/run/docker.sock
-        chmod +x ./deploy/build.sh && ./deploy/build.sh service topic_validation --env=${{ inputs.ENV }} --config-file=./platform.yml --config-file=./topic_validation.yaml
+        chmod +x ./deploy/build.sh && ./deploy/build.sh service topic_validation --env=production --config-file=./platform.yml --config-file=./topic_validation.yaml
       env: 
         BUNDLE_DEPLOYMENT: true
