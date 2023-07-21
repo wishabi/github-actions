@@ -1,0 +1,16 @@
+name: 'Wait for DB'
+description: 'Wait for the mysql db to be ready for connections'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install mysql-client
+      shell: bash
+      run: |
+        if ! command -v mysql &>/dev/null
+        then
+          sudo apt-get update && sudo apt-get install -y default-mysql-client
+        fi
+    - name: Wait for DB
+      shell: bash
+      run: ${GITHUB_ACTION_PATH}/wait-for-db.sh
