@@ -8,10 +8,6 @@ inputs:
   FLIPPCIRCLECIPULLER_REPO_TOKEN:
     description: Flipp circleci repo token
     required: true
-  GO_MOD_DIRECTORY:
-    description: Directory containing the go.mod and go.sum file
-    required: false
-    default: .
 
 runs:
   using: 'composite'
@@ -24,12 +20,11 @@ runs:
       id: vendor-cache
       uses: actions/cache@v3
       with:
-        path: "${{ inputs.GO_MOD_DIRECTORY }}vendor"
-        key: vendor-cache-${{ hashFiles(format('{0}/{1}', inputs.GO_MOD_DIRECTORY, 'go.mod'), format('{0}/{1}', inputs.GO_MOD_DIRECTORY, 'go.sum')) }}
-        restore-keys: vendor-cache-${{  hashFiles(format('{0}/{1}', inputs.GO_MOD_DIRECTORY, 'go.mod'), format('{0}/{1}', inputs.GO_MOD_DIRECTORY, 'go.sum')) }}
+        path: vendor
+        key: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
+        restore-keys: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
     - name: Setting up private modules access
       if: steps.vendor-cache.outputs.cache-hit != 'true'
-      working-directory: ./functions/flipp-accounts-to-user-vault
       shell: bash
       run: |
         set -e
