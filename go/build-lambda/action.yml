@@ -1,0 +1,18 @@
+name: 'go-deps'
+description: 'Install dependencies. Optionally runs "buf build" steps when BUF_REPO_NAME is provided'
+
+inputs:
+  LAMBDA_FUNCTION_DIRECTORY:
+    description: Directory containing the lambda function main.go file
+    required: false
+    default: .
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setting up private modules access
+      shell: bash
+      run: |
+        set -e
+        # Check that go.mod and go.sum are up to date
+        go build -o build/main ${{ inputs.LAMBDA_FUNCTION_DIRECTORY }}/main.go

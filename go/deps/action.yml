@@ -37,5 +37,3 @@ runs:
         go mod tidy
         git diff --exit-code -- go.mod go.sum
         go mod vendor
-    - name: Caching workspace for deploy jobs
-      uses: wishabi/github-actions/cache@v0
