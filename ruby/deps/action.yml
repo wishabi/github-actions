@@ -1,0 +1,24 @@
+name: 'Ruby bundle install and caching'
+description: 'custom GitHub action that runs to setup ruby bundle install and caching'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Bundle cache
+      id: bundle-cache
+      uses: actions/cache@v3
+      with:
+        path: vendor/bundle
+        key: rails-${{ hashFiles('Gemfile.lock') }}
+        restore-keys: rails-${{ hashFiles('Gemfile.lock') }}
+    - name: Bundle install
+      if: steps.bundle-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        sudo chown circleci:circleci -R /home/circleci/.bundle
+        bundle install
+      env: 
+        BUNDLE_JOBS: 4
+        BUNDLE_DEPLOYMENT: true
+    - name: Caching workspace for deploy jobs
+      uses: wishabi/github-actions/cache@v0

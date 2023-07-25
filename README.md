@@ -2,6 +2,10 @@
 
 This is a GitHub Action to be used in workflows at Flipp.
 
+## Versions
+
+The current major version tag is `v0`. When using actions in this repo you should generally use this tag. The repo will continue adding patch versions `v0.x` and advancing the `v0` tag to the latest patch version for all non-breaking changes.
+
 ## Usage
 
 This action should be included in every job in every workflow. It provides tools that should be useful across all workflows, particularly in the pre/post steps. Having all this in one action should reduce noise in your config files and allow you to get new updates "for free" in the future.
@@ -10,7 +14,7 @@ A sample configuration may look like this:
 
 ```yaml
     - name: Flipp global
-      uses: wishabi/github-actions@v0.5
+      uses: wishabi/github-actions@v0
       timeout-minutes: 10
       env:
         SLACK_BOT_TOKEN: "${{ secrets.SLACK_BOT_TOKEN }}"
@@ -53,3 +57,5 @@ ssh_always|No|If set, SSH sessions will always be created, even on success.
 ## Contributing
 
 Please make sure to run `npm run prepare` before committing your files! You should probably add this to `.git/hooks/pre-commit`.
+
+After creating a new minor patch version (ie `v0.x`), remember to update the major version tag to point to the latest patch.

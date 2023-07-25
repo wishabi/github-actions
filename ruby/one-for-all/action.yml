@@ -1,0 +1,20 @@
+name: 'one-for-all'
+description: 'Runs the one-for-all script'
+
+runs:
+  using: "composite"
+  steps: 
+    - name: Download test result
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ github.sha }}-test-report.out
+        path: ./result/
+    - name: execute one-for-all
+      shell: bash
+      run: |
+        aws s3 cp s3://one-for-all/start-one-for-all.sh start-one-for-all.sh
+        chmod +x ./start-one-for-all.sh
+        ENFORCER_LANGUAGE="ruby" ./start-one-for-all.sh
+      env:
+        CIRCLE_BRANCH: ${{ github.head_ref || github.ref_name }} 
+        CIRCLE_PROJECT_REPONAME: ${{ github.event.repository.name }}

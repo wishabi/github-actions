@@ -1,4 +1,4 @@
-name: 'SonarQube Quality Scan'
+name: 'SonarQube Scan'
 description: 'Runs various quality and security checks against changes'
 inputs:
   SONAR_HOST_URL:
@@ -7,27 +7,34 @@ inputs:
   SONAR_TOKEN:
     description: secret value
     required: true
+  CHECK_LINTER:
+    description: whether to download and analyze linter results
+    default: false
+
 runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - name: Setting up sonarqube
-      uses: warchant/setup-sonar-scanner@v4
     - name: Downloading test report
       uses: actions/download-artifact@v3
       with:
         name: "${{ github.sha }}-test-report.out"
-    - name: Downloading coverage
+    - name: Downloading coverage report
       uses: actions/download-artifact@v3
       with:
         name: "${{ github.sha }}-coverage.out"
+    - name: Download linter results
+      if: ${{ inputs.CHECK_LINTER == 'true' }}
+      uses: actions/download-artifact@v3
+      with:
+        name: "${{ github.sha }}-lint-results.out"
     - name: SonarQube Scan
-      shell: bash
-      run: |
-          export PATH=/home/circleci/_work/sonar-scanner/bin:$PATH
-          sonar-scanner \
-            -Dsonar.projectVersion=${GITHUB_SHA::7} \
-            -Dsonar.host.url=${{ inputs.SONAR_HOST_URL }} \
-            -Dsonar.token=${{ inputs.SONAR_TOKEN }}
+      uses: sonarsource/sonarqube-scan-action@master
+      env:
+        SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
+      with:
+        args: >
+          -Dsonar.projectVersion=${GITHUB_SHA::7}

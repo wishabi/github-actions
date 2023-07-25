@@ -6,7 +6,6 @@ inputs:
     description: Application environment (staging or production)
     required: true
 
-
 runs:
   using: 'composite'
   steps:

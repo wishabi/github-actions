@@ -1,0 +1,49 @@
+name: 'Tests - rspec'
+description: 'Runs tests using rspec'
+inputs:
+  DB_HOST:
+      description: Database host
+      required: false
+  DB_PORT:
+    description: Database port
+    required: false
+ 
+runs:
+  using: "composite"
+  steps:
+    - name: Execute rspec tests
+      if: ${{ inputs.DB_HOST != '' && inputs.DB_PORT != '' }}
+      shell: bash
+      run: |
+           bundle exec rails db:create db:migrate
+      env:
+        BUNDLE_DEPLOYMENT: true
+        DB_HOST: ${{ inputs.DB_HOST }}
+        DB_PORT: ${{ inputs.DB_PORT }}
+        RAILS_ENV: test
+    - name: Execute rspec tests
+      shell: bash
+      run: |
+           bundle exec rspec --format progress --format RspecJunitFormatter -o result/rspec.xml
+      env:
+        BUNDLE_DEPLOYMENT: true
+        DB_HOST: ${{ inputs.DB_HOST }}
+        DB_PORT: ${{ inputs.DB_PORT }}
+        RAILS_ENV: test
+    - name: Rename code coverage paths to be found by Sonarqube
+      working-directory: ./coverage
+      shell: bash
+      run: |
+        sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' coverage.json
+    - name: 'Upload coverage'
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ github.sha }}-coverage.out
+        path: ./coverage/coverage.json
+        retention-days: 1
+    - name: 'Upload test results'
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ github.sha }}-test-report.out
+        path: ./result/rspec.xml
+        retention-days: 1
