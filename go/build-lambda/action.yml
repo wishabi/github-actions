@@ -13,6 +13,4 @@ runs:
     - name: Setting up private modules access
       shell: bash
       run: |
-        set -e
-        # Check that go.mod and go.sum are up to date
-        go build -o build/main ${{ inputs.LAMBDA_FUNCTION_DIRECTORY }}/main.go
+        go build -o main ${{ inputs.LAMBDA_FUNCTION_DIRECTORY }}/main.go
