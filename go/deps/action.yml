@@ -22,14 +22,14 @@ runs:
     - name: Restoring vendor modules from cache
       id: vendor-cache
       uses: actions/cache@v3
-      directory: ${{ inputs.GO_MOD_DIRECTORY }}
+      working-directory: ${{ inputs.GO_MOD_DIRECTORY }}
       with:
         path: vendor
         key: vendor-cache-${{ hashFiles('go.mod', 'go.sum') }}
         restore-keys: vendor-cache-${{  hashFiles('go.mod', 'go.sum') }}
     - name: Setting up private modules access
       if: steps.vendor-cache.outputs.cache-hit != 'true'
-      directory: ${{ inputs.GO_MOD_DIRECTORY }}
+      working-directory: ${{ inputs.GO_MOD_DIRECTORY }}
       shell: bash
       run: |
         set -e
