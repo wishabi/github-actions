@@ -23,11 +23,10 @@ runs:
     - name: Restoring vendor modules from cache
       id: vendor-cache
       uses: actions/cache@v3
-      working-directory: ./functions/flipp-accounts-to-user-vault
       with:
-        path: vendor
-        key: vendor-cache-${{ hashFiles('go.mod', 'go.sum') }}
-        restore-keys: vendor-cache-${{  hashFiles('go.mod', 'go.sum') }}
+        path: "${{ inputs.GO_MOD_DIRECTORY }}vendor"
+        key: vendor-cache-${{ hashFiles(format('{0}go.mod',inputs.GO_MOD_DIRECTORY), format('{0}go.sum',inputs.GO_MOD_DIRECTORY)) }}
+        restore-keys: vendor-cache-${{  hashFiles(format('{0}go.mod',inputs.GO_MOD_DIRECTORY), format('{0}go.sum',inputs.GO_MOD_DIRECTORY)) }}
     - name: Setting up private modules access
       if: steps.vendor-cache.outputs.cache-hit != 'true'
       working-directory: ./functions/flipp-accounts-to-user-vault
