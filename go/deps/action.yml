@@ -8,6 +8,9 @@ inputs:
   FLIPPCIRCLECIPULLER_REPO_TOKEN:
     description: Flipp circleci repo token
     required: true
+  GO_MOD_DIRECTORY:
+    description: Directory containing the go.mod and go.sum file
+    required: false
 
 runs:
   using: 'composite'
@@ -21,13 +24,14 @@ runs:
       uses: actions/cache@v3
       with:
         path: vendor
-        key: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
-        restore-keys: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
+        key: vendor-cache-${{ hashFiles("${{ GO_MOD_DIRECTORY }}go.mod","${{ GO_MOD_DIRECTORY }}go.sum") }}
+        restore-keys: vendor-cache-${{  hashFiles("${{ GO_MOD_DIRECTORY }}go.mod","${{ GO_MOD_DIRECTORY }}go.sum") }}
     - name: Setting up private modules access
       if: steps.vendor-cache.outputs.cache-hit != 'true'
       shell: bash
       run: |
         set -e
+        cd ${{ GO_MOD_DIRECTORY }}
         # Check that go.mod and go.sum are up to date
         go mod tidy
         git diff --exit-code -- go.mod go.sum
