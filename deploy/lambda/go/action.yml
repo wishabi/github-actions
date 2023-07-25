@@ -5,6 +5,10 @@ inputs:
   ENV:
     description: Application environment (staging or production)
     required: true
+  LAMBDA_FUNCTION_DIRECTORY:
+    description: Directory containing the lambda function main.go file
+    required: false
+    default: .
 
 runs:
   using: 'composite'
@@ -15,6 +19,10 @@ runs:
       run: shopt -s dotglob && rm -rf "${{ github.workspace }}"/*
     - name: Restoring workspace from cache
       uses: wishabi/github-actions/cache@v0
+    - name: Building lambda function for deployment
+      shell: bash
+      run: |
+        go build -o ${{ inputs.LAMBDA_FUNCTION_DIRECTORY }}/main ${{ inputs.LAMBDA_FUNCTION_DIRECTORY }}/main.go
     - name: Deploying to Lambda
       shell: bash
       run: |
