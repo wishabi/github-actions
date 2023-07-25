@@ -24,14 +24,14 @@ runs:
       uses: actions/cache@v3
       with:
         path: vendor
-        key: vendor-cache-${{ hashFiles("${{ GO_MOD_DIRECTORY }}go.mod","${{ GO_MOD_DIRECTORY }}go.sum") }}
-        restore-keys: vendor-cache-${{  hashFiles("${{ GO_MOD_DIRECTORY }}go.mod","${{ GO_MOD_DIRECTORY }}go.sum") }}
+        key: vendor-cache-${{ hashFiles("${{ inputs.GO_MOD_DIRECTORY }}go.mod","${{ inputs.GO_MOD_DIRECTORY }}go.sum") }}
+        restore-keys: vendor-cache-${{  hashFiles("${{ inputs.GO_MOD_DIRECTORY }}go.mod","${{ inputs.GO_MOD_DIRECTORY }}go.sum") }}
     - name: Setting up private modules access
       if: steps.vendor-cache.outputs.cache-hit != 'true'
       shell: bash
       run: |
         set -e
-        cd ${{ GO_MOD_DIRECTORY }}
+        cd ${{ inputs.GO_MOD_DIRECTORY }}
         # Check that go.mod and go.sum are up to date
         go mod tidy
         git diff --exit-code -- go.mod go.sum
