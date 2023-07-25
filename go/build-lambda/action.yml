@@ -13,4 +13,4 @@ runs:
     - name: Setting up private modules access
       shell: bash
       run: |
-        go build -o main ${{ inputs.LAMBDA_FUNCTION_DIRECTORY }}/main.go
+        go build -o ${{ inputs.LAMBDA_FUNCTION_DIRECTORY }}/main ${{ inputs.LAMBDA_FUNCTION_DIRECTORY }}/main.go
