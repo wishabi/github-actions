@@ -11,6 +11,7 @@ inputs:
   GO_MOD_DIRECTORY:
     description: Directory containing the go.mod and go.sum file
     required: false
+    default: .
 
 runs:
   using: 'composite'
