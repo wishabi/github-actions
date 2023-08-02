@@ -9,7 +9,8 @@ inputs:
     required: false
   COVERAGE_ROOT_PATH:
     description: Root path for coverage files - make this overridable because of a bug in GitHub.
-    default: $GITHUB_WORKSPACE
+    # GitHub Actions do not support dynamic values, so default is an empty string.
+    default: ""
     required: false
   
 runs:
@@ -35,10 +36,12 @@ runs:
         DB_PORT: ${{ inputs.DB_PORT }}
         RAILS_ENV: test
     - name: Rename code coverage paths to be found by Sonarqube
+      env:
+        ROOT_PATH: ${{ inputs.COVERAGE_ROOT_PATH || $GITHUB_WORKSPACE }} 
       working-directory: ./coverage
       shell: bash
       run: |
-        sed -i 's@${{ inputs.COVERAGE_ROOT_PATH }}''@/github/workspace/@g' coverage.json
+        sed -i 's@${{ env.ROOT_PATH }}''@/github/workspace/@g' coverage.json
     - name: 'Upload coverage'
       uses: actions/upload-artifact@v3
       with:
