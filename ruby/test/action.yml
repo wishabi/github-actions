@@ -7,7 +7,11 @@ inputs:
   DB_PORT:
     description: Database port
     required: false
- 
+  COVERAGE_ROOT_PATH:
+    description: Root path for coverage files - make this overridable because of a bug in GitHub.
+    default: $GITHUB_WORKSPACE
+    required: false
+  
 runs:
   using: "composite"
   steps:
@@ -34,7 +38,7 @@ runs:
       working-directory: ./coverage
       shell: bash
       run: |
-        sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' coverage.json
+        sed -i 's@${{ inputs.COVERAGE_ROOT_PATH }}''@/github/workspace/@g' coverage.json
     - name: 'Upload coverage'
       uses: actions/upload-artifact@v3
       with:
