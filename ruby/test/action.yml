@@ -37,7 +37,9 @@ runs:
         RAILS_ENV: test
     - name: Rename code coverage paths to be found by Sonarqube
       env:
-        ROOT_PATH: ${{ inputs.COVERAGE_ROOT_PATH || $GITHUB_WORKSPACE }} 
+        # We used $HOME because $GITHUB_WORKSPACE is not pointing to the correct path.
+        # If GitHub fixes this, these actions might break. Using $COVERAGE_ROOT_PATH can be our workaround.
+        ROOT_PATH: ${{ inputs.COVERAGE_ROOT_PATH || $HOME }} 
       working-directory: ./coverage
       shell: bash
       run: |
