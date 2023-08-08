@@ -7,7 +7,12 @@ inputs:
   DB_PORT:
     description: Database port
     required: false
- 
+  COVERAGE_ROOT_PATH:
+    description: Root path for coverage files - make this overridable because of a bug in GitHub.
+    # GitHub Actions do not support dynamic values, so default is an empty string.
+    default: ""
+    required: false
+  
 runs:
   using: "composite"
   steps:
@@ -31,10 +36,14 @@ runs:
         DB_PORT: ${{ inputs.DB_PORT }}
         RAILS_ENV: test
     - name: Rename code coverage paths to be found by Sonarqube
+      env:
+        # We used $HOME because $GITHUB_WORKSPACE is not pointing to the correct path.
+        # If GitHub fixes this, these actions might break. Using $COVERAGE_ROOT_PATH can be our workaround.
+        ROOT_PATH: ${{ inputs.COVERAGE_ROOT_PATH || $HOME }} 
       working-directory: ./coverage
       shell: bash
       run: |
-        sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' coverage.json
+        sed -i 's@${{ env.ROOT_PATH }}''@/github/workspace/@g' coverage.json
     - name: 'Upload coverage'
       uses: actions/upload-artifact@v3
       with:
