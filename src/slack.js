@@ -25,7 +25,7 @@ const slack = (async () => {
     const color = status === "failure" ? "danger" : "good"
     const text = status === "failure" ? "GitHub Action build failed!" : "GitHub Action build succeeded!"
     const token = process.env.SLACK_BOT_TOKEN;
-    const slack = new WebClient(token);
+    const slack = new WebClient(token, { rejectRateLimitedCalls: true });
 
     const attachments = buildSlackAttachments({ color, github });
     const channelId = await lookUpChannelId({ slack, channel });
