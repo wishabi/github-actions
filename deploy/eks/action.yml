@@ -37,14 +37,12 @@ runs:
     - name: Deploying to EKS via Helm release
       shell: bash
       run: |
-        cmd = "chmod +x ./deploy/build.sh && ./deploy/build.sh service deploy_eks --env=${{ inputs.ENV }}"
+        cmd="chmod +x ./deploy/build.sh && ./deploy/build.sh service deploy_eks --env=${{ inputs.ENV }}"
         
         # Check if timeout is set and provide it as a flag
         if [ -n "${{ inputs.TIMEOUT }}" ]; then
-          cmd = "${cmd} --timeout=${{ inputs.TIMEOUT }}"
+          cmd="${cmd} --timeout=${{ inputs.TIMEOUT }}"
         fi
 
         # Execute command
-        $cmd
-
-        
+        eval $cmd
