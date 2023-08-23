@@ -6,7 +6,7 @@ inputs:
     description: Application environment (staging or production)
     required: true
   TIMEOUT:
-    description: Timeout for the deployment
+    description: Timeout (in minutes e.g. '5m') for the deployment step
     required: false
   AWS_ACCESS_KEY_ID:
     description: AWS access key id stored as secret
