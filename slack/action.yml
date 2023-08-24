@@ -29,30 +29,35 @@ runs:
         channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
         payload: |
           {
-            "color": "${{ job.status == 'success' && 'good' || job.status == 'failure' && 'danger' || 'warning' }}",
-            "fields": [
+            "text": "GitHub Action build",
+            "attachments": [
               {
-                "title": "Job",
-                "value": "<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} | ${{ github.job }}>",
-                "short": true
-              },
-              {
-                "title": "Repo",
-                "value": "<https://github.com/${owner}/${repo} | ${owner}/${repo}>",
-                "short": true
-              },
-              {
-                "title": "${{ github.event_name == 'pull_request' && 'Pull Request' || 'Branch' }}",
-                "value": "${{ github.event_name == 'pull_request' && '<${{ github.payload.pull_request.html_url }} | ${{ github.payload.pull_request.title }}>' || '<https://github.com/${{ github.repository }}/commit/${{ github.sha }} | ${{ env.BRANCH }}>' }}",
-                "short": true
-              },
-              {
-                "title": "Event",
-                "value": "${{ github.event_name }}",
-                "short": true
+                "color": "${{ job.status == 'success' && 'good' || job.status == 'failure' && 'danger' || 'warning' }}",
+                "fields": [
+                  {
+                    "title": "Job",
+                    "value": "<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} | ${{ github.job }}>",
+                    "short": true
+                  },
+                  {
+                    "title": "Repo",
+                    "value": "<https://github.com/${owner}/${repo} | ${owner}/${repo}>",
+                    "short": true
+                  },
+                  {
+                    "title": "${{ github.event_name == 'pull_request' && 'Pull Request' || 'Branch' }}",
+                    "value": "${{ github.event_name == 'pull_request' && '<${{ github.payload.pull_request.html_url }} | ${{ github.payload.pull_request.title }}>' || '<https://github.com/${{ github.repository }}/commit/${{ github.sha }} | ${{ env.BRANCH }}>' }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Event",
+                    "value": "${{ github.event_name }}",
+                    "short": true
+                  }
+                ],
+                "footer_icon": "https://github.githubassets.com/favicon.ico",
+                "footer": "<https://github.com/${{ github.repository }} | ${{ github.repository }}>",
+                "ts": 1692888097
               }
-            ],
-            "footer_icon": "https://github.githubassets.com/favicon.ico",
-            "footer": "<https://github.com/${{ github.repository }} | ${{ github.repository }}>",
-            "ts": 1692888097
+            ]
           }
