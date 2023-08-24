@@ -15,7 +15,8 @@ runs:
         if [ "${{ github.event_name }}" == "pull_request" ]; then
           BRANCH="${{ github.event.pull_request.head.ref }}"
         else
-          BRANCH="${{ github.ref#refs/heads/ }}"
+          BRANCH="${{ github.ref }}"
+          BRANCH="${BRANCH#refs/heads/}"
         fi
         echo "BRANCH=${BRANCH}" >> $GITHUB_ENV
     - uses: slackapi/slack-github-action@v1.24.0
