@@ -4,19 +4,6 @@ inputs:
   SLACK_WEBHOOK_URL:
     description: The Slack webhook URL to pass the data to
     required: true
-  JOB:
-    description: The Github Action job we're notifying about
-    required: true
-  REPO:
-    description: The repo the Github Action is running in
-    required: true
-  BRANCH:
-    description: The branch the Github Action is running on
-    required: true
-  EVENT:
-    description: The event that triggered the Github Action
-    required: true
-
 
 runs:
   using: "composite"
@@ -27,8 +14,8 @@ runs:
       with:
         payload: |
           {
-            "Job": "${{ inputs.JOB }}",
-            "Repo": "${{ inputs.REPO }}",
-            "Branch": "${{ inputs.BRANCH }}",
+            "Job": "${{ github.job }}",
+            "Repo": "${{ github.repository }}",
+            "Branch": "${{ github.eventName == 'pull_request' && github.payload.pull_request.head.ref || github.ref#refs/heads/ }}",
             "Event": "${{ inputs.EVENT }}"
           }
