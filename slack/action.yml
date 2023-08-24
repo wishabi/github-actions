@@ -8,6 +8,16 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Set BRANCH variable
+      id: set-branch
+      shell: bash
+      run: |
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+        else
+          BRANCH="${{ github.ref#refs/heads/ }}"
+        fi
+        echo "BRANCH=${BRANCH}" >> $GITHUB_ENV
     - uses: slackapi/slack-github-action@v1.24.0
       env:
         SLACK_WEBHOOK_URL: ${{ inputs.SLACK_WEBHOOK_URL }}
@@ -16,6 +26,6 @@ runs:
           {
             "Job": "${{ github.job }}",
             "Repo": "${{ github.repository }}",
-            "Branch": "${{ github.eventName == 'pull_request' && github.payload.pull_request.head.ref || github.ref#refs/heads/ }}",
+            "Branch": "${{ env.BRANCH }}",
             "Event": "${{ inputs.EVENT }}"
           }
