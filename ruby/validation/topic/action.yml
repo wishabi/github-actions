@@ -5,13 +5,13 @@ inputs:
   ENV:
     description: Application environment (staging or production)
     required: false
-    default: "production"
+    default: production
   CONSUMER_SERVICE:
     description: Name of the consumer service
-    required: true
+    required: false
   PRODUCER_SERVICE:
     description: Name of the producer service
-    required: true
+    required: false
 
 runs:
   using: "composite"
