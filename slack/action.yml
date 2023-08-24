@@ -27,8 +27,8 @@ runs:
       with:
         payload: |
           {
-            "Job": ${{ inputs.JOB }},
-            "Repo": ${{ inputs.REPO }},
-            "Branch": ${{ inputs.BRANCH }},
-            "Event": ${{ inputs.EVENT }}
+            "Job": "${{ inputs.JOB }}",
+            "Repo": "${{ inputs.REPO }}",
+            "Branch": "${{ inputs.BRANCH }}",
+            "Event": "${{ inputs.EVENT }}"
           }
