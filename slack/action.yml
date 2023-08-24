@@ -1,0 +1,13 @@
+name: 'Send Github Action data to Slack workflow'
+description: 'custom GitHub action that runs to send data to a Slack workflow'
+inputs:
+  SLACK_WEBHOOK_URL:
+    description: The Slack webhook URL to pass the data to
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: slackapi/slack-github-action@v1.24.0
+      env:
+        SLACK_WEBHOOK_URL: ${{ inputs.SLACK_WEBHOOK_URL }}
