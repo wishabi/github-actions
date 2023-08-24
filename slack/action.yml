@@ -25,7 +25,7 @@ runs:
       with:
         payload: |
           {
-            "Job": "[${{ github.job }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})",
+            "Job": "<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.job }}>",
             "Repo": "${{ github.repository }}",
             "Branch": "${{ env.BRANCH }}",
             "Event": "${{ github.eventName }}"
