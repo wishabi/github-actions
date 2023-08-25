@@ -1,0 +1,66 @@
+name: 'Send Github Action data to Slack workflow'
+description: 'custom GitHub action that runs to send data to a Slack workflow'
+inputs:
+  SLACK_CHANNEL_ID:
+    description: The Slack channel ID(s) to send the data to
+    required: true
+  SLACK_BOT_TOKEN:
+    description: The Slack bot token to pass the data to
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set BRANCH variable
+      id: set-branch
+      shell: bash
+      run: |
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+        else
+          BRANCH="${{ github.ref }}"
+          BRANCH="${BRANCH#refs/heads/}"
+        fi
+        echo "BRANCH=${BRANCH}" >> $GITHUB_ENV
+    - name: Get Unix Timestamp
+      id: timestamp-step
+      run: echo "::set-output name=timestamp::$(date +%s)"
+    - uses: slackapi/slack-github-action@v1.24.0
+      env:
+        SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
+      with:
+        channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+        payload: |
+          {
+            "text": "GitHub Action build",
+            "attachments": [
+              {
+                "color": "${{ job.status == 'success' && 'good' || job.status == 'failure' && 'danger' || 'warning' }}",
+                "fields": [
+                  {
+                    "title": "Job",
+                    "value": "<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} | ${{ github.job }}>",
+                    "short": true
+                  },
+                  {
+                    "title": "Repo",
+                    "value": "<https://github.com/${{ github.repository }} | ${{ github.repository }}>",
+                    "short": true
+                  },
+                  {
+                    "title": "${{ github.event_name == 'pull_request' && 'Pull Request' || 'Branch' }}",
+                    "value": "${{ github.event_name == 'pull_request' && format('<{0} | {1}>', github.event.pull_request.html_url, github.event.pull_request.title) || format('<https://github.com/{0}/commit/{1} | {2}>', github.repository, github.sha, env.BRANCH)}}",
+                    "short": true
+                  },
+                  {
+                    "title": "Event",
+                    "value": "${{ github.event_name }}",
+                    "short": true
+                  }
+                ],
+                "footer_icon": "https://github.githubassets.com/favicon.ico",
+                "footer": "<https://github.com/${{ github.repository }} | ${{ github.repository }}>",
+                "ts": ${{ steps.timestamp-step.outputs.timestamp }}
+              }
+            ]
+          }
