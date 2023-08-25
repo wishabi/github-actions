@@ -16,7 +16,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Execute rspec tests
+    - name: Run migrations for test database
       if: ${{ inputs.DB_HOST != '' && inputs.DB_PORT != '' }}
       shell: bash
       run: |
