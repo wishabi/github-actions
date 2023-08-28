@@ -24,6 +24,7 @@ runs:
         echo "BRANCH=${BRANCH}" >> $GITHUB_ENV
     - name: Get Unix Timestamp
       id: timestamp-step
+      shell: bash
       run: echo "::set-output name=timestamp::$(date +%s)"
     - uses: slackapi/slack-github-action@v1.24.0
       env:
