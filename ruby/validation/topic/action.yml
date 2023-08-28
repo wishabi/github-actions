@@ -2,21 +2,25 @@ name: 'Kafka Topic validation'
 description: 'custom GitHub action that runs kafka topic validation'
 
 inputs:
+  ENV:
+    description: Application environment (staging or production)
+    required: false
+    default: production
   CONSUMER_SERVICE:
     description: Name of the consumer service
-    required: true
+    required: false
   PRODUCER_SERVICE:
     description: Name of the producer service
-    required: true
+    required: false
 
 runs:
   using: "composite"
   steps:
-    - name: Staging Topic validation
+    - name: Topic validation
       shell: bash
       run: |
         bundle exec rails g flipp_ruby_kafka:topic_config --producer_services=${{ inputs.PRODUCER_SERVICE }} --consumer_services=${{ inputs.CONSUMER_SERVICE }}
         sudo chown circleci:circleci /var/run/docker.sock
-        chmod +x ./deploy/build.sh && ./deploy/build.sh service topic_validation --env=production --config-file=./platform.yml --config-file=./topic_validation.yaml
+        chmod +x ./deploy/build.sh && ./deploy/build.sh service topic_validation --env=${{ inputs.ENV }} --config-file=./platform.yml --config-file=./topic_validation.yaml
       env: 
         BUNDLE_DEPLOYMENT: true
