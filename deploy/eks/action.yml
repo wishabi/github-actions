@@ -5,6 +5,9 @@ inputs:
   ENV:
     description: Application environment (staging or production)
     required: true
+  TIMEOUT:
+    description: Timeout in minutes (e.g. '5m') for the deployment step
+    required: false
   AWS_ACCESS_KEY_ID:
     description: AWS access key id stored as secret
     required: true
@@ -34,4 +37,12 @@ runs:
     - name: Deploying to EKS via Helm release
       shell: bash
       run: |
-        chmod +x ./deploy/build.sh && ./deploy/build.sh service deploy_eks --env=${{ inputs.ENV }}
+        cmd="chmod +x ./deploy/build.sh && ./deploy/build.sh service deploy_eks --env=${{ inputs.ENV }}"
+        
+        # Check if timeout is set and provide it as a flag
+        if [ -n "${{ inputs.TIMEOUT }}" ]; then
+          cmd="${cmd} --timeout=${{ inputs.TIMEOUT }}"
+        fi
+
+        # Execute command
+        eval $cmd
