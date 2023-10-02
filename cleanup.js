@@ -7,7 +7,7 @@ async function run() {
     const status = core.getInput("job_status")
     const enableSSH = core.getInput("enable_ssh")
     await slack();
-    if (enableSSH && (status === "failure" || core.getInput("ssh_always"))) {
+    if (enableSSH === "false" && (status === "failure" || core.getInput("ssh_always") === "true")) {
       await ssh();
     }
   } catch (error) {
