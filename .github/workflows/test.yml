@@ -10,13 +10,11 @@ jobs:
   # unit tests
   units:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/wishabi/ci-build-environment:node-16-browsers
-      credentials:
-        username: "${{ github.repository_owner }}"
-        password: "${{ secrets.GHCR_TOKEN }}"
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
     - run: npm ci
     - run: npm test
 
@@ -24,7 +22,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: ./
       with:
         milliseconds: 1000
