@@ -30,6 +30,10 @@ runs:
       uses: actions/download-artifact@v3
       with:
         name: "${{ github.sha }}-lint-results.out"
+    - name: Get GitHub short SHA as version
+      id: get-short-sha
+      run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+      shell: bash
     - name: SonarQube Scan
       uses: sonarsource/sonarqube-scan-action@master
       env:
@@ -37,4 +41,4 @@ runs:
         SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
       with:
         args: >
-          -Dsonar.projectVersion=${GITHUB_SHA::7}
+          -Dsonar.projectVersion=${{ steps.get-short-sha.outputs.SHORT_SHA }}
