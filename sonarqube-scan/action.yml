@@ -33,6 +33,7 @@ runs:
     - name: Get GitHub short SHA as version
       id: get-short-sha
       run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+      shell: bash
     - name: SonarQube Scan
       uses: sonarsource/sonarqube-scan-action@master
       env:
