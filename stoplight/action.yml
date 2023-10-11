@@ -1,0 +1,26 @@
+name: 'publish-to-documentation-hub'
+description: 'Publishes an OpenAPI spec to a Stoplight documentation hub'
+inputs:
+  # Get the CI token from project settings on your Stoplight workspace
+  STOPLIGHT_PROJECT_TOKEN:
+    description: The Stoplight project token
+    required: true
+  STOPLIGHT_PROJECT_URL:
+    description: The Stoplight project URL
+    required: true
+  DIRECTORY:
+    description: The directory containing the OpenAPI spec
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name:
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Push files to Stoplight
+      run: |
+        npx @stoplight/cli@5 push --ci-token ${{inputs.STOPLIGHT_PROJECT_TOKEN}} --url ${{inputs.STOPLIGHT_PROJECT_URL}} --directory ${{inputs.DIRECTORY}}
