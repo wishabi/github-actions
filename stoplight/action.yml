@@ -22,5 +22,6 @@ runs:
     - name: Checkout code
       uses: actions/checkout@v3
     - name: Push files to Stoplight
+      shell: bash
       run: |
         npx @stoplight/cli@5 push --ci-token ${{inputs.STOPLIGHT_PROJECT_TOKEN}} --url ${{inputs.STOPLIGHT_PROJECT_URL}} --directory ${{inputs.DIRECTORY}}
