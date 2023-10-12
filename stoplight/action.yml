@@ -8,9 +8,6 @@ inputs:
   STOPLIGHT_PROJECT_URL:
     description: The Stoplight project URL
     required: true
-  DIRECTORY:
-    description: The directory containing the OpenAPI spec
-    required: true
 
 runs:
   using: 'composite'
@@ -21,11 +18,12 @@ runs:
         node-version: '14'
     - name: Checkout code
       uses: actions/checkout@v3
-    - name: list files
-      shell: bash
-      run: |
-        ls -la /home/circleci/actions-runner/_work/curator/curator/gen/openapiv2/services/curator/v2
+    - name: Download OpenAPI spec artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: openapi-spec.json
+        path: ${{github.workspace}}/specs
     - name: Push files to Stoplight
       shell: bash
       run: |
-        npx @stoplight/cli@5 push --verbose --ci-token ${{inputs.STOPLIGHT_PROJECT_TOKEN}} --url ${{inputs.STOPLIGHT_PROJECT_URL}} --directory ${{inputs.DIRECTORY}}
+        npx @stoplight/cli@5 push --verbose --ci-token ${{inputs.STOPLIGHT_PROJECT_TOKEN}} --url ${{inputs.STOPLIGHT_PROJECT_URL}} --directory ${{github.workspace}}/specs
