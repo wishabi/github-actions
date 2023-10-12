@@ -21,6 +21,10 @@ runs:
         node-version: '14'
     - name: Checkout code
       uses: actions/checkout@v3
+    - name: list files
+      shell: bash
+      run: |
+        ls -la /home/circleci/actions-runner/_work/curator/curator/gen/openapiv2/services/curator/v2
     - name: Push files to Stoplight
       shell: bash
       run: |
