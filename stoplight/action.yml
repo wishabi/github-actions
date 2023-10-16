@@ -29,4 +29,4 @@ runs:
     - name: Push files to Stoplight
       shell: bash
       run: |
-        npx @stoplight/cli@5 push --ci-token ${{inputs.STOPLIGHT_PROJECT_TOKEN}} --url ${{inputs.STOPLIGHT_PROJECT_URL}} --directory ${{github.workspace}}/specs
+        npx @stoplight/cli@5 push --ci-token ${{inputs.STOPLIGHT_PROJECT_TOKEN}} --url ${{inputs.STOPLIGHT_PROJECT_URL}} --directory ${{github.workspace}}/specs --branch main
