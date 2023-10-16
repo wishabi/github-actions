@@ -8,6 +8,9 @@ inputs:
   STOPLIGHT_PROJECT_URL:
     description: The Stoplight project URL
     required: true
+  SPEC_ARTIFACT_NAME:
+    description: The name of the OpenAPI spec artifact from a previous build step
+    required: true
 
 runs:
   using: 'composite'
@@ -21,9 +24,9 @@ runs:
     - name: Download OpenAPI spec artifact
       uses: actions/download-artifact@v3
       with:
-        name: openapi-spec.json
+        name: ${{inputs.SPEC_ARTIFACT_NAME}}
         path: ${{github.workspace}}/specs
     - name: Push files to Stoplight
       shell: bash
       run: |
-        npx @stoplight/cli@5 push --verbose --ci-token ${{inputs.STOPLIGHT_PROJECT_TOKEN}} --url ${{inputs.STOPLIGHT_PROJECT_URL}} --directory ${{github.workspace}}/specs
+        npx @stoplight/cli@5 push --ci-token ${{inputs.STOPLIGHT_PROJECT_TOKEN}} --url ${{inputs.STOPLIGHT_PROJECT_URL}} --directory ${{github.workspace}}/specs
