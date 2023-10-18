@@ -11,12 +11,18 @@ inputs:
   BUF_BUILD_API_TOKEN:
     description: Buf API token stored as secret
     required: false
+  FETCH_DEPTH:
+    description: Fetch depth for git checkout
+    required: false
+    default: 1
 
 runs:
   using: 'composite'
   steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      with:
+        fetch-depth: ${{ inputs.FETCH_DEPTH }}
     - name: Setting up private modules access
       shell: bash
       run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
