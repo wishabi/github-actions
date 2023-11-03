@@ -1,28 +1,20 @@
-name: "SonarQube Scan"
-description: "Runs various quality and security checks against changes"
+name: "Smoke Test"
+description: "Runs Go smoke tests"
 inputs:
-  SONAR_HOST_URL:
-    description: secret value
-    required: true
-  SONAR_TOKEN:
-    description: secret value
-    required: true
-  CHECK_LINTER:
-    description: whether to download and analyze linter results
-    default: false
   SLACK_CHANNEL_ID:
     description: The Slack channel ID(s) to send the data to
     required: false
   SLACK_BOT_TOKEN:
     description: The Slack bot token to pass the data to
     required: false
+  ENV:
+    description: Environment name used for Slack messages
+    required: false
+    default: "ENV input not provided"
 
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
     - name: Set branch variable
       id: set-branch
       shell: bash
@@ -38,30 +30,17 @@ runs:
       id: get-short-sha
       run: echo "short_sha=`echo ${GITHUB_SHA::7}`" > $GITHUB_OUTPUT
       shell: bash
-    - name: Downloading test report
-      uses: actions/download-artifact@v3
-      with:
-        name: "${{ github.sha }}-test-report.out"
-    - name: Downloading coverage report
-      uses: actions/download-artifact@v3
-      with:
-        name: "${{ github.sha }}-coverage.out"
-    - name: Download linter results
-      if: ${{ inputs.CHECK_LINTER == 'true' }}
-      uses: actions/download-artifact@v3
-      with:
-        name: "${{ github.sha }}-lint-results.out"
-    - name: SonarQube Scan
-      uses: sonarsource/sonarqube-scan-action@master
+    - name: Restore cache
+      uses: wishabi/github-actions/cache@v0
+    - name: Run Smoke Tests
       env:
-        SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
-      with:
-        args: >
-          -Dsonar.projectVersion=${{ steps.get-short-sha.outputs.short_sha }}
+        API_URL: "https://distribution-api-stg.flippback.com"
+        WRITER_API_URL: "https://distribution-api-writer-stg.flippback.com"
+      run: |
+        go test ./tests/smoke --tags=smoke
+      shell: bash
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_CHANNEL_ID != null
-      # if: failure() && github.ref == 'refs/heads/main'
       uses: slackapi/slack-github-action@v1.24.0
       env:
         SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
@@ -69,13 +48,13 @@ runs:
         channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
         payload: |
           {
-            "text": "SonarQube Scan Failed",
+            "text": "Smoke Test Failed",
             "blocks": [
               {
                 "type": "header",
                 "text": {
                   "type": "plain_text",
-                  "text": "SonarQube Scan Failed",
+                  "text": "Smoke Test Failed",
                   "emoji": true
                 }
               },
@@ -86,12 +65,12 @@ runs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "*Repository*\n<https://github.com/${{ github.repository }}|${{ github.repository }}>\n\n*${{ github.event_name == 'pull_request' && 'Pull Request' || 'Branch' }}*\n${{ github.event_name == 'pull_request' && format('<{0}|{1}>', github.event.pull_request.html_url, github.event.pull_request.title) || format('<https://github.com/{0}/commit/{1}|{2}>', github.repository, github.sha, steps.set-branch.outputs.branch)}}"
+                  "text": "*Repository*\n<https://github.com/${{ github.repository }}|${{ github.repository }}>\n\n*Environment*\n${{ inputs.ENV }}"
                 },
                 "accessory": {
                   "type": "image",
-                  "image_url": "https://emoji.slack-edge.com/T02AJQYGN/sonar-fail/3d49949af6831e63.png",
-                  "alt_text": "sonar fail icon"
+                  "image_url": "https://a.slack-edge.com/production-standard-emoji-assets/14.0/apple-large/1f6ad@2x.png",
+                  "alt_text": "smoke test fail icon"
                 }
               },
               {
@@ -99,10 +78,24 @@ runs:
               },
               {
                 "type": "section",
-                  "text": {
+                "fields": [
+                  {
                     "type": "mrkdwn",
-                    "text": "*Commit*\n${{ steps.get-short-sha.outputs.short_sha }}"
+                    "text": "*Branch*"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Commit*"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "${{ format('<https://github.com/{0}/commit/{1}|{2}>', github.repository, github.sha, steps.set-branch.outputs.branch)}}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "${{ steps.get-short-sha.outputs.short_sha }}"
                   }
+                ]
               },
               {
                 "type": "context",

@@ -1,4 +1,4 @@
-name: 'eks-deploy'
+name: "eks-deploy"
 description: 'Custom GitHub action that deploys the repository to EKS using its "/deploy/build.sh" script'
 
 inputs:
@@ -17,11 +17,34 @@ inputs:
   AWS_REGION:
     description: AWS region to deploy to stored as secret
     required: true
-
+  SLACK_SUCCESS_CHANNEL_ID:
+    description: The Slack channel ID(s) to send successful deployment notifications
+    required: false
+  SLACK_FAILURE_CHANNEL_ID:
+    description: The Slack channel ID(s) to send failed deployment notifications
+    required: false
+  SLACK_BOT_TOKEN:
+    description: The Slack bot token to pass the data to
+    required: false
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
+    - name: Set branch variable
+      id: set-branch
+      shell: bash
+      run: |
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          branch="${{ github.event.pull_request.head.ref }}"
+        else
+          branch="${{ github.ref }}"
+          branch="${branch#refs/heads/}"
+        fi
+        echo "branch=${branch}" >> $GITHUB_OUTPUT
+    - name: Get short sha
+      id: get-short-sha
+      run: echo "short_sha=`echo ${GITHUB_SHA::7}`" > $GITHUB_OUTPUT
+      shell: bash
     - name: Configuring AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
@@ -38,7 +61,7 @@ runs:
       shell: bash
       run: |
         cmd="chmod +x ./deploy/build.sh && ./deploy/build.sh service deploy_eks --env=${{ inputs.ENV }}"
-        
+
         # Check if timeout is set and provide it as a flag
         if [ -n "${{ inputs.TIMEOUT }}" ]; then
           cmd="${cmd} --timeout=${{ inputs.TIMEOUT }}"
@@ -46,3 +69,141 @@ runs:
 
         # Execute command
         eval $cmd
+    - name: Notify slack channel on success
+      if: success() && inputs.SLACK_SUCCESS_CHANNEL_ID != null
+      uses: slackapi/slack-github-action@v1.24.0
+      env:
+        SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
+      with:
+        channel-id: ${{ inputs.SLACK_SUCCESS_CHANNEL_ID }}
+        payload: |
+          {
+            "text": "EKS Deplloyment Succeeded",
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "EKS Deployment Succeeded",
+                  "emoji": true
+                }
+              },
+              {
+                "type": "divider"
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Repository*\n<https://github.com/${{ github.repository }}|${{ github.repository }}>\n\n*Environment*\n${{ inputs.ENV }}"
+                },
+                "accessory": {
+                  "type": "image",
+                  "image_url": "https://emoji.slack-edge.com/T02AJQYGN/shipped/43553cbf473da4d5.png",
+                  "alt_text": "deploy fail icon"
+                }
+              },
+              {
+                "type": "divider"
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Branch*"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Commit*"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "${{ format('<https://github.com/{0}/commit/{1}|{2}>', github.repository, github.sha, steps.set-branch.outputs.branch)}}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "${{ steps.get-short-sha.outputs.short_sha }}"
+                  }
+                ]
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Triggered By:* ${{ github.triggering_actor }}"
+                  }
+                ]
+              }
+            ]
+          }
+    - name: Notify slack channel on failure
+      if: failure() && inputs.SLACK_FAILURE_CHANNEL_ID != null
+      uses: slackapi/slack-github-action@v1.24.0
+      env:
+        SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
+      with:
+        channel-id: ${{ inputs.SLACK_FAILURE_CHANNEL_ID }}
+        payload: |
+          {
+            "text": "EKS Deployment Failed",
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "EKS Deployment Failed",
+                  "emoji": true
+                }
+              },
+              {
+                "type": "divider"
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Repository*\n<https://github.com/${{ github.repository }}|${{ github.repository }}>\n\n*Environment*\n${{ inputs.ENV }}"
+                },
+                "accessory": {
+                  "type": "image",
+                  "image_url": "https://emoji.slack-edge.com/T02AJQYGN/sad-cloud/d78efc194125ff42.png",
+                  "alt_text": "deploy fail icon"
+                }
+              },
+              {
+                "type": "divider"
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Branch*"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Commit*"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "${{ format('<https://github.com/{0}/commit/{1}|{2}>', github.repository, github.sha, steps.set-branch.outputs.branch)}}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "${{ steps.get-short-sha.outputs.short_sha }}"
+                  }
+                ]
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Triggered By:* ${{ github.triggering_actor }}"
+                  }
+                ]
+              }
+            ]
+          }

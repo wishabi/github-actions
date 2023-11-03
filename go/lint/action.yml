@@ -1,15 +1,16 @@
-name: "SonarQube Scan"
-description: "Runs various quality and security checks against changes"
+name: "Go Lint"
+description: "Lint Go Repo"
+
 inputs:
-  SONAR_HOST_URL:
-    description: secret value
+  FLIPPCIRCLECIPULLER_REPO_TOKEN:
+    description: Flipp circleci repo token
     required: true
-  SONAR_TOKEN:
-    description: secret value
-    required: true
-  CHECK_LINTER:
-    description: whether to download and analyze linter results
-    default: false
+  BUF_BUILD_USER:
+    description: Buf CI user stored as secret
+    required: false
+  BUF_BUILD_API_TOKEN:
+    description: Buf API token stored as secret
+    required: false
   SLACK_CHANNEL_ID:
     description: The Slack channel ID(s) to send the data to
     required: false
@@ -20,9 +21,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
     - name: Set branch variable
       id: set-branch
       shell: bash
@@ -38,30 +36,27 @@ runs:
       id: get-short-sha
       run: echo "short_sha=`echo ${GITHUB_SHA::7}`" > $GITHUB_OUTPUT
       shell: bash
-    - name: Downloading test report
-      uses: actions/download-artifact@v3
+    - name: Configure Go environment
+      uses: wishabi/github-actions/go/configure@v0
       with:
-        name: "${{ github.sha }}-test-report.out"
-    - name: Downloading coverage report
-      uses: actions/download-artifact@v3
+        FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
+        BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
+        BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
+        FETCH_DEPTH: 0
+    - name: Generate local protos
+      run: make generate-buf
+      shell: bash
+    - name: Setup Go dependencies
+      uses: wishabi/github-actions/go/deps@v0
       with:
-        name: "${{ github.sha }}-coverage.out"
-    - name: Download linter results
-      if: ${{ inputs.CHECK_LINTER == 'true' }}
-      uses: actions/download-artifact@v3
+        FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
+    - name: Run Go linter
+      uses: golangci/golangci-lint-action@v3
       with:
-        name: "${{ github.sha }}-lint-results.out"
-    - name: SonarQube Scan
-      uses: sonarsource/sonarqube-scan-action@master
-      env:
-        SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
-      with:
-        args: >
-          -Dsonar.projectVersion=${{ steps.get-short-sha.outputs.short_sha }}
+        skip-cache: true
+        args: --verbose
     - name: Notify slack channel on failure
-      if: failure() && inputs.SLACK_CHANNEL_ID != null
-      # if: failure() && github.ref == 'refs/heads/main'
+      if: failure() && inputs.SLACK_CHANNEL_ID != null && github.ref == 'refs/heads/main'
       uses: slackapi/slack-github-action@v1.24.0
       env:
         SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
@@ -69,13 +64,13 @@ runs:
         channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
         payload: |
           {
-            "text": "SonarQube Scan Failed",
+            "text": "Go Lint Failed",
             "blocks": [
               {
                 "type": "header",
                 "text": {
                   "type": "plain_text",
-                  "text": "SonarQube Scan Failed",
+                  "text": "Go Lint Failed",
                   "emoji": true
                 }
               },
@@ -90,8 +85,8 @@ runs:
                 },
                 "accessory": {
                   "type": "image",
-                  "image_url": "https://emoji.slack-edge.com/T02AJQYGN/sonar-fail/3d49949af6831e63.png",
-                  "alt_text": "sonar fail icon"
+                  "image_url": "https://emoji.slack-edge.com/T02AJQYGN/lint/84d851e0ac2b58c1.png",
+                  "alt_text": "lint error icon"
                 }
               },
               {
@@ -99,10 +94,24 @@ runs:
               },
               {
                 "type": "section",
-                  "text": {
+                "fields": [
+                  {
                     "type": "mrkdwn",
-                    "text": "*Commit*\n${{ steps.get-short-sha.outputs.short_sha }}"
+                    "text": "*Version/Commit*"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Event*"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "${{ steps.get-short-sha.outputs.short_sha }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "${{ github.event_name }}"
                   }
+                ]
               },
               {
                 "type": "context",

@@ -1,5 +1,5 @@
-name: 'go-configure'
-description: 'Set up Go environment for CI build. Sets up Buf if the relevant inputs are provided.'
+name: "go-configure"
+description: "Set up Go environment for CI build. Sets up Buf if the relevant inputs are provided."
 
 inputs:
   FLIPPCIRCLECIPULLER_REPO_TOKEN:
@@ -17,7 +17,7 @@ inputs:
     default: 1
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Checkout code
       uses: actions/checkout@v3
