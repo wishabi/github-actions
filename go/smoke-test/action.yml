@@ -33,9 +33,6 @@ runs:
     - name: Restore cache
       uses: wishabi/github-actions/cache@v0
     - name: Run Smoke Tests
-      env:
-        API_URL: "https://distribution-api-stg.flippback.com"
-        WRITER_API_URL: "https://distribution-api-writer-stg.flippback.com"
       run: |
         go test ./tests/smoke --tags=smoke
       shell: bash
