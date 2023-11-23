@@ -58,17 +58,21 @@ runs:
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
         BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
     - name: Generate local protos
-      run: make generate-buf
+      run: |
+        buf generate
+        go generate ./...
       shell: bash
     - name: Setup Go dependencies
       uses: wishabi/github-actions/go/deps@v0
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Install mockery
+      if: ${{ hashFiles('.mockery.yml') != '' }}
       run: go install github.com/vektra/mockery/v2
       shell: bash
     - name: Generate mocks
-      run: make generate-mocks
+      if: ${{ hashFiles('.mockery.yml') != '' }}
+      run: mockery
       shell: bash
     - name: Run custom Go test action
       uses: wishabi/github-actions/go/test@v0
