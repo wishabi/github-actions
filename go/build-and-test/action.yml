@@ -58,7 +58,7 @@ runs:
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
         BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
     - name: Generate local protos
-      if: ${{ hashFiles('buf.gen.yml') != '' }}
+      if: ${{ hashFiles('buf.gen.yaml') != '' }}
       run: buf generate
       shell: bash
     - name: Run go generate
