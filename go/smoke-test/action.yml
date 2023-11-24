@@ -1,0 +1,107 @@
+name: "Smoke Test"
+description: "Runs Go smoke tests"
+inputs:
+  SLACK_CHANNEL_ID:
+    description: The Slack channel ID(s) to send the data to
+    required: false
+  SLACK_BOT_TOKEN:
+    description: The Slack bot token to pass the data to
+    required: false
+  ENV:
+    description: Environment name used for Slack messages
+    required: false
+    default: "ENV input not provided"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set branch variable
+      id: set-branch
+      shell: bash
+      run: |
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          branch="${{ github.event.pull_request.head.ref }}"
+        else
+          branch="${{ github.ref }}"
+          branch="${branch#refs/heads/}"
+        fi
+        echo "branch=${branch}" >> $GITHUB_OUTPUT
+    - name: Get short sha
+      id: get-short-sha
+      run: echo "short_sha=`echo ${GITHUB_SHA::7}`" > $GITHUB_OUTPUT
+      shell: bash
+    - name: Restore cache
+      uses: wishabi/github-actions/cache@v0
+    - name: Run Smoke Tests
+      run: |
+        go test ./tests/smoke --tags=smoke
+      shell: bash
+    - name: Notify slack channel on failure
+      if: failure() && inputs.SLACK_CHANNEL_ID != null
+      uses: slackapi/slack-github-action@v1.24.0
+      env:
+        SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
+      with:
+        channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+        payload: |
+          {
+            "text": "Smoke Test Failed",
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "Smoke Test Failed",
+                  "emoji": true
+                }
+              },
+              {
+                "type": "divider"
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Repository*\n<https://github.com/${{ github.repository }}|${{ github.repository }}>\n\n*Environment*\n${{ inputs.ENV }}"
+                },
+                "accessory": {
+                  "type": "image",
+                  "image_url": "https://a.slack-edge.com/production-standard-emoji-assets/14.0/apple-large/1f6ad@2x.png",
+                  "alt_text": "smoke test fail icon"
+                }
+              },
+              {
+                "type": "divider"
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Branch*"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Commit*"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "${{ format('<https://github.com/{0}/commit/{1}|{2}>', github.repository, github.sha, steps.set-branch.outputs.branch)}}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "${{ steps.get-short-sha.outputs.short_sha }}"
+                  }
+                ]
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Triggered By:* ${{ github.triggering_actor }}"
+                  }
+                ]
+              }
+            ]
+          }

@@ -1,0 +1,156 @@
+name: "Go Build & Test"
+description: "Build and test go repo"
+
+inputs:
+  FLIPPCIRCLECIPULLER_REPO_TOKEN:
+    description: Flipp circleci repo token
+    required: true
+  BUF_BUILD_USER:
+    description: Buf CI user stored as secret
+    required: false
+  BUF_BUILD_API_TOKEN:
+    description: Buf API token stored as secret
+    required: false
+  SLACK_CHANNEL_ID:
+    description: The Slack channel ID(s) to send the data to
+    required: false
+  SLACK_BOT_TOKEN:
+    description: The Slack bot token to pass the data to
+    required: false
+  DB_HOST:
+    description: Database host
+    required: false
+  DB_USER:
+    description: Database user
+    required: false
+  DB_PASSWORD:
+    description: Database password
+    required: false
+  DB_PORT:
+    description: Database port
+    required: false
+  TEST_TAGS:
+    description: Test tags
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set branch variable
+      id: set-branch
+      shell: bash
+      run: |
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          branch="${{ github.event.pull_request.head.ref }}"
+        else
+          branch="${{ github.ref }}"
+          branch="${branch#refs/heads/}"
+        fi
+        echo "branch=${branch}" >> $GITHUB_OUTPUT
+    - name: Get short sha
+      id: get-short-sha
+      run: echo "short_sha=`echo ${GITHUB_SHA::7}`" > $GITHUB_OUTPUT
+      shell: bash
+    - name: Configure Go environment
+      uses: wishabi/github-actions/go/configure@v0
+      with:
+        FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
+        BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
+        BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
+    - name: Generate local protos
+      if: ${{ hashFiles('buf.gen.yml') != '' }}
+      run: buf generate
+      shell: bash
+    - name: Run go generate
+      run: go generate ./...
+      shell: bash
+    - name: Setup Go dependencies
+      uses: wishabi/github-actions/go/deps@v0
+      with:
+        FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
+    - name: Install mockery
+      if: ${{ hashFiles('.mockery.yml') != '' }}
+      run: go install github.com/vektra/mockery/v2
+      shell: bash
+    - name: Generate mocks
+      if: ${{ hashFiles('.mockery.yml') != '' }}
+      run: mockery
+      shell: bash
+    - name: Run custom Go test action
+      uses: wishabi/github-actions/go/test@v0
+      env:
+        DB_HOST: ${{ inputs.DB_HOST }}
+        DB_USER: ${{ inputs.DB_USER }}
+        DB_PASSWORD: ${{ inputs.DB_PASSWORD }}
+        DB_PORT: ${{ inputs.DB_PORT }}
+      with:
+        TAGS: ${{ inputs.TEST_TAGS }}
+    - name: Notify slack channel on failure
+      if: failure() && inputs.SLACK_CHANNEL_ID != null && github.ref == 'refs/heads/main'
+      uses: slackapi/slack-github-action@v1.24.0
+      env:
+        SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
+      with:
+        channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+        payload: |
+          {
+            "text": "Go Build and Test Failed",
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "Go Build and Test Failed",
+                  "emoji": true
+                }
+              },
+              {
+                "type": "divider"
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Repository*\n<https://github.com/${{ github.repository }}|${{ github.repository }}>\n\n*${{ github.event_name == 'pull_request' && 'Pull Request' || 'Branch' }}*\n${{ github.event_name == 'pull_request' && format('<{0}|{1}>', github.event.pull_request.html_url, github.event.pull_request.title) || format('<https://github.com/{0}/commit/{1}|{2}>', github.repository, github.sha, steps.set-branch.outputs.branch)}}"
+                },
+                "accessory": {
+                  "type": "image",
+                  "image_url": "https://emoji.slack-edge.com/T02AJQYGN/fail/d35657341d0b7dc4.png",
+                  "alt_text": "error icon"
+                }
+              },
+              {
+                "type": "divider"
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Version/Commit*"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Event*"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "${{ steps.get-short-sha.outputs.short_sha }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "${{ github.event_name }}"
+                  }
+                ]
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Triggered By:* ${{ github.triggering_actor }}"
+                  }
+                ]
+              }
+            ]
+          }
