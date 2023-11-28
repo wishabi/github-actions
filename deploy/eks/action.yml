@@ -128,6 +128,13 @@ runs:
                 ]
               },
               {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Commit Message*\n${{ github.event.head_commit.message }}"
+                }
+              },
+              {
                 "type": "context",
                 "elements": [
                   {
@@ -135,6 +142,9 @@ runs:
                     "text": "*Triggered By:* ${{ github.triggering_actor }}"
                   }
                 ]
+              },
+              {
+                "type": "divider"
               }
             ]
           }
@@ -197,6 +207,13 @@ runs:
                 ]
               },
               {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Commit Message*\n${{ github.event.head_commit.message }}"
+                }
+              },
+              {
                 "type": "context",
                 "elements": [
                   {
@@ -204,6 +221,9 @@ runs:
                     "text": "*Triggered By:* ${{ github.triggering_actor }}"
                   }
                 ]
+              },
+              {
+                "type": "divider"
               }
             ]
           }
