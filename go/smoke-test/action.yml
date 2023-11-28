@@ -8,9 +8,13 @@ inputs:
     description: The Slack bot token to pass the data to
     required: false
   ENV:
-    description: Environment name used for Slack messages
+    description: Environment name used for rollback and Slack messages
     required: false
     default: "ENV input not provided"
+  ROLLBACK_ON_FAIL:
+    description: Rollback the deployment on smoke test failure (pass 'true')
+    required: false
+    default: "false"
 
 runs:
   using: "composite"
@@ -35,6 +39,11 @@ runs:
     - name: Run Smoke Tests
       run: |
         go test ./tests/smoke --tags=smoke
+      shell: bash
+    - name: Rollback on failure
+      if: failure() $$ inputs.ROLLBACK_ON_FAIL == 'true'
+      run: |
+        chmod +x ./deploy/build.sh && ./deploy/build.sh service rollback --env=${{ inputs.ENV }}
       shell: bash
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_CHANNEL_ID != null
