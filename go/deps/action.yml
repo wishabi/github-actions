@@ -2,8 +2,9 @@ name: 'go-deps'
 description: 'Install dependencies. Optionally runs "buf build" steps when BUF_REPO_NAME is provided'
 
 inputs:
+  # Deprecated, leaving for backwards compatibility
   BUF_REPO_NAME:
-    description: Name of the buf repo to be built
+    description: DEPRECATED
     required: false
   FLIPPCIRCLECIPULLER_REPO_TOKEN:
     description: Flipp circleci repo token
@@ -13,9 +14,20 @@ runs:
   using: 'composite'
   steps:
     - name: Generating protobuf code
+      if: ${{ hashFiles('buf.gen.yaml') != '' }}
+      run: buf generate
       shell: bash
-      if: "${{ inputs.BUF_REPO_NAME != '' }}"
-      run: buf generate ${{ inputs.BUF_REPO_NAME }}
+    - name: Run go generate
+      run: go generate ./...
+      shell: bash
+    - name: Install mockery
+      if: ${{ hashFiles('.mockery.yml') != '' }}
+      run: go install github.com/vektra/mockery/v2
+      shell: bash
+    - name: Generate mocks
+      if: ${{ hashFiles('.mockery.yml') != '' }}
+      run: mockery
+      shell: bash
     - name: Restoring vendor modules from cache
       id: vendor-cache
       uses: actions/cache@v3

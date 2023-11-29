@@ -57,25 +57,10 @@ runs:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
         BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
-    - name: Generate local protos
-      if: ${{ hashFiles('buf.gen.yaml') != '' }}
-      run: buf generate
-      shell: bash
-    - name: Run go generate
-      run: go generate ./...
-      shell: bash
     - name: Setup Go dependencies
       uses: wishabi/github-actions/go/deps@v0
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
-    - name: Install mockery
-      if: ${{ hashFiles('.mockery.yml') != '' }}
-      run: go install github.com/vektra/mockery/v2
-      shell: bash
-    - name: Generate mocks
-      if: ${{ hashFiles('.mockery.yml') != '' }}
-      run: mockery
-      shell: bash
     - name: Run custom Go test action
       uses: wishabi/github-actions/go/test@v0
       env:
