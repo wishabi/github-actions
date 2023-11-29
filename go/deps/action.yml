@@ -13,21 +13,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Generating protobuf code
-      if: ${{ hashFiles('buf.gen.yaml') != '' }}
-      run: buf generate
-      shell: bash
-    - name: Run go generate
-      run: go generate ./...
-      shell: bash
-    - name: Install mockery
-      if: ${{ hashFiles('.mockery.yml') != '' }}
-      run: go install github.com/vektra/mockery/v2
-      shell: bash
-    - name: Generate mocks
-      if: ${{ hashFiles('.mockery.yml') != '' }}
-      run: mockery
-      shell: bash
     - name: Restoring vendor modules from cache
       id: vendor-cache
       uses: actions/cache@v3
@@ -44,5 +29,20 @@ runs:
         go mod tidy
         git diff --exit-code -- go.mod go.sum
         go mod vendor
+    - name: Generating protobuf code
+      if: ${{ hashFiles('buf.gen.yaml') != '' }}
+      run: buf generate
+      shell: bash
+    - name: Run go generate
+      run: go generate ./...
+      shell: bash
+    - name: Install mockery
+      if: ${{ hashFiles('.mockery.yml') != '' }}
+      run: go install github.com/vektra/mockery/v2
+      shell: bash
+    - name: Generate mocks
+      if: ${{ hashFiles('.mockery.yml') != '' }}
+      run: mockery
+      shell: bash
     - name: Caching workspace for deploy jobs
       uses: wishabi/github-actions/cache@v0
