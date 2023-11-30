@@ -37,14 +37,14 @@ runs:
       run: echo "short_sha=`echo ${GITHUB_SHA::7}`" > $GITHUB_OUTPUT
       shell: bash
     - name: Configure Go environment
-      uses: wishabi/github-actions/go/configure@pd-buildfix
+      uses: wishabi/github-actions/go/configure@v0
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
         BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
         FETCH_DEPTH: 0
     - name: Setup Go dependencies
-      uses: wishabi/github-actions/go/deps@pd-buildfix
+      uses: wishabi/github-actions/go/deps@v0
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Run Go linter
