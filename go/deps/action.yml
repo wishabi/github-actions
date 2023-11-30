@@ -20,6 +20,13 @@ runs:
         path: vendor
         key: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
         restore-keys: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
+    - name: Generating protobuf code
+      if: ${{ hashFiles('buf.gen.yaml') != '' }}
+      run: buf generate
+      shell: bash
+    - name: Run go generate
+      run: go generate ./...
+      shell: bash
     - name: Setting up private modules access
       if: steps.vendor-cache.outputs.cache-hit != 'true'
       shell: bash
@@ -29,13 +36,6 @@ runs:
         go mod tidy
         git diff --exit-code -- go.mod go.sum
         go mod vendor
-    - name: Generating protobuf code
-      if: ${{ hashFiles('buf.gen.yaml') != '' }}
-      run: buf generate
-      shell: bash
-    - name: Run go generate
-      run: go generate ./...
-      shell: bash
     - name: Install mockery
       if: ${{ hashFiles('.mockery.yml') != '' }}
       run: go install github.com/vektra/mockery/v2
