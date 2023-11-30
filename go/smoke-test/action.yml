@@ -41,7 +41,7 @@ runs:
         go test ./tests/smoke --tags=smoke
       shell: bash
     - name: Rollback on failure
-      if: failure() $$ inputs.ROLLBACK_ON_FAIL == 'true'
+      if: failure() && inputs.ROLLBACK_ON_FAIL == 'true'
       run: |
         chmod +x ./deploy/build.sh && ./deploy/build.sh service rollback --env=${{ inputs.ENV }}
       shell: bash
