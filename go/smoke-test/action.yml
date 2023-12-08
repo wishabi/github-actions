@@ -1,5 +1,5 @@
-name: "Smoke Test"
-description: "Runs Go smoke tests"
+name: 'Smoke Test'
+description: 'Runs Go smoke tests'
 inputs:
   SLACK_CHANNEL_ID:
     description: The Slack channel ID(s) to send the data to
@@ -10,14 +10,21 @@ inputs:
   ENV:
     description: Environment name used for rollback and Slack messages
     required: false
-    default: "ENV input not provided"
+    default: 'ENV input not provided'
   ROLLBACK_ON_FAIL:
     description: Rollback the deployment on smoke test failure (pass 'true')
     required: false
-    default: "false"
+    default: 'false'
+  GO_SMOKE:
+    description: Run go smoke tests
+    required: false
+    default: 'true'
+  DD_SYNTHETIC_IDS:
+    description: Public IDs of DataDog Synthetic tests to run
+    required: false
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Set branch variable
       id: set-branch
@@ -36,10 +43,18 @@ runs:
       shell: bash
     - name: Restore cache
       uses: wishabi/github-actions/cache@v0
-    - name: Run Smoke Tests
+    - name: Run Go Smoke Tests
+      if: inptuts.GO_SMOKE == 'true'
       run: |
         go test ./tests/smoke --tags=smoke
       shell: bash
+    - name: Run DataDog Synthetics
+      if: inputs.DD_SYNTHETIC_IDS != null
+      uses: DataDog/synthetics-ci-github-action@v0.20.0
+        with:
+          api_key: ${{secrets.DD_API_KEY}}
+          app_key: ${{secrets.DD_APP_KEY}}
+          public_ids: ${{ inptus.DD_SYNTHETIC_IDS }}
     - name: Rollback on failure
       if: failure() && inputs.ROLLBACK_ON_FAIL == 'true'
       run: |
