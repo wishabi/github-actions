@@ -44,7 +44,7 @@ runs:
     - name: Restore cache
       uses: wishabi/github-actions/cache@v0
     - name: Run Go Smoke Tests
-      if: inptuts.GO_SMOKE == 'true'
+      if: inputs.GO_SMOKE == 'true'
       run: |
         go test ./tests/smoke --tags=smoke
       shell: bash
