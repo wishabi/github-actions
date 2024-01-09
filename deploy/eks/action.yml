@@ -45,7 +45,7 @@ runs:
       id: get-commit-msg
       shell: bash
       run: |
-        echo "msg=`echo '${{ github.event.head_commit.message }}' | head -1`" >> $GITHUB_OUTPUT
+        echo "msg=`echo '${{ toJson(github.event.head_commit.message) }}'`" >> $GITHUB_OUTPUT
     - name: Get short sha
       id: get-short-sha
       run: echo "short_sha=`echo ${GITHUB_SHA::7}`" >> $GITHUB_OUTPUT
