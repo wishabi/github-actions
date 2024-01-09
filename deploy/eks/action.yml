@@ -41,11 +41,6 @@ runs:
           branch="${branch#refs/heads/}"
         fi
         echo "branch=${branch}" >> $GITHUB_OUTPUT
-    - name: Get commit message
-      id: get-commit-msg
-      shell: bash
-      run: |
-        echo "msg=`echo '${{ github.event.head_commit.message }}' | head -1`" >> $GITHUB_OUTPUT
     - name: Get short sha
       id: get-short-sha
       run: echo "short_sha=`echo ${GITHUB_SHA::7}`" >> $GITHUB_OUTPUT
@@ -136,7 +131,7 @@ runs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "*Commit Message*\n${{ steps.get-commit-msg.outputs.msg }}"
+                  "text": "*Commit Message*\n${{ toJson(github.event.head_commit.message) }}"
                 }
               },
               {
@@ -215,7 +210,7 @@ runs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "*Commit Message*\n${{ steps.get-commit-msg.outputs.msg }}"
+                  "text": "*Commit Message*\n${{ toJson(github.event.head_commit.message) }}"
                 }
               },
               {
