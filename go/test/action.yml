@@ -17,13 +17,13 @@ runs:
       shell: bash
       run: ${GITHUB_ACTION_PATH}/test.sh "${{ inputs.TAGS }}" "${{ inputs.TIMEOUT }}"
     - name: Uploading test report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: "${{ github.sha }}-test-report.out"
         path: "./test-report.out"
         retention-days: 1
     - name: Uploading coverage report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: "${{ github.sha }}-coverage.out"
         path: "./coverage.out"
