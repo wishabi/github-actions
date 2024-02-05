@@ -17,6 +17,10 @@ inputs:
   SLACK_BOT_TOKEN:
     description: The Slack bot token to pass the data to
     required: false
+  GOLANG_CI_LINT_VERSION:
+    description: The version of golangci-lint to use
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -52,6 +56,7 @@ runs:
       with:
         skip-cache: true
         args: --verbose
+        version: ${{ inputs.GOLANG_CI_LINT_VERSION }} # Optional - if blank, will use the action's default version resolution
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_CHANNEL_ID != null && github.ref == 'refs/heads/main'
       uses: slackapi/slack-github-action@v1.24.0
