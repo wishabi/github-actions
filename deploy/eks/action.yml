@@ -1,4 +1,4 @@
-name: 'eks-deploy'
+name: "eks-deploy"
 description: 'Custom GitHub action that deploys the repository to EKS using its "/deploy/build.sh" script'
 
 inputs:
@@ -26,9 +26,12 @@ inputs:
   SLACK_BOT_TOKEN:
     description: The Slack bot token to pass the data to
     required: false
+  ATOMIC:
+    description: EKS Atomic Deployment Flag (true or false) - default is true
+    required: false
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Set branch variable
       id: set-branch
@@ -62,9 +65,14 @@ runs:
       run: |
         cmd="chmod +x ./deploy/build.sh && ./deploy/build.sh service deploy_eks --env=${{ inputs.ENV }}"
 
-        # Check if timeout is set and provide it as a flag
+        # Check if TIMEOUT is set and provide it as a flag
         if [ -n "${{ inputs.TIMEOUT }}" ]; then
           cmd="${cmd} --timeout=${{ inputs.TIMEOUT }}"
+        fi
+
+         # Check if ATOMIC is set and provide it as a flag
+        if [ -n "${{ inputs.ATOMIC }}" ]; then
+          cmd="${cmd} --atomic=${{ inputs.ATOMIC }}"
         fi
 
         # Execute command
