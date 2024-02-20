@@ -21,6 +21,10 @@ inputs:
     description: The version of golangci-lint to use
     required: false
     default: ""
+  WORKSPACE:
+    description: workspace directory
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -51,6 +55,9 @@ runs:
       uses: wishabi/github-actions/go/deps@v0
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
+    - name: Setup safe directory
+      shell: bash
+      run: git config --global --add safe.directory ${{ inputs.WORKSPACE }}
     - name: Run Go linter
       uses: golangci/golangci-lint-action@v3
       with:
