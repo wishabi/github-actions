@@ -51,6 +51,9 @@ runs:
       uses: wishabi/github-actions/go/deps@v0
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
+    - name: Setup safe directory
+      shell: bash
+      run: git config --global --add safe.directory ${{ github.workspace }}
     - name: Run Go linter
       uses: golangci/golangci-lint-action@v3
       with:
