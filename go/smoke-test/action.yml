@@ -82,7 +82,7 @@ runs:
                 "type": "header",
                 "text": {
                   "type": "plain_text",
-                  "text": "Smoke Test Failed - Rollback: ${{ inputs.ROLLBACK_ON_FAIL }}",
+                  "text": "Smoke Test Failed",
                   "emoji": true
                 }
               },
@@ -117,11 +117,19 @@ runs:
                   },
                   {
                     "type": "mrkdwn",
+                    "text": "*Rollback Status*"
+                  },
+                  {
+                    "type": "mrkdwn",
                     "text": "${{ format('<https://github.com/{0}/commit/{1}|{2}>', github.repository, github.sha, steps.set-branch.outputs.branch)}}"
                   },
                   {
                     "type": "mrkdwn",
                     "text": "${{ steps.get-short-sha.outputs.short_sha }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "${{ inputs.ROLLBACK_ON_FAIL }}"
                   }
                 ]
               },
