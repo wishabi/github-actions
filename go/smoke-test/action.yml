@@ -82,7 +82,7 @@ runs:
                 "type": "header",
                 "text": {
                   "type": "plain_text",
-                  "text": "Smoke Test Failed",
+                  "text": "Smoke Test Failed - Rollback: ${{ inputs.ROLLBACK_ON_FAIL }}",
                   "emoji": true
                 }
               },
