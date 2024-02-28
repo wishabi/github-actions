@@ -64,6 +64,7 @@ runs:
     - name: Rollback on failure
       if: failure() && inputs.ROLLBACK_ON_FAIL == 'true'
       run: |
+        echo "WARNING: Rolling back service"
         chmod +x ./deploy/build.sh && ./deploy/build.sh service rollback --env=${{ inputs.ENV }}
       shell: bash
     - name: Notify slack channel on failure
@@ -116,11 +117,19 @@ runs:
                   },
                   {
                     "type": "mrkdwn",
+                    "text": "*Rollback Status*"
+                  },
+                  {
+                    "type": "mrkdwn",
                     "text": "${{ format('<https://github.com/{0}/commit/{1}|{2}>', github.repository, github.sha, steps.set-branch.outputs.branch)}}"
                   },
                   {
                     "type": "mrkdwn",
                     "text": "${{ steps.get-short-sha.outputs.short_sha }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "${{ inputs.ROLLBACK_ON_FAIL }}"
                   }
                 ]
               },
