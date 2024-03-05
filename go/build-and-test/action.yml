@@ -33,7 +33,7 @@ inputs:
     description: Test tags
     required: false
   TIMEOUT:
-    description: A timeout value. If tests take longer than this, they will fail. Set to an empty string to disable.
+    description: A timeout value seconds. If tests take longer than this, they will fail. Set to an empty string to disable.
     required: false
     default: ""
 
