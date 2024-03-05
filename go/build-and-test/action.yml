@@ -32,6 +32,10 @@ inputs:
   TEST_TAGS:
     description: Test tags
     required: false
+  TIMEOUT:
+    description: A timeout value. If tests take longer than this, they will fail. Set to an empty string to disable.
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -70,6 +74,7 @@ runs:
         DB_PORT: ${{ inputs.DB_PORT }}
       with:
         TAGS: ${{ inputs.TEST_TAGS }}
+        TIMEOUT: ${{ inputs.TIMEOUT }}
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_CHANNEL_ID != null && github.ref == 'refs/heads/main'
       uses: slackapi/slack-github-action@v1.24.0

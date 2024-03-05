@@ -8,7 +8,7 @@ inputs:
   TIMEOUT:
     description: A timeout value. If tests take longer than this, they will fail. Set to an empty string to disable.
     required: false
-    default: "30"
+    default: ""
 
 runs:
   using: 'composite'
