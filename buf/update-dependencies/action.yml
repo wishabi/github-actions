@@ -1,0 +1,53 @@
+name: "Buf Update"
+description: "Update Buf Dependencies"
+
+inputs:
+  BUF_BUILD_USER:
+    description: Buf CI user stored as secret
+    required: false
+  BUF_BUILD_API_TOKEN:
+    description: Buf API token stored as secret
+    required: false
+  WORKSPACE:
+    description: Workspace directory
+    required: false
+    default: ""
+
+on:
+  push:
+    branches:
+      - main
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setting up buf
+      uses: bufbuild/buf-setup-action@v1.30.0
+      if: "${{ inputs.BUF_BUILD_API_TOKEN != '' }}"
+      with:
+        github_token: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
+        buf_user: ${{ inputs.BUF_BUILD_USER }}
+        buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
+
+    - name: Test buf CLI
+      run: buf --version
+
+    - name: Run Buf mod update
+      run: buf mod update
+      working-directory: ${{ github.workspace }}/protos
+
+#    - name: Check for changes in buf.lock
+#      id: check-changes
+#      run: |
+#        BUF_LOCK_CHANGES=$(git diff --unified=0 ${{ inputs.WORKSPACE || github.workspace }}/protos/buf.lock)
+#        echo "::set-output name=buf-lock-changes::${BUF_LOCK_CHANGES}"
+
+ #   - name: Create Pull Requests
+ #     if: steps.check-changes.outputs.buf-lock-changes != ''
+ #     run: |
+ #       DEP_CHANGES=$(echo "${{ steps.check-changes.outputs.buf-lock-changes }}" | grep -Po "(?<=commit: )\S+")
+ #       for DEP_CHANGE in $DEP_CHANGES; do
+ #         echo "Creating PR for dependency update with commit: ${DEP_CHANGE}..."
+ #         # Add your logic to create pull requests for each dependency update.
+ #         # Example: Use GitHub API or 'gh' CLI to create pull requests.
+ #       done
