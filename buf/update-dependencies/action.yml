@@ -8,15 +8,6 @@ inputs:
   BUF_BUILD_API_TOKEN:
     description: Buf API token stored as secret
     required: false
-  WORKSPACE:
-    description: Workspace directory
-    required: false
-    default: ""
-
-on:
-  push:
-    branches:
-      - main
 
 runs:
   using: "composite"
@@ -30,9 +21,11 @@ runs:
         buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
 
     - name: Test buf CLI
+      shell: bash
       run: buf --version
 
     - name: Run Buf mod update
+      shell: bash
       run: buf mod update
       working-directory: ${{ github.workspace }}/protos
 
