@@ -24,21 +24,17 @@ runs:
     - name: Test buf CLI
       shell: bash
       run: buf --version
-    
-    - name: Test
-      shell: bash
-      run: ls -l
 
     - name: Run Buf mod update
       shell: bash
       run: buf mod update
       working-directory: ${{ github.workspace }}/protos
 
-#    - name: Check for changes in buf.lock
-#      id: check-changes
-#      run: |
-#        BUF_LOCK_CHANGES=$(git diff --unified=0 ${{ inputs.WORKSPACE || github.workspace }}/protos/buf.lock)
-#        echo "::set-output name=buf-lock-changes::${BUF_LOCK_CHANGES}"
+    - name: Check for changes in buf.lock
+      id: check-changes
+      run: |
+        BUF_LOCK_CHANGES=$(git diff --unified=0 ${{ inputs.WORKSPACE || github.workspace }}/protos/buf.lock)
+        echo "::set-output name=buf-lock-changes::${BUF_LOCK_CHANGES}"
 
  #   - name: Create Pull Requests
  #     if: steps.check-changes.outputs.buf-lock-changes != ''
