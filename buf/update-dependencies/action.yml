@@ -31,6 +31,7 @@ runs:
       working-directory: ${{ github.workspace }}/protos
 
     - name: Check for changes in buf.lock
+      shell: bash
       id: check-changes
       run: |
         BUF_LOCK_CHANGES=$(git diff --unified=0 ${{ inputs.WORKSPACE || github.workspace }}/protos/buf.lock)
