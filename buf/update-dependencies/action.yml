@@ -23,6 +23,10 @@ runs:
     - name: Test buf CLI
       shell: bash
       run: buf --version
+    
+    - name: Test
+      shell: bash
+      run: ls -l
 
     - name: Run Buf mod update
       shell: bash
