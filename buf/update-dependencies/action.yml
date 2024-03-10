@@ -34,15 +34,43 @@ runs:
       shell: bash
       id: check-changes
       run: |
-        BUF_LOCK_CHANGES=$(git diff --unified=0 ${{ inputs.WORKSPACE || github.workspace }}/protos/buf.lock)
+        BUF_LOCK_CHANGES=$(git diff -U0 ${{ github.workspace }}/protos/buf.lock)
         echo "::set-output name=buf-lock-changes::${BUF_LOCK_CHANGES}"
 
- #   - name: Create Pull Requests
- #     if: steps.check-changes.outputs.buf-lock-changes != ''
- #     run: |
- #       DEP_CHANGES=$(echo "${{ steps.check-changes.outputs.buf-lock-changes }}" | grep -Po "(?<=commit: )\S+")
- #       for DEP_CHANGE in $DEP_CHANGES; do
- #         echo "Creating PR for dependency update with commit: ${DEP_CHANGE}..."
- #         # Add your logic to create pull requests for each dependency update.
- #         # Example: Use GitHub API or 'gh' CLI to create pull requests.
- #       done
+    - name: Extract and create PRs for each change blob
+      shell: bash
+      if: steps.check-changes.outputs.buf-lock-changes != ''
+      run: |
+        CHANGES=$(git diff -U0 ${{ github.workspace }}/protos/buf.lock | grep -E "^@@")
+
+        IFS=$'\n'
+        for CHANGE in ${CHANGES}; do
+          LINE_NUMBERS=$(echo "${CHANGE}" | grep -Po "(^\@\@ -\d+,\d+ \+\d+,\d+ \@\@)")
+          LINE_NUMBERS=$(echo "${LINE_NUMBERS}" | awk -F '[-+,]' '{print $2}')
+
+          # Extract the blob of changes for the current range
+          CHANGE_BLOB=$(git diff -U0 ${{ github.workspace }}/protos/buf.lock -p | sed -n "/${LINE_NUMBERS}/,/^$/p")
+
+          # Create a temporary branch
+          BRANCH_NAME="update-buf-${RANDOM}"
+          git checkout -b "${BRANCH_NAME}"
+
+          # Apply the changes to the branch
+          echo "${CHANGE_BLOB}" | git apply -
+
+          # Commit the changes
+          git add .
+          git commit -m "Update Buf dependency"
+
+          # Push the changes to the remote repository
+          git push origin "${BRANCH_NAME}"
+
+          # Create a pull request
+          gh pr create --base main --head "${BRANCH_NAME}" --title "Update Buf dependency" --body "Automated PR to update Buf dependency."
+
+          # Switch back to the main branch
+          git checkout main
+
+          # Delete the temporary branch
+          git branch -D "${BRANCH_NAME}"
+        done
