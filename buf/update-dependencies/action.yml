@@ -38,7 +38,6 @@ runs:
 
     - name: Extract and create PRs for each change blob
       shell: bash
-      if: steps.check-changes.outputs.buf-lock-changes != ''
       run: |
         CHANGES=$(echo ${{ steps.check-changes.outputs.buf-lock-changes }} | grep -E "^@@")
 
