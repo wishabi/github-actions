@@ -31,11 +31,11 @@ runs:
       working-directory: ${{ github.workspace }}/protos
 
     - name: Check for changes in buf.lock
-      shell: bash
       id: check-changes
-      run: |
-        BUF_LOCK_CHANGES=$(git diff -U0 ${{ github.workspace }}/protos/buf.lock)
-        echo "::set-output name=buf-lock-changes::${BUF_LOCK_CHANGES}"
+      shell: bash
+      steps:
+        - run: |
+            echo "buf-lock-changes=$(git diff -U0 ${{ github.workspace }}/protos/buf.lock)" >> "$GITHUB_OUTPUT"
 
     - name: Extract and create PRs for each change blob
       shell: bash
