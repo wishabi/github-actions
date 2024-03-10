@@ -49,7 +49,7 @@ runs:
           LINE_NUMBERS=$(echo "${LINE_NUMBERS}" | awk -F '[-+,]' '{print $2}')
 
           # Extract the blob of changes for the current range
-          CHANGE_BLOB=$(git diff -U0 ${{ github.workspace }}/protos/buf.lock -p | sed -n "/${LINE_NUMBERS}/,/^$/p")
+          CHANGE_BLOB=$(git diff -U0 ${{ github.workspace }}/protos/buf.lock | sed -n "/${LINE_NUMBERS}/,/^$/p")
 
           # Create a temporary branch
           BRANCH_NAME="update-buf-${RANDOM}"
