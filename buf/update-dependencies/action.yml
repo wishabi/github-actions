@@ -40,8 +40,10 @@ runs:
 
     - name: Extract and create PRs for each change blob
       shell: bash
+      env:
+        BUF_CHANGES: ${{ steps.check-changes.outputs.buf-lock-changes }}
       run: |
-        CHANGES=$(echo ${{ steps.check-changes.outputs.buf-lock-changes }} | grep -E "^@@")
+        CHANGES=$(echo $BUF_CHANGES | grep -E "^@@")
 
         IFS=$'\n'
         for CHANGE in ${CHANGES}; do
