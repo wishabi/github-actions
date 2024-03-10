@@ -48,5 +48,6 @@ runs:
           LINE_NUMBERS=$(echo "${CHANGE}" | grep -Po "(^\@\@ -\d+,\d+ \+\d+,\d+ \@\@)")
           LINE_NUMBERS=$(echo "${LINE_NUMBERS}" | awk -F '[-+,]' '{print $2}')
 
-          echo "LINE_NUMBERS=${LINE_NUMBERS}"
+          CHANGE_BLOB=$(git diff -U0 ${{ github.workspace }}/protos/buf.lock | sed -n "/${LINE_NUMBERS}/,/^$/p")
+          echo "CHANGE_BLOB=${CHANGE_BLOB}"
         done
