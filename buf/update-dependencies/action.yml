@@ -45,9 +45,7 @@ runs:
 
         IFS=$'\n'
         for CHANGE in ${CHANGES}; do
-          LINE_NUMBERS=$(echo "${CHANGE}" | grep -Po "(^\@\@ -\d+,\d+ \+\d+,\d+ \@\@)")
-          LINE_NUMBERS=$(echo "${LINE_NUMBERS}" | awk -F '[-+,]' '{print $2}')
+          git reset --hard
 
-          CHANGE_BLOB=$(git diff -U0 ${{ github.workspace }}/protos/buf.lock | sed -n "/${LINE_NUMBERS}/,/^$/p")
-          echo "CHANGE_BLOB=${CHANGE_BLOB}"
+          echo $CHANGE
         done
