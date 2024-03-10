@@ -41,7 +41,7 @@ runs:
       shell: bash
       if: steps.check-changes.outputs.buf-lock-changes != ''
       run: |
-        CHANGES=$(git diff -U0 ${{ github.workspace }}/protos/buf.lock | grep -E "^@@")
+        CHANGES=$(${{ steps.check-changes.outputs.buf-lock-changes }} | grep -E "^@@")
 
         IFS=$'\n'
         for CHANGE in ${CHANGES}; do
