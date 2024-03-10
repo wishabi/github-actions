@@ -34,7 +34,9 @@ runs:
       id: check-changes
       shell: bash
       run: |
-        echo "buf-lock-changes=$(git diff -U0 ${{ github.workspace }}/protos/buf.lock)" >> "$GITHUB_OUTPUT"
+        echo 'var<<EOF' >> $GITHUB_OUTPUT
+        echo "buf-lock-changes=$(git diff -U0 ${{ github.workspace }}/protos/buf.lock)" >> $GITHUB_OUTPUT
+        echo 'EOF' >> $GITHUB_OUTPUT
 
     - name: Extract and create PRs for each change blob
       shell: bash
