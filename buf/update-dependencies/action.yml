@@ -34,7 +34,7 @@ runs:
       id: check-changes
       shell: bash
       run: |
-        echo 'var<<EOF' >> $GITHUB_OUTPUT
+        echo 'buf-lock-changes<<EOF' >> $GITHUB_OUTPUT
         echo "buf-lock-changes=$(git diff -U0 ${{ github.workspace }}/protos/buf.lock)" >> $GITHUB_OUTPUT
         echo 'EOF' >> $GITHUB_OUTPUT
 
@@ -43,7 +43,7 @@ runs:
       env:
         BUF_CHANGES: ${{ steps.check-changes.outputs.buf-lock-changes }}
       run: |
-        CHANGES=$(echo $BUF_CHANGES | grep -E "^@@")
+        CHANGES=$(echo ${{ env.BUF_CHANGES }} | grep -E "^@@")
 
         IFS=$'\n'
         for CHANGE in ${CHANGES}; do
