@@ -9,10 +9,12 @@ inputs:
     description: Use asdf for version management
     required: false
     default: false
+    type: boolean
   USE_ASDF_PLUGIN_MANAGER:
     description: Use asdf plugin manager for plugin management
     required: false
     default: false
+    type: boolean
   BUF_BUILD_USER:
     description: Buf CI user stored as secret
     required: false
@@ -36,13 +38,13 @@ runs:
       run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
     - name: Setting up buf
       uses: bufbuild/buf-setup-action@v1
-      if: "${{ inputs.BUF_BUILD_API_TOKEN != '' && USE_ASDF == 'false' }}"
+      if: "${{ inputs.BUF_BUILD_API_TOKEN != '' && inputsUSE_ASDF == 'false' }}"
       with:
         github_token: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         buf_user: ${{ inputs.BUF_BUILD_USER }}
         buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
     - name: Install mockery
-      if: ${{ hashFiles('.mockery.yml') != '' && USE_ASDF == 'false' }}
+      if: ${{ hashFiles('.mockery.yml') != '' && inputs.USE_ASDF == 'false' }}
       run: go install github.com/vektra/mockery/v2
       shell: bash
     - name: Install asdf tools
