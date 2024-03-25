@@ -62,7 +62,7 @@ runs:
         USE_ASDF: ${{ inputs.USE_ASDF }}
         USE_ASDF_PLUGIN_MANAGER: ${{ inputs.USE_ASDF_PLUGIN_MANAGER }}
     - name: Setup Go dependencies
-      uses: wishabi/github-actions/go/deps@v0
+      uses: wishabi/github-actions/go/deps@asdf-support
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Setup safe directory
