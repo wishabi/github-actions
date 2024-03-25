@@ -36,10 +36,6 @@ runs:
     - name: Run go generate
       run: go generate ./...
       shell: bash
-    - name: Install mockery
-      if: ${{ hashFiles('.mockery.yml') != '' }}
-      run: go install github.com/vektra/mockery/v2
-      shell: bash
     - name: Generate mocks
       if: ${{ hashFiles('.mockery.yml') != '' }}
       run: mockery
