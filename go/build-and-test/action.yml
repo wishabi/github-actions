@@ -60,7 +60,7 @@ runs:
       run: echo "short_sha=`echo ${GITHUB_SHA::7}`" > $GITHUB_OUTPUT
       shell: bash
     - name: Configure Go environment
-      uses: wishabi/github-actions/go/configure@v0
+      uses: wishabi/github-actions/go/configure@asdf-support
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
