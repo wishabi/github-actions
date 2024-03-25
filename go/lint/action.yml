@@ -69,11 +69,17 @@ runs:
       shell: bash
       run: git config --global --add safe.directory ${{ inputs.WORKSPACE || github.workspace }}
     - name: Run Go linter
+      if: ${{ inputs.USE_ASDF == 'false' }}
       uses: golangci/golangci-lint-action@v3
       with:
         skip-cache: true
         args: --verbose
         version: ${{ inputs.GOLANG_CI_LINT_VERSION }} # Optional - if blank, will use the action's default version resolution
+    - name: Run Go linter
+      if: ${{ inputs.USE_ASDF == 'true' }}
+      run: |
+        golangci-lint run --verbose
+      shell: bash
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_CHANNEL_ID != null && github.ref == 'refs/heads/main'
       uses: slackapi/slack-github-action@v1.24.0
