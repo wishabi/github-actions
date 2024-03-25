@@ -40,6 +40,10 @@ inputs:
     description: Use asdf plugin manager for plugin management
     required: false
     default: false
+  TIMEOUT:
+    description: A timeout value in seconds. If tests take longer than this, they will fail. Not setting this value will fallback to go test's default of 10 minutes.
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -80,6 +84,7 @@ runs:
         DB_PORT: ${{ inputs.DB_PORT }}
       with:
         TAGS: ${{ inputs.TEST_TAGS }}
+        TIMEOUT: ${{ inputs.TIMEOUT }}
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_CHANNEL_ID != null && github.ref == 'refs/heads/main'
       uses: slackapi/slack-github-action@v1.24.0
