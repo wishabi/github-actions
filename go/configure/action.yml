@@ -62,3 +62,7 @@ runs:
       if: ${{ inputs.USE_ASDF == 'true' }}
       run: asdf install
       shell: bash
+    - name: Login Buf
+      if: "${{ inputs.BUF_BUILD_API_TOKEN != '' && inputs.USE_ASDF == 'true' }}"
+      run: buf login --username ${{ inputs.BUF_BUILD_USER }} --token-stdin <<< ${{ inputs.BUF_BUILD_API_TOKEN }}
+      shell: bash
