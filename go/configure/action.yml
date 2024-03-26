@@ -33,6 +33,7 @@ runs:
         echo "MOCKERY_VERSION=${MOCKERY_VERSION}" >> $GITHUB_ENV
         BUF_VERSION=$(awk '/buf/ {print $2}' .tool-versions)
         echo "BUF_VERSION=${BUF_VERSION}" >> $GITHUB_ENV
+      shell: bash
     - name: Setting up buf
       uses: bufbuild/buf-setup-action@v1
       if: "${{ inputs.BUF_BUILD_API_TOKEN != '' }}"

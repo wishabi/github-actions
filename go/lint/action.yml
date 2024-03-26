@@ -63,6 +63,7 @@ runs:
       run: |
         GOLANGCI_LINT_VERSION=$(awk '/golangci-lint/ {print $2}' .tool-versions)
         echo "GOLANGCI_LINT_VERSION=${GOLANGCI_LINT_VERSION}" >> $GITHUB_ENV
+      shell: bash
     - name: Run Go linter
       uses: golangci/golangci-lint-action@v3
       with:
