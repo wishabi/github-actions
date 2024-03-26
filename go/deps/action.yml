@@ -39,7 +39,7 @@ runs:
     - name: Grab mockery version
       if: ${{ hashFiles('.tool-versions') != '' }}
       run: |
-        MOCKERY_INSTALL_VERSION=$(awk '/^mockery\s+/ {print "v"$2}' .tool-versions)
+        MOCKERY_INSTALL_VERSION=$(awk '/^mockery[[:space:]]+/ {print "v"$2}' .tool-versions)
         echo "MOCKERY_INSTALL_VERSION=${MOCKERY_INSTALL_VERSION}" >> $GITHUB_ENV
       shell: bash
     - name: Install mockery

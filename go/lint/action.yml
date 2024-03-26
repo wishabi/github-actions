@@ -61,7 +61,7 @@ runs:
     - name: Grab golangci-lint version
       if: ${{ hashFiles('.tool-versions') != '' }}
       run: |
-        GOLANGCI_LINT_VERSION=$(awk '/^golangci-lint\s+/ {print "v"$2}' .tool-versions)
+        GOLANGCI_LINT_VERSION=$(awk '/^golangci-lint[[:space:]]+/ {print "v"$2}' .tool-versions)
         echo "GOLANGCI_LINT_VERSION=${GOLANGCI_LINT_VERSION}" >> $GITHUB_ENV
       shell: bash
     - name: Run Go linter

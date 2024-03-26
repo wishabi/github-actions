@@ -29,7 +29,7 @@ runs:
     - name: Grab buf version
       if: ${{ hashFiles('.tool-versions') != '' }}
       run: |
-        BUF_VERSION=$(awk '/^buf\s+/ {print $2}' .tool-versions)
+        BUF_VERSION=$(awk '/^buf[[:space:]]+/ {print $2}' .tool-versions)
         echo "BUF_VERSION=${BUF_VERSION}" >> $GITHUB_ENV
       shell: bash
     - name: Setting up buf
