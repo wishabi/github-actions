@@ -21,4 +21,4 @@ runs:
         BUNDLE_JOBS: 4
         BUNDLE_DEPLOYMENT: true
     - name: Caching workspace for deploy jobs
-      uses: wishabi/github-actions/cache@v0
+      uses: wishabi/github-actions/cache@asdf-support

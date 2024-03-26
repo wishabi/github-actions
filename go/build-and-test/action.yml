@@ -66,7 +66,7 @@ runs:
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Run custom Go test action
-      uses: wishabi/github-actions/go/test@v0
+      uses: wishabi/github-actions/go/test@asdf-support
       env:
         DB_HOST: ${{ inputs.DB_HOST }}
         DB_USER: ${{ inputs.DB_USER }}

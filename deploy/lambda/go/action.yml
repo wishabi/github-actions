@@ -18,7 +18,7 @@ runs:
       shell: bash
       run: shopt -s dotglob && rm -rf "${{ github.workspace }}"/*
     - name: Restoring workspace from cache
-      uses: wishabi/github-actions/cache@v0
+      uses: wishabi/github-actions/cache@asdf-support
     - name: Building lambda function for deployment
       shell: bash
       run: |
