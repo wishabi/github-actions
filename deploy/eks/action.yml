@@ -54,7 +54,7 @@ runs:
         aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ inputs.AWS_REGION }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Cleaning workspace
       shell: bash
       run: shopt -s dotglob && rm -rf "${{ github.workspace }}"/*

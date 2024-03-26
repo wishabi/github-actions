@@ -65,7 +65,7 @@ runs:
         echo "GOLANGCI_LINT_VERSION=${GOLANGCI_LINT_VERSION}" >> $GITHUB_ENV
       shell: bash
     - name: Run Go linter
-      uses: golangci/golangci-lint-action@v3
+      uses: golangci/golangci-lint-action@v4
       with:
         skip-cache: true
         args: --verbose

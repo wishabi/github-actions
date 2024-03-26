@@ -45,13 +45,13 @@ runs:
       run: |
         sed -i 's@${{ env.ROOT_PATH }}''@/github/workspace/@g' coverage.json
     - name: 'Upload coverage'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.sha }}-coverage.out
         path: ./coverage/coverage.json
         retention-days: 1
     - name: 'Upload test results'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.sha }}-test-report.out
         path: ./result/rspec.xml

@@ -15,7 +15,7 @@ runs:
   steps:
     - name: Restoring vendor modules from cache
       id: vendor-cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: vendor
         key: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
