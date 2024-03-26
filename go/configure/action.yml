@@ -5,16 +5,6 @@ inputs:
   FLIPPCIRCLECIPULLER_REPO_TOKEN:
     description: Flipp circleci repo token
     required: true
-  USE_ASDF:
-    description: Use asdf for version management
-    required: false
-    default: false
-    type: boolean
-  USE_ASDF_PLUGIN_MANAGER:
-    description: Use asdf plugin manager for plugin management
-    required: false
-    default: false
-    type: boolean
   BUF_BUILD_USER:
     description: Buf CI user stored as secret
     required: false
@@ -36,33 +26,27 @@ runs:
     - name: Setting up private modules access
       shell: bash
       run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
+    - name: Grab buf and mockery version
+      if: ${{ hashFiles('.tool-versions') != '' }}
+      run: |
+        MOCKERY_VERSION=$(awk '/mockery/ {print $2}' .tool-versions)
+        echo "MOCKERY_VERSION=${MOCKERY_VERSION}" >> $GITHUB_ENV
+        BUF_VERSION=$(awk '/buf/ {print $2}' .tool-versions)
+        echo "BUF_VERSION=${BUF_VERSION}" >> $GITHUB_ENV
     - name: Setting up buf
       uses: bufbuild/buf-setup-action@v1
-      if: "${{ inputs.BUF_BUILD_API_TOKEN != '' && inputs.USE_ASDF == 'false' }}"
+      if: "${{ inputs.BUF_BUILD_API_TOKEN != '' }}"
       with:
         github_token: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         buf_user: ${{ inputs.BUF_BUILD_USER }}
         buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
+        buf_version: ${{ env.BUF_VERSION }}
     - name: Install mockery
-      if: ${{ hashFiles('.mockery.yml') != '' && inputs.USE_ASDF == 'false' }}
-      run: go install github.com/vektra/mockery/v2
-      shell: bash
-    - name: Install asdf tools
-      if: ${{ inputs.USE_ASDF == 'true' }}
-      uses: asdf-vm/actions/setup@v3.0.2
-    - name: Install asdf plugin manager
-      if: ${{ inputs.USE_ASDF_PLUGIN_MANAGER == 'true' }}
+      if: ${{ hashFiles('.mockery.yml') != '' }}
       run: |
-        set -e
-        asdf plugin add asdf-plugin-manager https://github.com/asdf-community/asdf-plugin-manager.git
-        asdf install asdf-plugin-manager
-        asdf-plugin-manager add-all
-      shell: bash
-    - name: Install asdf plugins
-      if: ${{ inputs.USE_ASDF == 'true' }}
-      run: asdf install
-      shell: bash
-    - name: Login Buf
-      if: "${{ inputs.BUF_BUILD_API_TOKEN != '' && inputs.USE_ASDF == 'true' }}"
-      run: buf registry login --username ${{ inputs.BUF_BUILD_USER }} --token-stdin <<< ${{ inputs.BUF_BUILD_API_TOKEN }}
+        if [ ! -z "${{ env.MOCKERY_VERSION }}" ]; then
+          go install github.com/vektra/mockery/v2@{{ env.MOCKERY_VERSION }}
+        else
+          go install github.com/vektra/mockery/v2
+        fi
       shell: bash

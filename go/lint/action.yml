@@ -21,14 +21,6 @@ inputs:
     description: The version of golangci-lint to use
     required: false
     default: ""
-  USE_ASDF:
-    description: Use asdf for version management
-    required: false
-    default: false
-  USE_ASDF_PLUGIN_MANAGER:
-    description: Use asdf plugin manager for plugin management
-    required: false
-    default: false
   WORKSPACE:
     description: workspace directory
     required: false
@@ -59,8 +51,6 @@ runs:
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
         BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
         FETCH_DEPTH: 0
-        USE_ASDF: ${{ inputs.USE_ASDF }}
-        USE_ASDF_PLUGIN_MANAGER: ${{ inputs.USE_ASDF_PLUGIN_MANAGER }}
     - name: Setup Go dependencies
       uses: wishabi/github-actions/go/deps@asdf-support
       with:
@@ -68,18 +58,17 @@ runs:
     - name: Setup safe directory
       shell: bash
       run: git config --global --add safe.directory ${{ inputs.WORKSPACE || github.workspace }}
+    - name: Grab golangci-lint version
+      if: ${{ hashFiles('.tool-versions') != '' }}
+      run: |
+        GOLANGCI_LINT_VERSION=$(awk '/golangci-lint/ {print $2}' .tool-versions)
+        echo "GOLANGCI_LINT_VERSION=${GOLANGCI_LINT_VERSION}" >> $GITHUB_ENV
     - name: Run Go linter
-      if: ${{ inputs.USE_ASDF == 'false' }}
       uses: golangci/golangci-lint-action@v3
       with:
         skip-cache: true
         args: --verbose
-        version: ${{ inputs.GOLANG_CI_LINT_VERSION }} # Optional - if blank, will use the action's default version resolution
-    - name: Run Go linter
-      if: ${{ inputs.USE_ASDF == 'true' }}
-      run: |
-        golangci-lint run --verbose
-      shell: bash
+        version: ${{ env.GOLANGCI_LINT_VERSION || inputs.GOLANG_CI_LINT_VERSION }} # Optional - if blank, will use the action's default version resolution
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_CHANNEL_ID != null && github.ref == 'refs/heads/main'
       uses: slackapi/slack-github-action@v1.24.0
