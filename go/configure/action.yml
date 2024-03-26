@@ -46,7 +46,7 @@ runs:
       if: ${{ hashFiles('.mockery.yml') != '' }}
       run: |
         if [ ! -z "${{ env.MOCKERY_VERSION }}" ]; then
-          go install github.com/vektra/mockery/v2@${{ env.MOCKERY_VERSION }}
+          go install github.com/vektra/mockery/v2@v${{ env.MOCKERY_VERSION }}
         else
           go install github.com/vektra/mockery/v2
         fi
