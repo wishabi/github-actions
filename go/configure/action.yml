@@ -29,8 +29,8 @@ runs:
     - name: Grab buf and mockery version
       if: ${{ hashFiles('.tool-versions') != '' }}
       run: |
-        MOCKERY_VERSION=$(awk '/mockery/ {print $2}' .tool-versions)
-        echo "MOCKERY_VERSION=${MOCKERY_VERSION}" >> $GITHUB_ENV
+        MOCKERY_INSTALL_VERSION=$(awk '/mockery/ {print $2}' .tool-versions)
+        echo "MOCKERY_INSTALL_VERSION=${MOCKERY_INSTALL_VERSION}" >> $GITHUB_ENV
         BUF_VERSION=$(awk '/buf/ {print $2}' .tool-versions)
         echo "BUF_VERSION=${BUF_VERSION}" >> $GITHUB_ENV
       shell: bash
@@ -45,8 +45,8 @@ runs:
     - name: Install mockery
       if: ${{ hashFiles('.mockery.yml') != '' }}
       run: |
-        if [ ! -z "${{ env.MOCKERY_VERSION }}" ]; then
-          go install github.com/vektra/mockery/v2@v${{ env.MOCKERY_VERSION }}
+        if [ ! -z "${{ env.MOCKERY_INSTALL_VERSION }}" ]; then
+          go install github.com/vektra/mockery/v2@v${{ env.MOCKERY_INSTALL_VERSION }}
         else
           go install github.com/vektra/mockery/v2
         fi
