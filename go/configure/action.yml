@@ -39,4 +39,4 @@ runs:
         github_token: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         buf_user: ${{ inputs.BUF_BUILD_USER }}
         buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
-        buf_version: ${{ env.BUF_VERSION }}
+        version: ${{ env.BUF_VERSION }}
