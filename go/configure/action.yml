@@ -32,11 +32,18 @@ runs:
         BUF_VERSION=$(awk '/^buf[[:space:]]+/ {print $2}' .tool-versions)
         echo "BUF_VERSION=${BUF_VERSION}" >> $GITHUB_ENV
       shell: bash
-    - name: Setting up buf
+    - name: Setting up buf if version is provided
       uses: bufbuild/buf-setup-action@v1
-      if: "${{ inputs.BUF_BUILD_API_TOKEN != '' }}"
+      if: "${{ inputs.BUF_BUILD_API_TOKEN != '' && env.BUF_VERSION != '' }}"
       with:
         github_token: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         buf_user: ${{ inputs.BUF_BUILD_USER }}
         buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
         version: ${{ env.BUF_VERSION }}
+    - name: Setting up buf if version is not provided
+      uses: bufbuild/buf-setup-action@v1
+      if: "${{ inputs.BUF_BUILD_API_TOKEN != '' && env.BUF_VERSION == '' }}"
+      with:
+        github_token: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
+        buf_user: ${{ inputs.BUF_BUILD_USER }}
+        buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
