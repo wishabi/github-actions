@@ -26,12 +26,10 @@ runs:
     - name: Setting up private modules access
       shell: bash
       run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
-    - name: Grab buf and mockery version
+    - name: Grab buf version
       if: ${{ hashFiles('.tool-versions') != '' }}
       run: |
-        MOCKERY_INSTALL_VERSION=$(awk '/mockery/ {print $2}' .tool-versions)
-        echo "MOCKERY_INSTALL_VERSION=${MOCKERY_INSTALL_VERSION}" >> $GITHUB_ENV
-        BUF_VERSION=$(awk '/buf/ {print $2}' .tool-versions)
+        BUF_VERSION=$(awk '/^buf\s+/ {print $2}' .tool-versions)
         echo "BUF_VERSION=${BUF_VERSION}" >> $GITHUB_ENV
       shell: bash
     - name: Setting up buf
@@ -42,12 +40,3 @@ runs:
         buf_user: ${{ inputs.BUF_BUILD_USER }}
         buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
         buf_version: ${{ env.BUF_VERSION }}
-    - name: Install mockery
-      if: ${{ hashFiles('.mockery.yml') != '' }}
-      run: |
-        if [ ! -z "${{ env.MOCKERY_INSTALL_VERSION }}" ]; then
-          go install github.com/vektra/mockery/v2@v${{ env.MOCKERY_INSTALL_VERSION }}
-        else
-          go install github.com/vektra/mockery/v2
-        fi
-      shell: bash
