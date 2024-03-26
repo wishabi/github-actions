@@ -58,12 +58,18 @@ runs:
     - name: Setup safe directory
       shell: bash
       run: git config --global --add safe.directory ${{ inputs.WORKSPACE || github.workspace }}
+    - name: Grab golangci-lint version
+      if: ${{ hashFiles('.tool-versions') != '' }}
+      run: |
+        GOLANGCI_LINT_VERSION=$(awk '/^golangci-lint[[:space:]]+/ {print "v"$2}' .tool-versions)
+        echo "GOLANGCI_LINT_VERSION=${GOLANGCI_LINT_VERSION}" >> $GITHUB_ENV
+      shell: bash
     - name: Run Go linter
-      uses: golangci/golangci-lint-action@v3
+      uses: golangci/golangci-lint-action@v4
       with:
         skip-cache: true
         args: --verbose
-        version: ${{ inputs.GOLANG_CI_LINT_VERSION }} # Optional - if blank, will use the action's default version resolution
+        version: ${{ env.GOLANGCI_LINT_VERSION || inputs.GOLANG_CI_LINT_VERSION }} # Optional - if blank, will use the action's default version resolution
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_CHANNEL_ID != null && github.ref == 'refs/heads/main'
       uses: slackapi/slack-github-action@v1.24.0
