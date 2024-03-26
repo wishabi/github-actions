@@ -48,7 +48,7 @@ runs:
       run: echo "short_sha=`echo ${GITHUB_SHA::7}`" > $GITHUB_OUTPUT
       shell: bash
     - name: Restore cache
-      uses: wishabi/github-actions/cache@asdf-support
+      uses: wishabi/github-actions/cache@v0
     - name: Run Go Smoke Tests
       if: inputs.GO_SMOKE == 'true'
       run: |
@@ -56,7 +56,7 @@ runs:
       shell: bash
     - name: Run DataDog Synthetics
       if: inputs.DD_SYNTHETIC_IDS != null
-      uses: DataDog/synthetics-ci-github-action@asdf-support.20.0
+      uses: DataDog/synthetics-ci-github-action@v0.20.0
       with:
         api_key: ${{ inputs.DD_API_KEY }}
         app_key: ${{ inputs.DD_APP_KEY }}

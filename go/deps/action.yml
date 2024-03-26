@@ -56,4 +56,4 @@ runs:
       run: mockery
       shell: bash
     - name: Caching workspace for deploy jobs
-      uses: wishabi/github-actions/cache@asdf-support
+      uses: wishabi/github-actions/cache@v0
