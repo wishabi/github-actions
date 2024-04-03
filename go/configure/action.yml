@@ -26,9 +26,6 @@ runs:
     - name: Setting up private modules access
       shell: bash
       run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
-    - name: Fixing git permissions
-      shell: bash
-      run: git config --global --add safe.directory '*'
     - name: Grab buf version
       if: ${{ hashFiles('.tool-versions') != '' }}
       run: |
