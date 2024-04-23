@@ -20,7 +20,11 @@ runs:
       shell: bash
       run: |
         bundle exec rails g flipp_ruby_kafka:topic_config --producer_services=${{ inputs.PRODUCER_SERVICE }} --consumer_services=${{ inputs.CONSUMER_SERVICE }}
-        sudo chown circleci:circleci /var/run/docker.sock
+
+        # check if the circeci user exists and update permission. This is needed for non runner-fleet-v2 jobs
+        if id "3434" >/dev/null 2>&1; then
+            sudo chown circleci:circleci /var/run/docker.sock
+        fi
         chmod +x ./deploy/build.sh && ./deploy/build.sh service topic_validation --env=${{ inputs.ENV }} --config-file=./platform.yml --config-file=./topic_validation.yaml
       env: 
         BUNDLE_DEPLOYMENT: true
