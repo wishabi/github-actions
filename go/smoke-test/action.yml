@@ -109,27 +109,15 @@ runs:
                 "fields": [
                   {
                     "type": "mrkdwn",
-                    "text": "*Branch*"
+                    "text": "*Branch*\n${{ format('<https://github.com/{0}/commit/{1}|{2}>', github.repository, github.sha, steps.set-branch.outputs.branch)}}"
                   },
                   {
                     "type": "mrkdwn",
-                    "text": "*Commit*"
+                    "text": "*Commit*\n${{ steps.get-short-sha.outputs.short_sha }}"
                   },
                   {
                     "type": "mrkdwn",
-                    "text": "*Rollback Status*"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "${{ format('<https://github.com/{0}/commit/{1}|{2}>', github.repository, github.sha, steps.set-branch.outputs.branch)}}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "${{ steps.get-short-sha.outputs.short_sha }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "${{ inputs.ROLLBACK_ON_FAIL }}"
+                    "text": "*Rollback Status*\n${{ inputs.ROLLBACK_ON_FAIL }}"
                   }
                 ]
               },
