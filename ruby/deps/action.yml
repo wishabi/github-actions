@@ -17,7 +17,7 @@ runs:
         key: rails-${{ hashFiles('Gemfile.lock') }}
         restore-keys: rails-${{ hashFiles('Gemfile.lock') }}
     - name: Set bundle permissions
-      if: steps.bundle-cache.outputs.cache-hit != 'true' && inputs.USE_CIRCLECI_USER
+      if: steps.bundle-cache.outputs.cache-hit != 'true' || inputs.USE_CIRCLECI_USER
       shell: bash
       run: |
         sudo chown -R circleci:circleci /home/circleci/.bundle
