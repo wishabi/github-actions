@@ -15,7 +15,7 @@ runs:
       if: steps.bundle-cache.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        sudo chown root:root -R /home/root/.bundle
+        sudo chown root:root -R /root/.bundle
         bundle install
       env: 
         BUNDLE_JOBS: 4
