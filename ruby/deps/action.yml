@@ -1,10 +1,5 @@
 name: 'Ruby bundle install and caching'
 description: 'custom GitHub action that runs to setup ruby bundle install and caching'
-inputs:
-  USE_CIRCLECI_USER:
-      description: Flag that controls whether we're assuming `circleci` user
-      required: false
-      default: true
 
 runs:
   using: "composite"
@@ -16,11 +11,6 @@ runs:
         path: vendor/bundle
         key: rails-${{ hashFiles('Gemfile.lock') }}
         restore-keys: rails-${{ hashFiles('Gemfile.lock') }}
-    - name: Set bundle permissions
-      if: steps.bundle-cache.outputs.cache-hit != 'true' && inputs.USE_CIRCLECI_USER
-      shell: bash
-      run: |
-        sudo chown -R circleci:circleci /home/circleci/.bundle
     - name: Bundle install
       if: steps.bundle-cache.outputs.cache-hit != 'true'
       shell: bash
