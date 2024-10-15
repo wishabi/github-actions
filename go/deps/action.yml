@@ -2,13 +2,12 @@ name: 'go-deps'
 description: 'Install dependencies. Optionally runs "buf build" steps when BUF_REPO_NAME is provided'
 
 inputs:
-  # Deprecated, leaving for backwards compatibility
-  BUF_REPO_NAME:
+  BUF_REPO_NAME:  # Deprecated, leaving for backwards compatibility
     description: DEPRECATED
     required: false
-  FLIPPCIRCLECIPULLER_REPO_TOKEN:
+  FLIPPCIRCLECIPULLER_REPO_TOKEN:  # Deprecated, leaving for backwards compatibility
     description: Flipp circleci repo token
-    required: true
+    required: false
 
 runs:
   using: 'composite'

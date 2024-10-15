@@ -25,6 +25,10 @@ inputs:
     description: workspace directory
     required: false
     default: ""
+  SKIP_SETUP: 
+    description: Flag indicating whether to skip configuring of go environment and go dependencies
+    required: false
+    default: false
 
 runs:
   using: "composite"
@@ -46,6 +50,7 @@ runs:
       shell: bash
     - name: Configure Go environment
       uses: wishabi/github-actions/go/configure@v0
+      if: ${{ !inputs.SKIP_SETUP }}
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
@@ -53,6 +58,7 @@ runs:
         FETCH_DEPTH: 0
     - name: Setup Go dependencies
       uses: wishabi/github-actions/go/deps@v0
+      if: ${{ !inputs.SKIP_SETUP }}
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Setup safe directory
