@@ -40,6 +40,8 @@ runs:
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
         BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
         FETCH_DEPTH: ${{ inputs.FETCH_DEPTH }}
+        SLACK_CHANNEL_ID: ${{ inputs.SLACK_CHANNEL_ID }}
+        SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
     - name: Setup safe directory
       shell: bash
       run: git config --global --add safe.directory ${{ inputs.WORKSPACE || github.workspace }}
