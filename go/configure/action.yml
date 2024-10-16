@@ -14,7 +14,7 @@ inputs:
   FETCH_DEPTH:
     description: Fetch depth for git checkout
     required: false
-    default: 1
+    default: "1"
 
 runs:
   using: "composite"

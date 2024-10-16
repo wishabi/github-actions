@@ -9,7 +9,7 @@ inputs:
     required: true
   CHECK_LINTER:
     description: whether to download and analyze linter results
-    default: false
+    default: "false"
   SLACK_CHANNEL_ID:
     description: The Slack channel ID(s) to send the data to
     required: false

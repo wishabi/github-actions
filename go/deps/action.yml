@@ -14,11 +14,10 @@ runs:
   steps:
     - name: Restoring vendor modules from cache
       id: vendor-cache
-      uses: actions/cache@v4
+      uses: actions/cache/restore@v4
       with:
         path: vendor
         key: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
-        restore-keys: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
     - name: Generating protobuf code
       if: ${{ hashFiles('buf.gen.yaml') != '' }}
       run: buf generate
@@ -56,3 +55,9 @@ runs:
       shell: bash
     - name: Caching workspace for deploy jobs
       uses: wishabi/github-actions/cache@v0
+    - name: Saving vendor modules
+      id: vendor-cache-save
+      uses: actions/cache/save@v4
+      with:
+        path: vendor
+        key: vendor-cache-${{ hashFiles('go.mod','go.sum') }}

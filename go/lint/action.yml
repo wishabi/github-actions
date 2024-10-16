@@ -1,5 +1,5 @@
 name: "Go Lint"
-description: "Lint Go Repo"
+description: "Lint Go Repo - Important: If you run build first it will cache the workspace (helpful for running both test and lint)"
 
 inputs:
   FLIPPCIRCLECIPULLER_REPO_TOKEN:
@@ -11,56 +11,35 @@ inputs:
   BUF_BUILD_API_TOKEN:
     description: Buf API token stored as secret
     required: false
+  GOLANG_CI_LINT_VERSION:
+    description: The version of golangci-lint to use
+    required: false
+    default: ""
+  FETCH_DEPTH:
+    description: Fetch depth for git checkout
+    required: false
+    default: "1"
   SLACK_CHANNEL_ID:
     description: The Slack channel ID(s) to send the data to
     required: false
   SLACK_BOT_TOKEN:
     description: The Slack bot token to pass the data to
     required: false
-  GOLANG_CI_LINT_VERSION:
-    description: The version of golangci-lint to use
-    required: false
-    default: ""
   WORKSPACE:
     description: workspace directory
     required: false
     default: ""
-  SKIP_SETUP: 
-    description: Flag indicating whether to skip configuring of go environment and go dependencies
-    required: false
-    default: false
 
 runs:
   using: "composite"
   steps:
-    - name: Set branch variable
-      id: set-branch
-      shell: bash
-      run: |
-        if [ "${{ github.event_name }}" == "pull_request" ]; then
-          branch="${{ github.event.pull_request.head.ref }}"
-        else
-          branch="${{ github.ref }}"
-          branch="${branch#refs/heads/}"
-        fi
-        echo "branch=${branch}" >> $GITHUB_OUTPUT
-    - name: Get short sha
-      id: get-short-sha
-      run: echo "short_sha=`echo ${GITHUB_SHA::7}`" > $GITHUB_OUTPUT
-      shell: bash
-    - name: Configure Go environment
-      uses: wishabi/github-actions/go/configure@v0
-      if: ${{ !inputs.SKIP_SETUP }}
+    - name: Run custom Go build action
+      uses: wishabi/github-actions/go/build@dp-568
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
         BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
-        FETCH_DEPTH: 0
-    - name: Setup Go dependencies
-      uses: wishabi/github-actions/go/deps@v0
-      if: ${{ !inputs.SKIP_SETUP }}
-      with:
-        FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
+        FETCH_DEPTH: ${{ inputs.FETCH_DEPTH }}
     - name: Setup safe directory
       shell: bash
       run: git config --global --add safe.directory ${{ inputs.WORKSPACE || github.workspace }}
