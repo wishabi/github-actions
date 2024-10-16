@@ -67,7 +67,7 @@ runs:
       if: ${{ !steps.restore-cache.outputs.cache-hit }}
       uses: actions/cache/save@v4
       with:
-        key: workspace-cache-${{ github.run_id }}
+        key: workspace-cache-${{ github.run_id }}-${{ inputs.FETCH_DEPTH }}
         path: ./*
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_CHANNEL_ID != null && github.ref == 'refs/heads/main'
