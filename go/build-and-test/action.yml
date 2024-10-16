@@ -56,10 +56,10 @@ runs:
     - name: Run custom Go test action
       uses: wishabi/github-actions/go/test@v0
       env:
-        DB_HOST: ${{ inputs.DB_HOST }}
-        DB_USER: ${{ inputs.DB_USER }}
-        DB_PASSWORD: ${{ inputs.DB_PASSWORD }}
-        DB_PORT: ${{ inputs.DB_PORT }}
+        DB_HOST: ${{ inputs.DB_HOST || env.DB_HOST }}
+        DB_USER: ${{ inputs.DB_USER || env.DB_USER }}
+        DB_PASSWORD: ${{ inputs.DB_PASSWORD || env.DB_PASSWORD }}
+        DB_PORT: ${{ inputs.DB_PORT || env.DB_PORT  }}
       with:
         TAGS: ${{ inputs.TEST_TAGS }}
         TIMEOUT: ${{ inputs.TIMEOUT }}
