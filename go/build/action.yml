@@ -1,5 +1,5 @@
-name: "Go Build & Test"
-description: "Build and test go repo"
+name: "Go Build Action"
+description: "Build and cache go repo"
 
 inputs:
   FLIPPCIRCLECIPULLER_REPO_TOKEN:
