@@ -52,7 +52,7 @@ runs:
       with:
         name: "${{ github.sha }}-lint-results.out"
     - name: SonarQube Scan
-      uses: sonarsource/sonarqube-scan-action@master
+      uses: sonarsource/sonarqube-scan-action@v3.1.0
       env:
         SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
