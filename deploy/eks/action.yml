@@ -29,6 +29,14 @@ inputs:
   ATOMIC:
     description: EKS Atomic Deployment Flag (true or false) - default is true
     required: false
+  DEPLOY_CACHE_PATH:
+    description: Path to restore cache
+    required: false
+    default: ./*
+  DEPLOY_CACHE_KEY:
+    description: Cache key
+    required: false
+    default: workspace-cache-${{ github.run_id }}
 
 runs:
   using: "composite"
@@ -60,6 +68,9 @@ runs:
       run: shopt -s dotglob && rm -rf "${{ github.workspace }}"/*
     - name: Restoring workspace from cache
       uses: wishabi/github-actions/cache@v0
+      with:
+        DEPLOY_CACHE_PATH: ${{ inputs.DEPLOY_CACHE_PATH }}
+        DEPLOY_CACHE_KEY: ${{ inputs.DEPLOY_CACHE_KEY }}
     - name: Deploying to EKS via Helm release
       shell: bash
       run: |
