@@ -95,7 +95,7 @@ runs:
       shell: bash
     - name: Run v1 Go linter
       if : ${{ !env.IS_V2 }}
-      uses: golangci/golangci-lint-action@v4
+      uses: golangci/golangci-lint-action@v6
       with:
         skip-cache: true
         args: --verbose
