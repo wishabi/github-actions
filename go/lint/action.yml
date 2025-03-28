@@ -1,5 +1,5 @@
-name: "Go Lint"
-description: "Lint Go Repo (using golangci-lint v1)"
+name: "Go Lint v2"
+description: "Lint Go Repo (using golangci-lint v2)"
 
 inputs:
   FLIPPCIRCLECIPULLER_REPO_TOKEN:
@@ -58,18 +58,60 @@ runs:
     - name: Setup safe directory
       shell: bash
       run: git config --global --add safe.directory ${{ inputs.WORKSPACE || github.workspace }}
-    - name: Grab golangci-lint version
-      if: ${{ hashFiles('.tool-versions') != '' }}
+    - name: Determine golangci-lint and config version
       run: |
-        GOLANGCI_LINT_VERSION=$(awk '/^golangci-lint[[:space:]]+/ {print "v"$2}' .tool-versions)
+        # Default to empty version and v1 config
+        GOLANGCI_LINT_VERSION=""
+        IS_V2="false"
+  
+        # Check for GOLANG_CI_LINT_VERSION input
+        if [ -n "${{ inputs.GOLANG_CI_LINT_VERSION }}" ]; then
+          GOLANGCI_LINT_VERSION="${{ inputs.GOLANG_CI_LINT_VERSION }}"
+        fi
+
+        # Check .tool-versions if it exists and is not empty
+        if [ -z "$GOLANGCI_LINT_VERSION" ] && [ -f ".tool-versions" ] && [ -s ".tool-versions" ]; then
+          GOLANGCI_LINT_VERSION=$(awk '/^golangci-lint[[:space:]]+/ {print $2}' .tool-versions) # Extract version directly
+        fi
+
+        # Check go.mod for golangci-lint dependency
+        if [ -z "$GOLANGCI_LINT_VERSION" ] && [ -f "go.mod" ]; then
+          GOLANGCI_LINT_VERSION=$(grep 'golangci/golangci-lint' go.mod | awk '{print $2}')
+          # Remove the version comment if it exists
+          GOLANGCI_LINT_VERSION=$(echo "$GOLANGCI_LINT_VERSION" | sed 's/\/\/.*//')
+        fi
+
+        # Check .golangci.yml for explicit version declaration
+        if [ -f ".golangci.yml" ]; then
+          if grep -q 'version: "2"' .golangci.yml; then
+            IS_V2="true"
+          fi
+        fi
+
+        # Determine v2 based on version if not explicitly set in .golangci.yml
+        if [ "$IS_V2" == "false" ] && [ -n "$GOLANGCI_LINT_VERSION" ]; then
+          if [[ "$GOLANGCI_LINT_VERSION" =~ ^v2\..* ]]; then
+            IS_V2="true"
+          fi
+        fi
+
+        echo "IS_V2=${IS_V2}" >> $GITHUB_ENV
         echo "GOLANGCI_LINT_VERSION=${GOLANGCI_LINT_VERSION}" >> $GITHUB_ENV
       shell: bash
-    - name: Run Go linter
+    - name: Run v1 Go linter
+      if : ${{ steps.golangci_version_config.outputs.IS_V2 == 'false' }}
       uses: golangci/golangci-lint-action@v4
       with:
         skip-cache: true
         args: --verbose
-        version: ${{ env.GOLANGCI_LINT_VERSION || inputs.GOLANG_CI_LINT_VERSION }} # Optional - if blank, will use the action's default version resolution
+        version: ${{ env.GOLANGCI_LINT_VERSION }} # Optional - if blank, will use the action's default version resolution
+    - name: Run v2 Go linter
+      if : ${{ steps.golangci_version_config.outputs.IS_V2 == 'true' }}
+      uses: golangci/golangci-lint-action@v7 # Note: v7 and up require golangci-lint v2 config
+      with:
+        skip-cache: true
+        args: --verbose
+        version: ${{ env.GOLANGCI_LINT_VERSION }} # Optional - if blank, will use the action's default version resolution
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_CHANNEL_ID != null && github.ref == 'refs/heads/main'
       uses: slackapi/slack-github-action@v1.24.0
