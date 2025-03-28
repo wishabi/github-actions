@@ -57,12 +57,11 @@ runs:
       shell: bash
     - name: Run custom Go build action
       uses: wishabi/github-actions/go/build@skip-test
-      env:
+      with:
+        FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         BUF_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
         BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
-      with:
-        FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Run custom Go test action
       uses: wishabi/github-actions/go/test@v0
       env:
