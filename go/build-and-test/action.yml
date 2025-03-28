@@ -59,7 +59,7 @@ runs:
       uses: wishabi/github-actions/go/build@skip-test
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
-        BUF_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
+        BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
         BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
     - name: Run custom Go test action
