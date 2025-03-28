@@ -76,14 +76,6 @@ runs:
           echo "Using GOLANG_CI_LINT_VERSION=${GOLANGCI_LINT_VERSION} from .tool-versions"
         fi
 
-        # Check go.mod for golangci-lint dependency version
-        if [ -z "$GOLANGCI_LINT_VERSION" ] && [ -f "go.mod" ]; then
-          GOLANGCI_LINT_VERSION=$(grep 'golangci/golangci-lint' go.mod | awk '{print "v"$2}')
-          # Remove the version comment if it exists
-          GOLANGCI_LINT_VERSION=$(echo "$GOLANGCI_LINT_VERSION" | sed 's/\/\/.*//')
-          echo "Using GOLANG_CI_LINT_VERSION=${GOLANGCI_LINT_VERSION} from go.mod"
-        fi
-
         # Check .golangci.yml for version 2 config of golangci-lint
         if [ -f ".golangci.yml" ] && grep -q 'version: "2"' .golangci.yml; then
           IS_V2=true
