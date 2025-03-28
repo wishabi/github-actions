@@ -94,14 +94,14 @@ runs:
         echo "GOLANGCI_LINT_VERSION=${GOLANGCI_LINT_VERSION}" >> $GITHUB_ENV
       shell: bash
     - name: Run v1 Go linter
-      if : ${{ env.IS_V2 == "false" }}
+      if : ${{ env.IS_V2 == 'false' }}
       uses: golangci/golangci-lint-action@v6
       with:
         skip-cache: true
         args: --verbose
         version: ${{ env.GOLANGCI_LINT_VERSION }} # Optional - if blank, will use the action's default version resolution
     - name: Run v2 Go linter
-      if : ${{ env.IS_V2 == "true" }}
+      if : ${{ env.IS_V2 == 'true' }}
       uses: golangci/golangci-lint-action@v7 # Note: v7 and up require golangci-lint v2 config
       with:
         skip-cache: true
