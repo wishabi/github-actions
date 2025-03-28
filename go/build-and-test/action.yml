@@ -40,6 +40,21 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Set branch variable
+      id: set-branch
+      shell: bash
+      run: |
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          branch="${{ github.event.pull_request.head.ref }}"
+        else
+          branch="${{ github.ref }}"
+          branch="${branch#refs/heads/}"
+        fi
+        echo "branch=${branch}" >> $GITHUB_OUTPUT
+    - name: Get short sha
+      id: get-short-sha
+      run: echo "short_sha=`echo ${GITHUB_SHA::7}`" > $GITHUB_OUTPUT
+      shell: bash
     - name: Run custom Go build action
       uses: wishabi/github-actions/go/build@skip-test
       env:
