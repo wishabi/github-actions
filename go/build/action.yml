@@ -1,5 +1,5 @@
-name: "Go Build & Test"
-description: "Build and test go repo"
+name: "Go Build"
+description: "Build go repo"
 
 inputs:
   FLIPPCIRCLECIPULLER_REPO_TOKEN:
@@ -17,25 +17,6 @@ inputs:
   SLACK_BOT_TOKEN:
     description: The Slack bot token to pass the data to
     required: false
-  DB_HOST:
-    description: Database host
-    required: false
-  DB_USER:
-    description: Database user
-    required: false
-  DB_PASSWORD:
-    description: Database password
-    required: false
-  DB_PORT:
-    description: Database port
-    required: false
-  TEST_TAGS:
-    description: Test tags
-    required: false
-  TIMEOUT:
-    description: A timeout value in seconds. If tests take longer than this, they will fail. Not setting this value will fallback to go test's default of 10 minutes.
-    required: false
-    default: ""
 
 runs:
   using: "composite"
@@ -55,22 +36,18 @@ runs:
       id: get-short-sha
       run: echo "short_sha=`echo ${GITHUB_SHA::7}`" > $GITHUB_OUTPUT
       shell: bash
-    - name: Run custom Go build action
-      uses: wishabi/github-actions/go/build@skip-test
+    - name: Configure Go environment
+      uses: wishabi/github-actions/go/configure@v0
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
         BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
-    - name: Run custom Go test action
-      uses: wishabi/github-actions/go/test@v0
+    - name: Setup Go dependencies
+      uses: wishabi/github-actions/go/deps@v0
       env:
-        DB_HOST: ${{ inputs.DB_HOST }}
-        DB_USER: ${{ inputs.DB_USER }}
-        DB_PASSWORD: ${{ inputs.DB_PASSWORD }}
-        DB_PORT: ${{ inputs.DB_PORT }}
+        BUF_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
       with:
-        TAGS: ${{ inputs.TEST_TAGS }}
-        TIMEOUT: ${{ inputs.TIMEOUT }}
+        FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_CHANNEL_ID != null && github.ref == 'refs/heads/main'
       uses: slackapi/slack-github-action@v1.24.0
@@ -80,13 +57,13 @@ runs:
         channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
         payload: |
           {
-            "text": "Go Build and Test Failed",
+            "text": "Go Build Failed",
             "blocks": [
               {
                 "type": "header",
                 "text": {
                   "type": "plain_text",
-                  "text": "Go Build and Test Failed",
+                  "text": "Go Build Failed",
                   "emoji": true
                 }
               },
