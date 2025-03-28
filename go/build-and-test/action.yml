@@ -36,10 +36,6 @@ inputs:
     description: A timeout value in seconds. If tests take longer than this, they will fail. Not setting this value will fallback to go test's default of 10 minutes.
     required: false
     default: ""
-  SKIP_TESTS:
-    description: Skip tests
-    required: false
-    default: false
 
 runs:
   using: "composite"
@@ -73,7 +69,6 @@ runs:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Run custom Go test action
       uses: wishabi/github-actions/go/test@v0
-      if: ${{ !inputs.SKIP_TESTS }}
       env:
         DB_HOST: ${{ inputs.DB_HOST }}
         DB_USER: ${{ inputs.DB_USER }}
