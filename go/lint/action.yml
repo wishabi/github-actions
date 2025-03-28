@@ -1,5 +1,5 @@
-name: "Go Lint v2"
-description: "Lint Go Repo (using golangci-lint v2)"
+name: "Go Lint"
+description: "Lint Go Repo"
 
 inputs:
   FLIPPCIRCLECIPULLER_REPO_TOKEN:
