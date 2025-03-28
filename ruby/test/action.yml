@@ -12,15 +12,29 @@ inputs:
     # GitHub Actions do not support dynamic values, so default is an empty string.
     default: ""
     required: false
-  
+  LOAD_SCHEMA:
+    description: Set this if you want to use db:schema:load before db:migrate.
+    default: ""
+    required: false
+
 runs:
   using: "composite"
   steps:
     - name: Run migrations for test database
-      if: ${{ inputs.DB_HOST != '' && inputs.DB_PORT != '' }}
+      if: ${{ inputs.DB_HOST != '' && inputs.DB_PORT != '' && inputs.LOAD_SCHEMA == '' }}
       shell: bash
       run: |
            bundle exec rails db:create db:migrate
+      env:
+        BUNDLE_DEPLOYMENT: true
+        DB_HOST: ${{ inputs.DB_HOST }}
+        DB_PORT: ${{ inputs.DB_PORT }}
+        RAILS_ENV: test
+    - name: Run schema load and migrations for test database
+      if: ${{ inputs.DB_HOST != '' && inputs.DB_PORT != '' && inputs.LOAD_SCHEMA != '' }}
+      shell: bash
+      run: |
+           bundle exec rails db:create db:schema:load db:migrate
       env:
         BUNDLE_DEPLOYMENT: true
         DB_HOST: ${{ inputs.DB_HOST }}
@@ -39,7 +53,7 @@ runs:
       env:
         # We used $HOME because $GITHUB_WORKSPACE is not pointing to the correct path.
         # If GitHub fixes this, these actions might break. Using $COVERAGE_ROOT_PATH can be our workaround.
-        ROOT_PATH: ${{ inputs.COVERAGE_ROOT_PATH || env.HOME }} 
+        ROOT_PATH: ${{ inputs.COVERAGE_ROOT_PATH || env.HOME }}
       working-directory: ./coverage
       shell: bash
       run: |
