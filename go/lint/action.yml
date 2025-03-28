@@ -62,7 +62,7 @@ runs:
       run: |
         # Default to empty version and v1 config
         GOLANGCI_LINT_VERSION=""
-        IS_V2="false"
+        IS_V2=false
   
         # Check for GOLANG_CI_LINT_VERSION input
         if [ -n "${{ inputs.GOLANG_CI_LINT_VERSION }}" ]; then
@@ -70,48 +70,38 @@ runs:
           echo "Using GOLANG_CI_LINT_VERSION=${GOLANGCI_LINT_VERSION} from input"
         fi
 
-        # Check .tool-versions if it exists and is not empty
+        # Check .tool-versions for golangci-lint version
         if [ -z "$GOLANGCI_LINT_VERSION" ] && [ -f ".tool-versions" ] && [ -s ".tool-versions" ]; then
           GOLANGCI_LINT_VERSION=$(awk '/^golangci-lint[[:space:]]+/ {print $2}' .tool-versions) # Extract version directly
-           echo "Using GOLANG_CI_LINT_VERSION=${GOLANGCI_LINT_VERSION} from .tool-versions"
+          echo "Using GOLANG_CI_LINT_VERSION=${GOLANGCI_LINT_VERSION} from .tool-versions"
         fi
 
-        # Check go.mod for golangci-lint dependency
+        # Check go.mod for golangci-lint dependency version
         if [ -z "$GOLANGCI_LINT_VERSION" ] && [ -f "go.mod" ]; then
           GOLANGCI_LINT_VERSION=$(grep 'golangci/golangci-lint' go.mod | awk '{print $2}')
           # Remove the version comment if it exists
           GOLANGCI_LINT_VERSION=$(echo "$GOLANGCI_LINT_VERSION" | sed 's/\/\/.*//')
-           echo "Using GOLANG_CI_LINT_VERSION=${GOLANGCI_LINT_VERSION} from go.mod"
+          echo "Using GOLANG_CI_LINT_VERSION=${GOLANGCI_LINT_VERSION} from go.mod"
         fi
 
-        # Check .golangci.yml for explicit version declaration
-        if [ -f ".golangci.yml" ]; then
-          if grep -q 'version: "2"' .golangci.yml; then
-            IS_V2="true"
-            echo "Found golangci-lint v2 config in .golangci.yml"
-          fi
-        fi
-
-        # Determine v2 based on version if not explicitly set in .golangci.yml
-        if [ "$IS_V2" == "false" ] && [ -n "$GOLANGCI_LINT_VERSION" ]; then
-          if [[ "$GOLANGCI_LINT_VERSION" =~ ^v2\..* ]]; then
-            IS_V2="true"
-            echo "Detected golangci-lint v2 version from GOLANG_CI_LINT_VERSION"
-          fi
+        # Check .golangci.yml for version 2 of golangci-lint
+        if [ -f ".golangci.yml" ] && [ grep -q 'version: "2"' .golangci.yml ]; then
+          IS_V2=true
+          echo "Found golangci-lint v2 config in .golangci.yml"
         fi
 
         echo "IS_V2=${IS_V2}" >> $GITHUB_ENV
         echo "GOLANGCI_LINT_VERSION=${GOLANGCI_LINT_VERSION}" >> $GITHUB_ENV
       shell: bash
     - name: Run v1 Go linter
-      if : ${{ env.IS_V2 == 'false' }}
+      if : ${{ !env.IS_V2 }}
       uses: golangci/golangci-lint-action@v4
       with:
         skip-cache: true
         args: --verbose
         version: ${{ env.GOLANGCI_LINT_VERSION }} # Optional - if blank, will use the action's default version resolution
     - name: Run v2 Go linter
-      if : ${{ env.IS_V2 == 'true' }}
+      if : ${{ env.IS_V2 }}
       uses: golangci/golangci-lint-action@v7 # Note: v7 and up require golangci-lint v2 config
       with:
         skip-cache: true
