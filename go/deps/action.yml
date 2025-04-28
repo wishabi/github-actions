@@ -9,6 +9,10 @@ inputs:
   FLIPPCIRCLECIPULLER_REPO_TOKEN:
     description: Flipp circleci repo token
     required: true
+  MOCKERY_INSTALL_VERSION:
+    description: The version of mockery to use
+    required: false
+    default: ""
 
 runs:
   using: 'composite'
@@ -37,18 +41,40 @@ runs:
       run: go generate ./...
       shell: bash
     - name: Grab mockery version
-      if: ${{ hashFiles('.tool-versions') != '' }}
       run: |
-        MOCKERY_INSTALL_VERSION=$(awk '/^mockery[[:space:]]+/ {print "v"$2}' .tool-versions)
+        # Default to empty version and v1 config
+        MOCKERY_INSTALL_VERSION=""
+  
+        # Check for MOCKERY_INSTALL_VERSION input
+        if [ -n "${{ inputs.MOCKERY_INSTALL_VERSION }}" ]; then
+          MOCKERY_INSTALL_VERSION="${{ inputs.MOCKERY_INSTALL_VERSION }}"
+          echo "Using MOCKERY_INSTALL_VERSION=${MOCKERY_INSTALL_VERSION} from input"
+        fi
+
+        # Check .tool-versions for mockery version
+        if [ -z "$MOCKERY_INSTALL_VERSION" ] && [ -f ".tool-versions" ] && [ -s ".tool-versions" ]; then
+          MOCKERY_INSTALL_VERSION=$(awk '/^mockery[[:space:]]+/ {print "v"$2}' .tool-versions)
+          echo "Using MOCKERY_INSTALL_VERSION=${MOCKERY_INSTALL_VERSION} from .tool-versions"
+        fi
+
+        # Grab the major version from the full version
+        MOCKERY_INSTALL_MAJOR_VERSION=""
+        if [ -n "$MOCKERY_INSTALL_VERSION" ]; then
+          temp_version=${MOCKERY_INSTALL_VERSION#v}
+          MOCKERY_INSTALL_MAJOR_VERSION=${temp_version%%.*}
+          echo "Extracted MOCKERY_INSTALL_MAJOR_VERSION=${MOCKERY_INSTALL_MAJOR_VERSION}"
+        fi
+
+        echo "MOCKERY_INSTALL_MAJOR_VERSION=${MOCKERY_INSTALL_MAJOR_VERSION}" >> $GITHUB_ENV
         echo "MOCKERY_INSTALL_VERSION=${MOCKERY_INSTALL_VERSION}" >> $GITHUB_ENV
       shell: bash
     - name: Install mockery
       if: ${{ hashFiles('.mockery.yml') != '' }}
       run: |
         if [ -n "${{ env.MOCKERY_INSTALL_VERSION }}" ]; then
-          go install github.com/vektra/mockery/v2@${{ env.MOCKERY_INSTALL_VERSION }}
+          go install github.com/vektra/mockery/v${{ env.MOCKERY_INSTALL_MAJOR_VERSION }}@${{ env.MOCKERY_INSTALL_VERSION }}
         else
-          go install github.com/vektra/mockery/v2
+          go install github.com/vektra/mockery/v2@latest
         fi
       shell: bash
     - name: Generate mocks
