@@ -43,7 +43,7 @@ runs:
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
         BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
     - name: Setup Go dependencies
-      uses: wishabi/github-actions/go/deps@mockery-v3
+      uses: wishabi/github-actions/go/deps@v0
       env:
         BUF_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
       with:
