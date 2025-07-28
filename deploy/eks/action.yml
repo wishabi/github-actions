@@ -108,7 +108,7 @@ runs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "*Repository*\n<https://github.com/${{ github.repository }}|${{ github.repository }}>\n\n*Environment*\n${{ inputs.ENV }}"
+                  "text": "*Repository*\n<https://github.com/${{ github.repository }}|${{ github.repository }}>\n\n*Environment*\n${{ inputs.ENV }}\n\n*Message*\n${{ github.event.workflow_run.head_commit }}"
                 },
                 "accessory": {
                   "type": "image",
