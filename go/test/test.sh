@@ -3,6 +3,7 @@ set -e
 
 TAGS=$1
 TIMEOUT=$2
+PARALLEL=$3
 
 cmd="go test 2>&1 ./... -coverprofile=coverage.out"
 
@@ -29,6 +30,10 @@ fi
 
 if [ -n "$TIMEOUT" ]; then
   cmd="$cmd -timeout ${TIMEOUT}s"
+fi
+
+if [ "$PARALLEL" = "false" ]; then
+  cmd="$cmd -p 1"
 fi
 
 echo "$cmd  | tee test-report.out"
