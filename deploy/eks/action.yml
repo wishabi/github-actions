@@ -9,13 +9,16 @@ inputs:
     description: Timeout in minutes (e.g. '5m') for the deployment step
     required: false
   AWS_ACCESS_KEY_ID:
-    description: AWS access key id stored as secret
-    required: true
+    description: AWS access key id stored as secret (required for static credential auth)
+    required: false
   AWS_SECRET_ACCESS_KEY:
-    description: AWS secret access key stored as secret
-    required: true
+    description: AWS secret access key stored as secret (required for static credential auth)
+    required: false
+  AWS_ROLE_ARN:
+    description: IAM role ARN for OIDC-based authentication (requires id-token:write permission on the calling job)
+    required: false
   AWS_REGION:
-    description: AWS region to deploy to stored as secret
+    description: AWS region to deploy to
     required: true
   SLACK_SUCCESS_CHANNEL_ID:
     description: The Slack channel ID(s) to send successful deployment notifications
@@ -52,8 +55,22 @@ runs:
       id: get-short-sha
       run: echo "short_sha=`echo ${GITHUB_SHA::7}`" >> $GITHUB_OUTPUT
       shell: bash
-    - name: Configuring AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
+    - name: Validate AWS credentials input
+      shell: bash
+      run: |
+        if [ -z "${{ inputs.AWS_ROLE_ARN }}" ] && { [ -z "${{ inputs.AWS_ACCESS_KEY_ID }}" ] || [ -z "${{ inputs.AWS_SECRET_ACCESS_KEY }}" ]; }; then
+          echo "::error::Either AWS_ROLE_ARN (IAM auth) or both AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY (static auth) must be provided."
+          exit 1
+        fi
+    - name: Configuring AWS credentials (IAM role)
+      if: ${{ inputs.AWS_ROLE_ARN != '' }}
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ inputs.AWS_ROLE_ARN }}
+        aws-region: ${{ inputs.AWS_REGION }}
+    - name: Configuring AWS credentials (static)
+      if: ${{ inputs.AWS_ROLE_ARN == '' }}
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
