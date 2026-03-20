@@ -1,11 +1,11 @@
 #! /bin/bash
-set -e
+set -eu
 
-TAGS=$1
-TIMEOUT=$2
-PARALLEL=$3
+TAGS=${1:-}
+TIMEOUT=${2:-}
+PARALLEL=${3:-}
 
-cmd="go test 2>&1 ./... -coverprofile=coverage.out"
+cmd="go test ./... -coverprofile=coverage.out"
 
 # find non-ignored subdirectories
 file_list=()
@@ -36,7 +36,7 @@ if [ "$PARALLEL" = "false" ]; then
   cmd="$cmd -p 1"
 fi
 
-echo "$cmd  | tee test-report.out"
-eval "$cmd" | tee test-report.out
+echo "$cmd | tee test-report.out"
+bash -c "$cmd" 2>&1 | tee test-report.out
 
 exit ${PIPESTATUS[0]}
