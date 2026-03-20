@@ -36,6 +36,18 @@ inputs:
     description: A timeout value in seconds. If tests take longer than this, they will fail. Not setting this value will fallback to go test's default of 10 minutes.
     required: false
     default: ""
+  PRE_TEST_COMMANDS:
+    description: Shell commands to run between build and test steps (e.g. DB migrations, code generation)
+    required: false
+    default: ""
+  PARALLEL:
+    description: Whether to run tests in parallel. Defaults to true.
+    required: false
+    default: "true"
+  MOCKERY_INSTALL_VERSION:
+    description: The version of mockery to use
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -44,11 +56,24 @@ runs:
       id: branch-info
       uses: wishabi/github-actions/common/branch-info@v0
     - name: Run custom Go build action
-      uses: wishabi/github-actions/go/build@v0
+      uses: wishabi/github-actions/go/build@pre-test-commands
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
         BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
+        MOCKERY_INSTALL_VERSION: ${{ inputs.MOCKERY_INSTALL_VERSION }}
+    - name: Run pre-test commands
+      if: ${{ inputs.PRE_TEST_COMMANDS != '' }}
+      shell: bash
+      run: |
+        set -e
+        eval "$PRE_TEST_COMMANDS"
+      env:
+        PRE_TEST_COMMANDS: ${{ inputs.PRE_TEST_COMMANDS }}
+        DB_HOST: ${{ inputs.DB_HOST }}
+        DB_USER: ${{ inputs.DB_USER }}
+        DB_PASSWORD: ${{ inputs.DB_PASSWORD }}
+        DB_PORT: ${{ inputs.DB_PORT }}
     - name: Run custom Go test action
       uses: wishabi/github-actions/go/test@v0
       env:
@@ -59,6 +84,7 @@ runs:
       with:
         TAGS: ${{ inputs.TEST_TAGS }}
         TIMEOUT: ${{ inputs.TIMEOUT }}
+        PARALLEL: ${{ inputs.PARALLEL }}
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_CHANNEL_ID != '' && github.ref == 'refs/heads/main'
       uses: slackapi/slack-github-action@v1.27.1

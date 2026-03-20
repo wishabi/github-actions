@@ -17,6 +17,14 @@ inputs:
   SLACK_BOT_TOKEN:
     description: The Slack bot token to pass the data to
     required: false
+  MOCKERY_INSTALL_VERSION:
+    description: The version of mockery to use
+    required: false
+    default: ""
+  CODE_GEN_COMMANDS:
+    description: Shell commands to run before go mod tidy (e.g. sqlc generate, wire, ent generate)
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -36,6 +44,8 @@ runs:
         BUF_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
+        MOCKERY_INSTALL_VERSION: ${{ inputs.MOCKERY_INSTALL_VERSION }}
+        CODE_GEN_COMMANDS: ${{ inputs.CODE_GEN_COMMANDS }}
     - name: Write build summary
       if: always()
       shell: bash
