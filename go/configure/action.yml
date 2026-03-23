@@ -6,7 +6,7 @@ inputs:
     description: Flipp circleci repo token
     required: true
   BUF_BUILD_USER:
-    description: Buf CI user stored as secret
+    description: Buf CI user stored as secret. Deprecated - no longer used by buf-action, kept for backward compatibility.
     required: false
   BUF_BUILD_API_TOKEN:
     description: Buf API token stored as secret
@@ -20,7 +20,7 @@ runs:
   using: "composite"
   steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: ${{ inputs.FETCH_DEPTH }}
     - name: Setting up private modules access
@@ -32,18 +32,11 @@ runs:
         BUF_VERSION=$(awk '/^buf[[:space:]]+/ {print $2}' .tool-versions)
         echo "BUF_VERSION=${BUF_VERSION}" >> $GITHUB_ENV
       shell: bash
-    - name: Setting up buf if version is provided
-      uses: bufbuild/buf-setup-action@v1
-      if: "${{ inputs.BUF_BUILD_API_TOKEN != '' && env.BUF_VERSION != '' }}"
+    - name: Setting up buf
+      uses: bufbuild/buf-action@v1
+      if: "${{ inputs.BUF_BUILD_API_TOKEN != '' }}"
       with:
+        setup_only: true
         github_token: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
-        buf_user: ${{ inputs.BUF_BUILD_USER }}
-        buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}
+        token: ${{ inputs.BUF_BUILD_API_TOKEN }}
         version: ${{ env.BUF_VERSION }}
-    - name: Setting up buf if version is not provided
-      uses: bufbuild/buf-setup-action@v1
-      if: "${{ inputs.BUF_BUILD_API_TOKEN != '' && env.BUF_VERSION == '' }}"
-      with:
-        github_token: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
-        buf_user: ${{ inputs.BUF_BUILD_USER }}
-        buf_api_token: ${{ inputs.BUF_BUILD_API_TOKEN }}

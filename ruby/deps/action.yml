@@ -11,7 +11,7 @@ runs:
   steps:
     - name: Bundle cache
       id: bundle-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: vendor/bundle
         key: rails-${{ hashFiles('Gemfile.lock') }}
