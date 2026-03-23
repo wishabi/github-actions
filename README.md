@@ -54,6 +54,41 @@ slack_always|No|If set, both success and failure notifications will be sent to S
 enable_ssh|No|If set, SSH sessions will be created on failure.
 ssh_always|No|If set, SSH sessions will always be created, even on success.
 
+## Composite Actions
+
+This repo also contains reusable composite actions for CI/CD pipelines:
+
+### Go
+| Action | Description |
+|--------|-------------|
+| `go/build` | Build Go repo, configure environment, install dependencies |
+| `go/test` | Run Go tests with coverage and artifact upload |
+| `go/lint` | Run golangci-lint with v1/v2 config auto-detection |
+| `go/build-and-test` | Combined build + test with optional `TEST_SETUP_COMMANDS` and `CODE_GEN_COMMANDS` |
+| `go/deps` | Install Go dependencies, vendor modules, generate mocks. Supports `CODE_GEN_COMMANDS` for pre-vendor code generation (sqlc, wire, ent) |
+| `go/configure` | Configure Go environment (GOPRIVATE, buf, etc.) |
+| `go/smoke-test` | Post-deploy smoke tests with optional DataDog Synthetics |
+
+### Ruby
+| Action | Description |
+|--------|-------------|
+| `ruby/deps` | Install Ruby dependencies via Bundler |
+| `ruby/lint` | Run RuboCop linter |
+| `ruby/test` | Run RSpec tests with artifact upload |
+| `ruby/one-for-all` | One-for-all Helm chart validation |
+| `ruby/validation/topic` | Kafka topic validation |
+| `ruby/validation/schema` | Schema validation |
+
+### Shared
+| Action | Description |
+|--------|-------------|
+| `deploy/eks` | Deploy to EKS (staging/production) with Slack notifications |
+| `slack` | Send Slack notifications on job failure/success |
+| `cache` | Cache/restore workspace between jobs |
+| `common/branch-info` | Extract branch name and short SHA for use in other steps |
+
+Each action's inputs are documented in its `action.yml` file. Use `@v0` to track the latest stable version.
+
 ## Contributing
 
 Please make sure to run `npm run prepare` before committing your files! You should probably add this to `.git/hooks/pre-commit`.
