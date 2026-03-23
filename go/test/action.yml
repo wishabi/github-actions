@@ -30,8 +30,8 @@ runs:
       run: |
         echo "## Go Test Results" >> $GITHUB_STEP_SUMMARY
         if [ -f test-report.out ]; then
-          PASS=$(grep -c '^ok' test-report.out || true)
-          FAIL=$(grep -c '^FAIL' test-report.out || true)
+          PASS=$(grep -c '^ok ' test-report.out || true)
+          FAIL=$(grep -cP '^FAIL\t' test-report.out || true)
           SKIP=$(grep -c '\[no test files\]' test-report.out || true)
           echo "| Status | Packages |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|----------|" >> $GITHUB_STEP_SUMMARY
@@ -43,7 +43,7 @@ runs:
             echo "<details><summary>Failed Packages</summary>" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            grep '^FAIL' test-report.out >> $GITHUB_STEP_SUMMARY
+            grep -P '^FAIL\t' test-report.out >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             echo "</details>" >> $GITHUB_STEP_SUMMARY
           fi
