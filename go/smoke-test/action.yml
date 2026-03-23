@@ -48,7 +48,7 @@ runs:
       run: echo "short_sha=`echo ${GITHUB_SHA::7}`" > $GITHUB_OUTPUT
       shell: bash
     - name: Restore cache
-      uses: wishabi/github-actions/cache@v0
+      uses: wishabi/github-actions/cache@CDIS-3318
     - name: Run Go Smoke Tests
       if: inputs.GO_SMOKE == 'true'
       run: |

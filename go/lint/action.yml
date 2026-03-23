@@ -45,14 +45,14 @@ runs:
       run: echo "short_sha=`echo ${GITHUB_SHA::7}`" > $GITHUB_OUTPUT
       shell: bash
     - name: Configure Go environment
-      uses: wishabi/github-actions/go/configure@v0
+      uses: wishabi/github-actions/go/configure@CDIS-3318
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
         BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
         FETCH_DEPTH: 0
     - name: Setup Go dependencies
-      uses: wishabi/github-actions/go/deps@v0
+      uses: wishabi/github-actions/go/deps@CDIS-3318
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Setup safe directory
@@ -94,7 +94,7 @@ runs:
         version: ${{ env.GOLANGCI_LINT_VERSION }} # Optional - if blank, will use the action's default version resolution
     - name: Run v2 Go linter
       if : ${{ env.IS_V2 == 'true' }}
-      uses: golangci/golangci-lint-action@v7 # Note: v7 and up require golangci-lint v2 config
+      uses: golangci/golangci-lint-action@v9 # Note: v7/v9 and up require golangci-lint v2 config. v9 runs on Node.js 24.
       with:
         skip-cache: true
         args: --verbose
