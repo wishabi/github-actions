@@ -13,6 +13,10 @@ inputs:
     description: The version of mockery to use
     required: false
     default: ""
+  CODE_GEN_COMMANDS:
+    description: Shell commands to run before go mod tidy (e.g. sqlc generate, wire, ent generate)
+    required: false
+    default: ""
 
 runs:
   using: 'composite'
@@ -35,6 +39,14 @@ runs:
         echo "Go: $(go version)"
         if command -v buf &> /dev/null; then echo "Buf: $(buf --version)"; fi
         echo "::endgroup::"
+    - name: Run code generation commands
+      if: ${{ inputs.CODE_GEN_COMMANDS != '' }}
+      shell: bash
+      run: |
+        set -e
+        eval "$CODE_GEN_COMMANDS"
+      env:
+        CODE_GEN_COMMANDS: ${{ inputs.CODE_GEN_COMMANDS }}
     - name: Setting up private modules access
       if: steps.vendor-cache.outputs.cache-hit != 'true'
       shell: bash

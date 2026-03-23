@@ -36,8 +36,8 @@ inputs:
     description: A timeout value in seconds. If tests take longer than this, they will fail. Not setting this value will fallback to go test's default of 10 minutes.
     required: false
     default: ""
-  PRE_TEST_COMMANDS:
-    description: Shell commands to run between build and test steps (e.g. DB migrations, code generation)
+  TEST_SETUP_COMMANDS:
+    description: Shell commands to run between build and test steps (e.g. DB migrations, seed data, config generation)
     required: false
     default: ""
   PARALLEL:
@@ -48,6 +48,10 @@ inputs:
     description: The version of mockery to use
     required: false
     default: ""
+  CODE_GEN_COMMANDS:
+    description: Shell commands to run before go mod tidy (e.g. sqlc generate, wire, ent generate)
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -56,20 +60,21 @@ runs:
       id: branch-info
       uses: wishabi/github-actions/common/branch-info@v0
     - name: Run custom Go build action
-      uses: wishabi/github-actions/go/build@pre-test-commands
+      uses: wishabi/github-actions/go/build@v0
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
         BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
         MOCKERY_INSTALL_VERSION: ${{ inputs.MOCKERY_INSTALL_VERSION }}
-    - name: Run pre-test commands
-      if: ${{ inputs.PRE_TEST_COMMANDS != '' }}
+        CODE_GEN_COMMANDS: ${{ inputs.CODE_GEN_COMMANDS }}
+    - name: Run test setup commands
+      if: ${{ inputs.TEST_SETUP_COMMANDS != '' }}
       shell: bash
       run: |
         set -e
-        eval "$PRE_TEST_COMMANDS"
+        eval "$TEST_SETUP_COMMANDS"
       env:
-        PRE_TEST_COMMANDS: ${{ inputs.PRE_TEST_COMMANDS }}
+        TEST_SETUP_COMMANDS: ${{ inputs.TEST_SETUP_COMMANDS }}
         DB_HOST: ${{ inputs.DB_HOST }}
         DB_USER: ${{ inputs.DB_USER }}
         DB_PASSWORD: ${{ inputs.DB_PASSWORD }}
