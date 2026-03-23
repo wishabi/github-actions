@@ -30,20 +30,20 @@ runs:
       run: |
         echo "## Go Test Results" >> $GITHUB_STEP_SUMMARY
         if [ -f test-report.out ]; then
-          PASS=$(grep -c '^ok ' test-report.out || true)
-          FAIL=$(grep -c '^FAIL[[:space:]]' test-report.out || true)
-          SKIP=$(grep -c '\[no test files\]' test-report.out || true)
-          echo "| Status | Packages |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|----------|" >> $GITHUB_STEP_SUMMARY
+          PASS=$(grep -c '^--- PASS:' test-report.out || true)
+          FAIL=$(grep -c '^--- FAIL:' test-report.out || true)
+          SKIP=$(grep -c '^--- SKIP:' test-report.out || true)
+          echo "| Status | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Passed | ${PASS} |" >> $GITHUB_STEP_SUMMARY
           echo "| Failed | ${FAIL} |" >> $GITHUB_STEP_SUMMARY
-          echo "| No Tests | ${SKIP} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Skipped | ${SKIP} |" >> $GITHUB_STEP_SUMMARY
           if [ "$FAIL" -gt 0 ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "<details><summary>Failed Packages</summary>" >> $GITHUB_STEP_SUMMARY
+            echo "<details><summary>Failed Tests</summary>" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            grep '^FAIL[[:space:]]' test-report.out >> $GITHUB_STEP_SUMMARY
+            grep '^--- FAIL:' test-report.out >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             echo "</details>" >> $GITHUB_STEP_SUMMARY
           fi
