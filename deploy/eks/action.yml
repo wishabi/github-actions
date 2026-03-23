@@ -88,7 +88,7 @@ runs:
         # Execute command
         eval $cmd
     - name: Notify slack channel on success
-      if: success() && inputs.SLACK_SUCCESS_CHANNEL_ID != null
+      if: success() && inputs.SLACK_SUCCESS_CHANNEL_ID != ''
       uses: slackapi/slack-github-action@v1.27.1
       env:
         SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
@@ -160,7 +160,7 @@ runs:
             ]
           }
     - name: Notify slack channel on failure
-      if: failure() && inputs.SLACK_FAILURE_CHANNEL_ID != null
+      if: failure() && inputs.SLACK_FAILURE_CHANNEL_ID != ''
       uses: slackapi/slack-github-action@v1.27.1
       env:
         SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}

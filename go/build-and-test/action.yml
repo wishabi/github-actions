@@ -60,7 +60,7 @@ runs:
         TAGS: ${{ inputs.TEST_TAGS }}
         TIMEOUT: ${{ inputs.TIMEOUT }}
     - name: Notify slack channel on failure
-      if: failure() && inputs.SLACK_CHANNEL_ID != null && github.ref == 'refs/heads/main'
+      if: failure() && inputs.SLACK_CHANNEL_ID != '' && github.ref == 'refs/heads/main'
       uses: slackapi/slack-github-action@v1.27.1
       env:
         SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}

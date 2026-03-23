@@ -43,7 +43,7 @@ runs:
         go test ./tests/smoke --tags=smoke
       shell: bash
     - name: Run DataDog Synthetics
-      if: inputs.DD_SYNTHETIC_IDS != null
+      if: inputs.DD_SYNTHETIC_IDS != ''
       uses: DataDog/synthetics-ci-github-action@v1.17.0
       with:
         api_key: ${{ inputs.DD_API_KEY }}
@@ -74,7 +74,7 @@ runs:
         chmod +x ./deploy/build.sh && ./deploy/build.sh service rollback --env=${{ inputs.ENV }}
       shell: bash
     - name: Notify slack channel on failure
-      if: failure() && inputs.SLACK_CHANNEL_ID != null
+      if: failure() && inputs.SLACK_CHANNEL_ID != ''
       uses: slackapi/slack-github-action@v1.27.1
       env:
         SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
