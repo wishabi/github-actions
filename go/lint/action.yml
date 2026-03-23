@@ -33,14 +33,14 @@ runs:
       id: branch-info
       uses: wishabi/github-actions/common/branch-info@v0
     - name: Configure Go environment
-      uses: wishabi/github-actions/go/configure@CDIS-3318
+      uses: wishabi/github-actions/go/configure@v0
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
         BUF_BUILD_API_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
         FETCH_DEPTH: 0
     - name: Setup Go dependencies
-      uses: wishabi/github-actions/go/deps@CDIS-3318
+      uses: wishabi/github-actions/go/deps@v0
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Setup safe directory

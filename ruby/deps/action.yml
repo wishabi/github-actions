@@ -28,4 +28,4 @@ runs:
         BUNDLE_JOBS: 4
         BUNDLE_DEPLOYMENT: ${{ inputs.library == '' }}
     - name: Caching workspace for deploy jobs
-      uses: wishabi/github-actions/cache@CDIS-3318
+      uses: wishabi/github-actions/cache@v0

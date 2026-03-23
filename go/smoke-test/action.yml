@@ -36,7 +36,7 @@ runs:
       id: branch-info
       uses: wishabi/github-actions/common/branch-info@v0
     - name: Restore cache
-      uses: wishabi/github-actions/cache@CDIS-3318
+      uses: wishabi/github-actions/cache@v0
     - name: Run Go Smoke Tests
       if: inputs.GO_SMOKE == 'true'
       run: |
@@ -44,7 +44,7 @@ runs:
       shell: bash
     - name: Run DataDog Synthetics
       if: inputs.DD_SYNTHETIC_IDS != ''
-      uses: DataDog/synthetics-ci-github-action@v4.0.0
+      uses: DataDog/synthetics-ci-github-action@v3.8.2
       with:
         api-key: ${{ inputs.DD_API_KEY }}
         app-key: ${{ inputs.DD_APP_KEY }}

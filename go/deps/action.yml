@@ -107,4 +107,4 @@ runs:
         if command -v mockery &> /dev/null; then echo "Mockery: $(mockery --version 2>/dev/null || echo 'installed but version unknown')"; fi
         echo "::endgroup::"
     - name: Caching workspace for deploy jobs
-      uses: wishabi/github-actions/cache@CDIS-3318
+      uses: wishabi/github-actions/cache@v0

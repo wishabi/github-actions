@@ -69,7 +69,7 @@ runs:
       shell: bash
       run: shopt -s dotglob && rm -rf "${{ github.workspace }}"/*
     - name: Restoring workspace from cache
-      uses: wishabi/github-actions/cache@CDIS-3318
+      uses: wishabi/github-actions/cache@v0
     - name: Deploying to EKS via Helm release
       shell: bash
       run: |

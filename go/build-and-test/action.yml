@@ -60,7 +60,7 @@ runs:
       id: branch-info
       uses: wishabi/github-actions/common/branch-info@v0
     - name: Run custom Go build action
-      uses: wishabi/github-actions/go/build@CDIS-3318
+      uses: wishabi/github-actions/go/build@v0
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
         BUF_BUILD_USER: ${{ inputs.BUF_BUILD_USER }}
@@ -80,7 +80,7 @@ runs:
         DB_PASSWORD: ${{ inputs.DB_PASSWORD }}
         DB_PORT: ${{ inputs.DB_PORT }}
     - name: Run custom Go test action
-      uses: wishabi/github-actions/go/test@CDIS-3318
+      uses: wishabi/github-actions/go/test@v0
       env:
         DB_HOST: ${{ inputs.DB_HOST }}
         DB_USER: ${{ inputs.DB_USER }}
