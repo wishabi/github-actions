@@ -44,11 +44,11 @@ runs:
       shell: bash
     - name: Run DataDog Synthetics
       if: inputs.DD_SYNTHETIC_IDS != ''
-      uses: DataDog/synthetics-ci-github-action@v1.17.0
+      uses: DataDog/synthetics-ci-github-action@v4
       with:
-        api_key: ${{ inputs.DD_API_KEY }}
-        app_key: ${{ inputs.DD_APP_KEY }}
-        public_ids: ${{ inputs.DD_SYNTHETIC_IDS }}
+        api-key: ${{ inputs.DD_API_KEY }}
+        app-key: ${{ inputs.DD_APP_KEY }}
+        public-ids: ${{ inputs.DD_SYNTHETIC_IDS }}
     - name: Write smoke test summary
       if: always()
       shell: bash
