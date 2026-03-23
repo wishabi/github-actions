@@ -13,6 +13,10 @@ inputs:
     description: Whether to run tests in parallel. Defaults to true.
     required: false
     default: "true"
+  ARTIFACT_RETENTION_DAYS:
+    description: Number of days to retain test and coverage artifacts.
+    required: false
+    default: "1"
 
 runs:
   using: 'composite'
@@ -20,15 +24,41 @@ runs:
     - name: Running go tests
       shell: bash
       run: ${GITHUB_ACTION_PATH}/test.sh "${{ inputs.TAGS }}" "${{ inputs.TIMEOUT }}" "${{ inputs.PARALLEL }}"
+    - name: Write test summary
+      if: always()
+      shell: bash
+      run: |
+        echo "## Go Test Results" >> $GITHUB_STEP_SUMMARY
+        if [ -f test-report.out ]; then
+          PASS=$(grep -c '^--- PASS:' test-report.out || true)
+          FAIL=$(grep -c '^--- FAIL:' test-report.out || true)
+          SKIP=$(grep -c '^--- SKIP:' test-report.out || true)
+          echo "| Status | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Passed | ${PASS} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Failed | ${FAIL} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Skipped | ${SKIP} |" >> $GITHUB_STEP_SUMMARY
+          if [ "$FAIL" -gt 0 ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "<details><summary>Failed Tests</summary>" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            grep '^--- FAIL:' test-report.out >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "</details>" >> $GITHUB_STEP_SUMMARY
+          fi
+        else
+          echo "> **Warning:** No test report found" >> $GITHUB_STEP_SUMMARY
+        fi
     - name: Uploading test report
       uses: actions/upload-artifact@v6
       with:
         name: "${{ github.sha }}-test-report.out"
         path: "./test-report.out"
-        retention-days: 1
+        retention-days: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
     - name: Uploading coverage report
       uses: actions/upload-artifact@v6
       with:
         name: "${{ github.sha }}-coverage.out"
         path: "./coverage.out"
-        retention-days: 1
+        retention-days: ${{ inputs.ARTIFACT_RETENTION_DAYS }}

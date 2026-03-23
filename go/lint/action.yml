@@ -29,21 +29,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Set branch variable
-      id: set-branch
-      shell: bash
-      run: |
-        if [ "${{ github.event_name }}" == "pull_request" ]; then
-          branch="${{ github.event.pull_request.head.ref }}"
-        else
-          branch="${{ github.ref }}"
-          branch="${branch#refs/heads/}"
-        fi
-        echo "branch=${branch}" >> $GITHUB_OUTPUT
-    - name: Get short sha
-      id: get-short-sha
-      run: echo "short_sha=`echo ${GITHUB_SHA::7}`" > $GITHUB_OUTPUT
-      shell: bash
+    - name: Get branch and commit info
+      id: branch-info
+      uses: wishabi/github-actions/common/branch-info@v0
     - name: Configure Go environment
       uses: wishabi/github-actions/go/configure@CDIS-3318
       with:
@@ -85,23 +73,49 @@ runs:
         echo "IS_V2=${IS_V2}" >> $GITHUB_ENV
         echo "GOLANGCI_LINT_VERSION=${GOLANGCI_LINT_VERSION}" >> $GITHUB_ENV
       shell: bash
+    - name: Log tool versions
+      shell: bash
+      run: |
+        echo "::group::Tool Versions"
+        echo "Go: $(go version)"
+        if [ -n "${{ env.GOLANGCI_LINT_VERSION }}" ]; then echo "golangci-lint: ${{ env.GOLANGCI_LINT_VERSION }}"; fi
+        echo "::endgroup::"
     - name: Run v1 Go linter
-      if : ${{ env.IS_V2 == 'false' }}
+      if: ${{ env.IS_V2 == 'false' }}
       uses: golangci/golangci-lint-action@v6
       with:
         skip-cache: true
         args: --verbose
         version: ${{ env.GOLANGCI_LINT_VERSION }} # Optional - if blank, will use the action's default version resolution
     - name: Run v2 Go linter
-      if : ${{ env.IS_V2 == 'true' }}
+      if: ${{ env.IS_V2 == 'true' }}
       uses: golangci/golangci-lint-action@v9 # Note: v7/v9 and up require golangci-lint v2 config. v9 runs on Node.js 24.
       with:
         skip-cache: true
         args: --verbose
         version: ${{ env.GOLANGCI_LINT_VERSION }} # Optional - if blank, will use the action's default version resolution
+    - name: Write lint summary
+      if: always()
+      shell: bash
+      run: |
+        echo "## Go Lint Results" >> $GITHUB_STEP_SUMMARY
+        echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Go | $(go version | awk '{print $3}') |" >> $GITHUB_STEP_SUMMARY
+        if [ -n "${{ env.GOLANGCI_LINT_VERSION }}" ]; then
+          echo "| golangci-lint | ${{ env.GOLANGCI_LINT_VERSION }} |" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "| Config version | ${{ env.IS_V2 == 'true' && 'v2' || 'v1' }} |" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ job.status }}" = "success" ]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> Lint passed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> **Lint failed** — check the logs above for details" >> $GITHUB_STEP_SUMMARY
+        fi
     - name: Notify slack channel on failure
-      if: failure() && inputs.SLACK_CHANNEL_ID != null && github.ref == 'refs/heads/main'
-      uses: slackapi/slack-github-action@v1.24.0
+      if: failure() && inputs.SLACK_CHANNEL_ID != '' && github.ref == 'refs/heads/main'
+      uses: slackapi/slack-github-action@v1.27.1
       env:
         SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
       with:
@@ -125,7 +139,7 @@ runs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "*Repository*\n<https://github.com/${{ github.repository }}|${{ github.repository }}>\n\n*${{ github.event_name == 'pull_request' && 'Pull Request' || 'Branch' }}*\n${{ github.event_name == 'pull_request' && format('<{0}|{1}>', github.event.pull_request.html_url, github.event.pull_request.title) || format('<https://github.com/{0}/commit/{1}|{2}>', github.repository, github.sha, steps.set-branch.outputs.branch)}}"
+                  "text": "*Repository*\n<https://github.com/${{ github.repository }}|${{ github.repository }}>\n\n*${{ github.event_name == 'pull_request' && 'Pull Request' || 'Branch' }}*\n${{ github.event_name == 'pull_request' && format('<{0}|{1}>', github.event.pull_request.html_url, github.event.pull_request.title) || format('<https://github.com/{0}/commit/{1}|{2}>', github.repository, github.sha, steps.branch-info.outputs.branch)}}"
                 },
                 "accessory": {
                   "type": "image",
@@ -149,7 +163,7 @@ runs:
                   },
                   {
                     "type": "mrkdwn",
-                    "text": "${{ steps.get-short-sha.outputs.short_sha }}"
+                    "text": "${{ steps.branch-info.outputs.short_sha }}"
                   },
                   {
                     "type": "mrkdwn",

@@ -16,6 +16,10 @@ inputs:
     description: Set this if you want to use db:schema:load before db:migrate.
     default: ""
     required: false
+  ARTIFACT_RETENTION_DAYS:
+    description: Number of days to retain test and coverage artifacts.
+    required: false
+    default: "1"
 
 runs:
   using: "composite"
@@ -63,10 +67,10 @@ runs:
       with:
         name: ${{ github.sha }}-coverage.out
         path: ./coverage/coverage.json
-        retention-days: 1
+        retention-days: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
     - name: 'Upload test results'
       uses: actions/upload-artifact@v6
       with:
         name: ${{ github.sha }}-test-report.out
         path: ./result/rspec.xml
-        retention-days: 1
+        retention-days: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
