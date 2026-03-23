@@ -1,6 +1,12 @@
 name: 'Lint - rubocop'
 description: 'Lints using rubocop'
 
+inputs:
+  ARTIFACT_RETENTION_DAYS:
+    description: Number of days to retain lint result artifacts.
+    required: false
+    default: "1"
+
 runs:
   using: "composite"
   steps:
@@ -16,4 +22,4 @@ runs:
       with:
         name: "${{ github.sha }}-lint-results.out"
         path: ./rubocop/rubocop.json
-        retention-days: 1
+        retention-days: ${{ inputs.ARTIFACT_RETENTION_DAYS }}

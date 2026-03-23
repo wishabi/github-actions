@@ -21,21 +21,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Set branch variable
-      id: set-branch
-      shell: bash
-      run: |
-        if [ "${{ github.event_name }}" == "pull_request" ]; then
-          branch="${{ github.event.pull_request.head.ref }}"
-        else
-          branch="${{ github.ref }}"
-          branch="${branch#refs/heads/}"
-        fi
-        echo "branch=${branch}" >> $GITHUB_OUTPUT
-    - name: Get short sha
-      id: get-short-sha
-      run: echo "short_sha=`echo ${GITHUB_SHA::7}`" > $GITHUB_OUTPUT
-      shell: bash
+    - name: Get branch and commit info
+      id: branch-info
+      uses: wishabi/github-actions/common/branch-info@v0
     - name: Configure Go environment
       uses: wishabi/github-actions/go/configure@v0
       with:
@@ -48,9 +36,26 @@ runs:
         BUF_TOKEN: ${{ inputs.BUF_BUILD_API_TOKEN }}
       with:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
+    - name: Write build summary
+      if: always()
+      shell: bash
+      run: |
+        echo "## Go Build Results" >> $GITHUB_STEP_SUMMARY
+        echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Go | $(go version | awk '{print $3}') |" >> $GITHUB_STEP_SUMMARY
+        echo "| Repository | ${{ github.repository }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Commit | ${{ steps.branch-info.outputs.short_sha }} |" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ job.status }}" = "success" ]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> Build passed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> **Build failed** — check the logs above for details" >> $GITHUB_STEP_SUMMARY
+        fi
     - name: Notify slack channel on failure
-      if: failure() && inputs.SLACK_CHANNEL_ID != null && github.ref == 'refs/heads/main'
-      uses: slackapi/slack-github-action@v1.24.0
+      if: failure() && inputs.SLACK_CHANNEL_ID != '' && github.ref == 'refs/heads/main'
+      uses: slackapi/slack-github-action@v1.27.1
       env:
         SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
       with:
@@ -74,7 +79,7 @@ runs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "*Repository*\n<https://github.com/${{ github.repository }}|${{ github.repository }}>\n\n*${{ github.event_name == 'pull_request' && 'Pull Request' || 'Branch' }}*\n${{ github.event_name == 'pull_request' && format('<{0}|{1}>', github.event.pull_request.html_url, github.event.pull_request.title) || format('<https://github.com/{0}/commit/{1}|{2}>', github.repository, github.sha, steps.set-branch.outputs.branch)}}"
+                  "text": "*Repository*\n<https://github.com/${{ github.repository }}|${{ github.repository }}>\n\n*${{ github.event_name == 'pull_request' && 'Pull Request' || 'Branch' }}*\n${{ github.event_name == 'pull_request' && format('<{0}|{1}>', github.event.pull_request.html_url, github.event.pull_request.title) || format('<https://github.com/{0}/commit/{1}|{2}>', github.repository, github.sha, steps.branch-info.outputs.branch)}}"
                 },
                 "accessory": {
                   "type": "image",
@@ -98,7 +103,7 @@ runs:
                   },
                   {
                     "type": "mrkdwn",
-                    "text": "${{ steps.get-short-sha.outputs.short_sha }}"
+                    "text": "${{ steps.branch-info.outputs.short_sha }}"
                   },
                   {
                     "type": "mrkdwn",

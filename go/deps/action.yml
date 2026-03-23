@@ -28,6 +28,13 @@ runs:
       if: ${{ hashFiles('buf.gen.yaml') != '' }}
       run: buf generate
       shell: bash
+    - name: Log tool versions
+      shell: bash
+      run: |
+        echo "::group::Tool Versions"
+        echo "Go: $(go version)"
+        if command -v buf &> /dev/null; then echo "Buf: $(buf --version)"; fi
+        echo "::endgroup::"
     - name: Setting up private modules access
       if: steps.vendor-cache.outputs.cache-hit != 'true'
       shell: bash
@@ -81,5 +88,11 @@ runs:
       if: ${{ hashFiles('.mockery.yml') != '' }}
       run: mockery
       shell: bash
+    - name: Log generated tool versions
+      shell: bash
+      run: |
+        echo "::group::Generated Tool Versions"
+        if command -v mockery &> /dev/null; then echo "Mockery: $(mockery --version 2>/dev/null || echo 'installed but version unknown')"; fi
+        echo "::endgroup::"
     - name: Caching workspace for deploy jobs
       uses: wishabi/github-actions/cache@v0

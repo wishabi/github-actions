@@ -10,11 +10,14 @@ jobs:
   # unit tests
   units:
     runs-on: ubuntu-latest
+    env:
+      # ncc@0.28.6 uses legacy OpenSSL hashing; Node 20+ requires this flag
+      NODE_OPTIONS: --openssl-legacy-provider
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-node@v3
+    - uses: actions/setup-node@v4
       with:
-        node-version: 16
+        node-version: 20
     - run: npm ci
     - run: npm test
 

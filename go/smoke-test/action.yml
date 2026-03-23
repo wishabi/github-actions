@@ -32,21 +32,9 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Set branch variable
-      id: set-branch
-      shell: bash
-      run: |
-        if [ "${{ github.event_name }}" == "pull_request" ]; then
-          branch="${{ github.event.pull_request.head.ref }}"
-        else
-          branch="${{ github.ref }}"
-          branch="${branch#refs/heads/}"
-        fi
-        echo "branch=${branch}" >> $GITHUB_OUTPUT
-    - name: Get short sha
-      id: get-short-sha
-      run: echo "short_sha=`echo ${GITHUB_SHA::7}`" > $GITHUB_OUTPUT
-      shell: bash
+    - name: Get branch and commit info
+      id: branch-info
+      uses: wishabi/github-actions/common/branch-info@v0
     - name: Restore cache
       uses: wishabi/github-actions/cache@v0
     - name: Run Go Smoke Tests
@@ -55,12 +43,30 @@ runs:
         go test ./tests/smoke --tags=smoke
       shell: bash
     - name: Run DataDog Synthetics
-      if: inputs.DD_SYNTHETIC_IDS != null
-      uses: DataDog/synthetics-ci-github-action@v0.20.0
+      if: inputs.DD_SYNTHETIC_IDS != ''
+      uses: DataDog/synthetics-ci-github-action@v1.17.0
       with:
         api_key: ${{ inputs.DD_API_KEY }}
         app_key: ${{ inputs.DD_APP_KEY }}
         public_ids: ${{ inputs.DD_SYNTHETIC_IDS }}
+    - name: Write smoke test summary
+      if: always()
+      shell: bash
+      run: |
+        echo "## Smoke Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Environment | ${{ inputs.ENV }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Go Smoke | ${{ inputs.GO_SMOKE }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| DataDog Synthetics | ${{ inputs.DD_SYNTHETIC_IDS != '' && 'yes' || 'no' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Rollback on Fail | ${{ inputs.ROLLBACK_ON_FAIL }} |" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ job.status }}" = "success" ]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> Smoke tests passed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> **Smoke tests failed** — check the logs above for details" >> $GITHUB_STEP_SUMMARY
+        fi
     - name: Rollback on failure
       if: failure() && inputs.ROLLBACK_ON_FAIL == 'true'
       run: |
@@ -68,8 +74,8 @@ runs:
         chmod +x ./deploy/build.sh && ./deploy/build.sh service rollback --env=${{ inputs.ENV }}
       shell: bash
     - name: Notify slack channel on failure
-      if: failure() && inputs.SLACK_CHANNEL_ID != null
-      uses: slackapi/slack-github-action@v1.24.0
+      if: failure() && inputs.SLACK_CHANNEL_ID != ''
+      uses: slackapi/slack-github-action@v1.27.1
       env:
         SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
       with:
@@ -109,11 +115,11 @@ runs:
                 "fields": [
                   {
                     "type": "mrkdwn",
-                    "text": "*Branch*\n${{ format('<https://github.com/{0}/commit/{1}|{2}>', github.repository, github.sha, steps.set-branch.outputs.branch)}}"
+                    "text": "*Branch*\n${{ format('<https://github.com/{0}/commit/{1}|{2}>', github.repository, github.sha, steps.branch-info.outputs.branch)}}"
                   },
                   {
                     "type": "mrkdwn",
-                    "text": "*Commit*\n${{ steps.get-short-sha.outputs.short_sha }}"
+                    "text": "*Commit*\n${{ steps.branch-info.outputs.short_sha }}"
                   },
                   {
                     "type": "mrkdwn",
