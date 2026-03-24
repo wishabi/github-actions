@@ -5,7 +5,7 @@ TAGS=${1:-}
 TIMEOUT=${2:-}
 PARALLEL=${3:-}
 
-cmd="go test ./... -coverprofile=coverage.out"
+cmd="go test -v ./... -coverprofile=coverage.out"
 
 # find non-ignored subdirectories
 file_list=()
