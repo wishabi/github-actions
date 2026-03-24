@@ -18,7 +18,7 @@ runs:
       env: 
         BUNDLE_DEPLOYMENT: true
     - name: 'Upload rubocop results'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: "${{ github.sha }}-lint-results.out"
         path: ./rubocop/rubocop.json

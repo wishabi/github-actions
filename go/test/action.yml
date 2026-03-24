@@ -51,13 +51,13 @@ runs:
           echo "> **Warning:** No test report found" >> $GITHUB_STEP_SUMMARY
         fi
     - name: Uploading test report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: "${{ github.sha }}-test-report.out"
         path: "./test-report.out"
         retention-days: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
     - name: Uploading coverage report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: "${{ github.sha }}-coverage.out"
         path: "./coverage.out"

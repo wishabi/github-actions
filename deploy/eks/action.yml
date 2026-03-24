@@ -52,18 +52,18 @@ runs:
         fi
     - name: Configuring AWS credentials (IAM role)
       if: ${{ inputs.AWS_ROLE_ARN != '' }}
-      uses: aws-actions/configure-aws-credentials@v4
+      uses: aws-actions/configure-aws-credentials@v6
       with:
         role-to-assume: ${{ inputs.AWS_ROLE_ARN }}
         aws-region: ${{ inputs.AWS_REGION }}
     - name: Configuring AWS credentials (static)
       if: ${{ inputs.AWS_ROLE_ARN == '' }}
-      uses: aws-actions/configure-aws-credentials@v4
+      uses: aws-actions/configure-aws-credentials@v6
       with:
         aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ inputs.AWS_REGION }}
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Cleaning workspace
       if: ${{ inputs.CLEAN_WORKSPACE == 'true' }}
       shell: bash
