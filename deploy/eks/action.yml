@@ -45,8 +45,12 @@ runs:
       uses: wishabi/github-actions/common/branch-info@v0
     - name: Validate AWS credentials input
       shell: bash
+      env:
+        AWS_ROLE_ARN_INPUT: ${{ inputs.AWS_ROLE_ARN }}
+        AWS_ACCESS_KEY_ID_INPUT: ${{ inputs.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY_INPUT: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
       run: |
-        if [ -z "${{ inputs.AWS_ROLE_ARN }}" ] && { [ -z "${{ inputs.AWS_ACCESS_KEY_ID }}" ] || [ -z "${{ inputs.AWS_SECRET_ACCESS_KEY }}" ]; }; then
+        if [ -z "$AWS_ROLE_ARN_INPUT" ] && { [ -z "$AWS_ACCESS_KEY_ID_INPUT" ] || [ -z "$AWS_SECRET_ACCESS_KEY_INPUT" ]; }; then
           echo "::error::Either AWS_ROLE_ARN (IAM auth) or both AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY (static auth) must be provided."
           exit 1
         fi
@@ -67,26 +71,31 @@ runs:
     - name: Cleaning workspace
       if: ${{ inputs.CLEAN_WORKSPACE == 'true' }}
       shell: bash
-      run: shopt -s dotglob && rm -rf "${{ github.workspace }}"/*
+      run: shopt -s dotglob && rm -rf "$GITHUB_WORKSPACE"/*
     - name: Restoring workspace from cache
       uses: wishabi/github-actions/cache@v0
     - name: Deploying to EKS via Helm release
       shell: bash
+      env:
+        DEPLOY_ENV: ${{ inputs.ENV }}
+        DEPLOY_TIMEOUT: ${{ inputs.TIMEOUT }}
+        DEPLOY_ATOMIC: ${{ inputs.ATOMIC }}
       run: |
-        cmd="chmod +x ./deploy/build.sh && ./deploy/build.sh service deploy_eks --env=${{ inputs.ENV }}"
+        chmod +x ./deploy/build.sh
+        cmd=(./deploy/build.sh service deploy_eks --env="$DEPLOY_ENV")
 
         # Check if TIMEOUT is set and provide it as a flag
-        if [ -n "${{ inputs.TIMEOUT }}" ]; then
-          cmd="${cmd} --timeout=${{ inputs.TIMEOUT }}"
+        if [ -n "$DEPLOY_TIMEOUT" ]; then
+          cmd+=(--timeout="$DEPLOY_TIMEOUT")
         fi
 
-         # Check if ATOMIC is set and provide it as a flag
-        if [ -n "${{ inputs.ATOMIC }}" ]; then
-          cmd="${cmd} --atomic=${{ inputs.ATOMIC }}"
+        # Check if ATOMIC is set and provide it as a flag
+        if [ -n "$DEPLOY_ATOMIC" ]; then
+          cmd+=(--atomic="$DEPLOY_ATOMIC")
         fi
 
         # Execute command
-        eval $cmd
+        "${cmd[@]}"
     - name: Notify slack channel on success
       if: success() && inputs.SLACK_SUCCESS_CHANNEL_ID != ''
       uses: slackapi/slack-github-action@v1.27.1
