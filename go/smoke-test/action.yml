@@ -69,9 +69,11 @@ runs:
         fi
     - name: Rollback on failure
       if: failure() && inputs.ROLLBACK_ON_FAIL == 'true'
+      env:
+        DEPLOY_ENV: ${{ inputs.ENV }}
       run: |
         echo "WARNING: Rolling back service"
-        chmod +x ./deploy/build.sh && ./deploy/build.sh service rollback --env=${{ inputs.ENV }}
+        chmod +x ./deploy/build.sh && ./deploy/build.sh service rollback --env="$DEPLOY_ENV"
       shell: bash
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_CHANNEL_ID != ''

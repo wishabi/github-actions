@@ -45,16 +45,20 @@ runs:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Setup safe directory
       shell: bash
-      run: git config --global --add safe.directory ${{ inputs.WORKSPACE || github.workspace }}
+      env:
+        LINT_WORKSPACE: ${{ inputs.WORKSPACE || github.workspace }}
+      run: git config --global --add safe.directory "$LINT_WORKSPACE"
     - name: Determine golangci-lint and config version
+      env:
+        LINT_VERSION: ${{ inputs.GOLANG_CI_LINT_VERSION }}
       run: |
         # Default to empty version and v1 config
         GOLANGCI_LINT_VERSION=""
         IS_V2=false
   
         # Check for GOLANG_CI_LINT_VERSION input
-        if [ -n "${{ inputs.GOLANG_CI_LINT_VERSION }}" ]; then
-          GOLANGCI_LINT_VERSION="${{ inputs.GOLANG_CI_LINT_VERSION }}"
+        if [ -n "$LINT_VERSION" ]; then
+          GOLANGCI_LINT_VERSION="$LINT_VERSION"
           echo "Using GOLANG_CI_LINT_VERSION=${GOLANGCI_LINT_VERSION} from input"
         fi
 

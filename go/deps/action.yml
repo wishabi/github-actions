@@ -27,7 +27,7 @@ runs:
       with:
         path: vendor
         key: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
-        restore-keys: vendor-cache-${{ hashFiles('go.mod','go.sum') }}
+        restore-keys: vendor-cache-
     - name: Generating protobuf code
       if: ${{ hashFiles('buf.gen.yaml') != '' }}
       run: buf generate
@@ -47,7 +47,7 @@ runs:
         eval "$CODE_GEN_COMMANDS"
       env:
         CODE_GEN_COMMANDS: ${{ inputs.CODE_GEN_COMMANDS }}
-    - name: Setting up private modules access
+    - name: Tidy and vendor modules
       if: steps.vendor-cache.outputs.cache-hit != 'true'
       shell: bash
       run: |
@@ -60,13 +60,15 @@ runs:
       run: go generate ./...
       shell: bash
     - name: Grab mockery version
+      env:
+        MOCKERY_VERSION: ${{ inputs.MOCKERY_INSTALL_VERSION }}
       run: |
         # Default to empty version and v1 config
         MOCKERY_INSTALL_VERSION=""
   
         # Check for MOCKERY_INSTALL_VERSION input
-        if [ -n "${{ inputs.MOCKERY_INSTALL_VERSION }}" ]; then
-          MOCKERY_INSTALL_VERSION="${{ inputs.MOCKERY_INSTALL_VERSION }}"
+        if [ -n "$MOCKERY_VERSION" ]; then
+          MOCKERY_INSTALL_VERSION="$MOCKERY_VERSION"
           echo "Using MOCKERY_INSTALL_VERSION=${MOCKERY_INSTALL_VERSION} from input"
         fi
 

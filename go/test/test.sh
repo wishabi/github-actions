@@ -1,9 +1,9 @@
 #! /bin/bash
 set -eu
 
-TAGS=${1:-}
-TIMEOUT=${2:-}
-PARALLEL=${3:-}
+TAGS=${TEST_TAGS:-}
+TIMEOUT=${TEST_TIMEOUT:-}
+PARALLEL=${TEST_PARALLEL:-true}
 
 cmd="go test -v ./... -coverprofile=coverage.out"
 

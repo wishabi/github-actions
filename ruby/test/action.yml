@@ -61,14 +61,16 @@ runs:
       working-directory: ./coverage
       shell: bash
       run: |
-        sed -i 's@${{ env.ROOT_PATH }}''@/github/workspace/@g' coverage.json
+        sed -i "s@${ROOT_PATH}@/github/workspace/@g" coverage.json
     - name: 'Upload coverage'
+      if: always()
       uses: actions/upload-artifact@v6
       with:
         name: ${{ github.sha }}-coverage.out
         path: ./coverage/coverage.json
         retention-days: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
     - name: 'Upload test results'
+      if: always()
       uses: actions/upload-artifact@v6
       with:
         name: ${{ github.sha }}-test-report.out
