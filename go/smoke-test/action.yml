@@ -52,15 +52,23 @@ runs:
     - name: Write smoke test summary
       if: always()
       shell: bash
+      env:
+        SMOKE_ENV: ${{ inputs.ENV }}
+        GO_SMOKE: ${{ inputs.GO_SMOKE }}
+        DD_SYNTHETIC_IDS: ${{ inputs.DD_SYNTHETIC_IDS }}
+        ROLLBACK_ON_FAIL: ${{ inputs.ROLLBACK_ON_FAIL }}
+        JOB_STATUS: ${{ job.status }}
       run: |
+        DD_ENABLED="no"
+        if [ -n "$DD_SYNTHETIC_IDS" ]; then DD_ENABLED="yes"; fi
         echo "## Smoke Test Results" >> $GITHUB_STEP_SUMMARY
         echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
         echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
-        echo "| Environment | ${{ inputs.ENV }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Go Smoke | ${{ inputs.GO_SMOKE }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| DataDog Synthetics | ${{ inputs.DD_SYNTHETIC_IDS != '' && 'yes' || 'no' }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Rollback on Fail | ${{ inputs.ROLLBACK_ON_FAIL }} |" >> $GITHUB_STEP_SUMMARY
-        if [ "${{ job.status }}" = "success" ]; then
+        echo "| Environment | $SMOKE_ENV |" >> $GITHUB_STEP_SUMMARY
+        echo "| Go Smoke | $GO_SMOKE |" >> $GITHUB_STEP_SUMMARY
+        echo "| DataDog Synthetics | $DD_ENABLED |" >> $GITHUB_STEP_SUMMARY
+        echo "| Rollback on Fail | $ROLLBACK_ON_FAIL |" >> $GITHUB_STEP_SUMMARY
+        if [ "$JOB_STATUS" = "success" ]; then
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "> Smoke tests passed" >> $GITHUB_STEP_SUMMARY
         else
