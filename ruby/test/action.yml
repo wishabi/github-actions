@@ -61,7 +61,8 @@ runs:
       working-directory: ./coverage
       shell: bash
       run: |
-        sed -i "s@${ROOT_PATH}@/github/workspace/@g" coverage.json
+        ESCAPED_ROOT=$(printf '%s\n' "$ROOT_PATH" | sed 's/[[\.*^$()+?{|\\]/\\&/g')
+        sed -i "s@${ESCAPED_ROOT}@/github/workspace/@g" coverage.json
     - name: 'Upload coverage'
       if: always()
       uses: actions/upload-artifact@v6
