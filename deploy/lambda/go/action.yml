@@ -16,15 +16,18 @@ runs:
     - uses: actions/checkout@v6
     - name: Cleaning workspace
       shell: bash
-      run: shopt -s dotglob && rm -rf "${{ github.workspace }}"/*
+      run: shopt -s dotglob && rm -rf "$GITHUB_WORKSPACE"/*
     - name: Restoring workspace from cache
       uses: wishabi/github-actions/cache@v0
     - name: Building lambda function for deployment
       shell: bash
+      env:
+        LAMBDA_DIR: ${{ inputs.LAMBDA_FUNCTION_DIRECTORY }}
       run: |
-        go build -o ${{ inputs.LAMBDA_FUNCTION_DIRECTORY }}/main ${{ inputs.LAMBDA_FUNCTION_DIRECTORY }}/main.go
+        go build -o "$LAMBDA_DIR/main" "$LAMBDA_DIR/main.go"
     - name: Deploying to Lambda
       shell: bash
+      env:
+        DEPLOY_ENV: ${{ inputs.ENV }}
       run: |
-        export DEPLOY_ENV=${{ inputs.ENV }}
         chmod +x ./deploy/build.sh && ./deploy/build.sh service

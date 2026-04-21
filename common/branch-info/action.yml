@@ -15,11 +15,15 @@ runs:
     - name: Set branch variable
       id: set-branch
       shell: bash
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        GIT_REF: ${{ github.ref }}
       run: |
-        if [ "${{ github.event_name }}" == "pull_request" ]; then
-          branch="${{ github.event.pull_request.head.ref }}"
+        if [ "$EVENT_NAME" == "pull_request" ]; then
+          branch="$PR_HEAD_REF"
         else
-          branch="${{ github.ref }}"
+          branch="$GIT_REF"
           branch="${branch#refs/heads/}"
         fi
         echo "branch=${branch}" >> $GITHUB_OUTPUT

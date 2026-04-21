@@ -45,16 +45,20 @@ runs:
         FLIPPCIRCLECIPULLER_REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
     - name: Setup safe directory
       shell: bash
-      run: git config --global --add safe.directory ${{ inputs.WORKSPACE || github.workspace }}
+      env:
+        LINT_WORKSPACE: ${{ inputs.WORKSPACE || github.workspace }}
+      run: git config --global --add safe.directory "$LINT_WORKSPACE"
     - name: Determine golangci-lint and config version
+      env:
+        LINT_VERSION: ${{ inputs.GOLANG_CI_LINT_VERSION }}
       run: |
         # Default to empty version and v1 config
         GOLANGCI_LINT_VERSION=""
         IS_V2=false
   
         # Check for GOLANG_CI_LINT_VERSION input
-        if [ -n "${{ inputs.GOLANG_CI_LINT_VERSION }}" ]; then
-          GOLANGCI_LINT_VERSION="${{ inputs.GOLANG_CI_LINT_VERSION }}"
+        if [ -n "$LINT_VERSION" ]; then
+          GOLANGCI_LINT_VERSION="$LINT_VERSION"
           echo "Using GOLANG_CI_LINT_VERSION=${GOLANGCI_LINT_VERSION} from input"
         fi
 
@@ -78,7 +82,7 @@ runs:
       run: |
         echo "::group::Tool Versions"
         echo "Go: $(go version)"
-        if [ -n "${{ env.GOLANGCI_LINT_VERSION }}" ]; then echo "golangci-lint: ${{ env.GOLANGCI_LINT_VERSION }}"; fi
+        if [ -n "$GOLANGCI_LINT_VERSION" ]; then echo "golangci-lint: $GOLANGCI_LINT_VERSION"; fi
         echo "::endgroup::"
     - name: Run v1 Go linter
       if: ${{ env.IS_V2 == 'false' }}
@@ -97,16 +101,20 @@ runs:
     - name: Write lint summary
       if: always()
       shell: bash
+      env:
+        JOB_STATUS: ${{ job.status }}
       run: |
         echo "## Go Lint Results" >> $GITHUB_STEP_SUMMARY
         echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
         echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
         echo "| Go | $(go version | awk '{print $3}') |" >> $GITHUB_STEP_SUMMARY
-        if [ -n "${{ env.GOLANGCI_LINT_VERSION }}" ]; then
-          echo "| golangci-lint | ${{ env.GOLANGCI_LINT_VERSION }} |" >> $GITHUB_STEP_SUMMARY
+        if [ -n "$GOLANGCI_LINT_VERSION" ]; then
+          echo "| golangci-lint | $GOLANGCI_LINT_VERSION |" >> $GITHUB_STEP_SUMMARY
         fi
-        echo "| Config version | ${{ env.IS_V2 == 'true' && 'v2' || 'v1' }} |" >> $GITHUB_STEP_SUMMARY
-        if [ "${{ job.status }}" = "success" ]; then
+        CONFIG_VERSION="v1"
+        if [ "$IS_V2" = "true" ]; then CONFIG_VERSION="v2"; fi
+        echo "| Config version | $CONFIG_VERSION |" >> $GITHUB_STEP_SUMMARY
+        if [ "$JOB_STATUS" = "success" ]; then
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "> Lint passed" >> $GITHUB_STEP_SUMMARY
         else

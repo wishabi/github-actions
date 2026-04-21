@@ -23,7 +23,11 @@ runs:
   steps:
     - name: Running go tests
       shell: bash
-      run: ${GITHUB_ACTION_PATH}/test.sh "${{ inputs.TAGS }}" "${{ inputs.TIMEOUT }}" "${{ inputs.PARALLEL }}"
+      env:
+        TEST_TAGS: ${{ inputs.TAGS }}
+        TEST_TIMEOUT: ${{ inputs.TIMEOUT }}
+        TEST_PARALLEL: ${{ inputs.PARALLEL }}
+      run: ${GITHUB_ACTION_PATH}/test.sh
     - name: Write test summary
       if: always()
       shell: bash
@@ -51,12 +55,14 @@ runs:
           echo "> **Warning:** No test report found" >> $GITHUB_STEP_SUMMARY
         fi
     - name: Uploading test report
+      if: always()
       uses: actions/upload-artifact@v6
       with:
         name: "${{ github.sha }}-test-report.out"
         path: "./test-report.out"
         retention-days: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
     - name: Uploading coverage report
+      if: always()
       uses: actions/upload-artifact@v6
       with:
         name: "${{ github.sha }}-coverage.out"

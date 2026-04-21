@@ -25,7 +25,9 @@ runs:
         fetch-depth: ${{ inputs.FETCH_DEPTH }}
     - name: Setting up private modules access
       shell: bash
-      run: git config --global url."https://${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
+      env:
+        REPO_TOKEN: ${{ inputs.FLIPPCIRCLECIPULLER_REPO_TOKEN }}
+      run: git config --global url."https://$REPO_TOKEN:x-oauth-basic@github.com/wishabi".insteadOf "https://github.com/wishabi"
     - name: Grab buf version
       if: ${{ hashFiles('.tool-versions') != '' }}
       run: |

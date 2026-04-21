@@ -15,7 +15,7 @@ runs:
       with:
         path: vendor/bundle
         key: rails-${{ hashFiles('Gemfile.lock') }}
-        restore-keys: rails-${{ hashFiles('Gemfile.lock') }}
+        restore-keys: rails-
     - name: Bundle install
       if: steps.bundle-cache.outputs.cache-hit != 'true'
       shell: bash
