@@ -21,10 +21,10 @@ inputs:
     description: AWS region to deploy to
     required: true
   SLACK_SUCCESS_CHANNEL_ID:
-    description: The Slack channel ID(s) to send successful deployment notifications
+    description: The Slack channel ID to send successful deployment notifications
     required: false
   SLACK_FAILURE_CHANNEL_ID:
-    description: The Slack channel ID(s) to send failed deployment notifications
+    description: The Slack channel ID to send failed deployment notifications
     required: false
   SLACK_BOT_TOKEN:
     description: The Slack bot token to pass the data to

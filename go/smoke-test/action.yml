@@ -2,7 +2,7 @@ name: 'Smoke Test'
 description: 'Runs Go smoke tests'
 inputs:
   SLACK_CHANNEL_ID:
-    description: The Slack channel ID(s) to send the data to
+    description: The Slack channel ID to send the data to
     required: false
   SLACK_BOT_TOKEN:
     description: The Slack bot token to pass the data to
