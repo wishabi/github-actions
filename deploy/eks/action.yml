@@ -36,6 +36,10 @@ inputs:
     description: Whether to clean the workspace before deploying (true or false)
     required: false
     default: "true"
+  MULTI_ARCH_BUILD:
+    description: Set to "true" if build.sh produces multi-arch (amd64 + arm64) images; sets up QEMU and Buildx before the deploy step.
+    required: false
+    default: "false"
 
 runs:
   using: "composite"
@@ -74,6 +78,12 @@ runs:
       run: shopt -s dotglob && rm -rf "$GITHUB_WORKSPACE"/*
     - name: Restoring workspace from cache
       uses: wishabi/github-actions/cache@v0
+    - name: Set up QEMU
+      if: ${{ inputs.MULTI_ARCH_BUILD == 'true' }}
+      uses: docker/setup-qemu-action@v4
+    - name: Set up Docker Buildx
+      if: ${{ inputs.MULTI_ARCH_BUILD == 'true' }}
+      uses: docker/setup-buildx-action@v4
     - name: Deploying to EKS via Helm release
       shell: bash
       env:
