@@ -85,13 +85,13 @@ runs:
       shell: bash
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_CHANNEL_ID != ''
-      uses: slackapi/slack-github-action@v1.27.1
-      env:
-        SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
+      uses: slackapi/slack-github-action@v3.0.3
       with:
-        channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+        method: chat.postMessage
+        token: ${{ inputs.SLACK_BOT_TOKEN }}
         payload: |
           {
+            "channel": "${{ inputs.SLACK_CHANNEL_ID }}",
             "text": "Smoke Test Failed",
             "blocks": [
               {

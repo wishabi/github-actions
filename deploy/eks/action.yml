@@ -98,13 +98,13 @@ runs:
         "${cmd[@]}"
     - name: Notify slack channel on success
       if: success() && inputs.SLACK_SUCCESS_CHANNEL_ID != ''
-      uses: slackapi/slack-github-action@v1.27.1
-      env:
-        SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
+      uses: slackapi/slack-github-action@v3.0.3
       with:
-        channel-id: ${{ inputs.SLACK_SUCCESS_CHANNEL_ID }}
+        method: chat.postMessage
+        token: ${{ inputs.SLACK_BOT_TOKEN }}
         payload: |
           {
+            "channel": "${{ inputs.SLACK_SUCCESS_CHANNEL_ID }}",
             "text": "EKS Deployment Succeeded",
             "blocks": [
               {
@@ -170,13 +170,13 @@ runs:
           }
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_FAILURE_CHANNEL_ID != ''
-      uses: slackapi/slack-github-action@v1.27.1
-      env:
-        SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
+      uses: slackapi/slack-github-action@v3.0.3
       with:
-        channel-id: ${{ inputs.SLACK_FAILURE_CHANNEL_ID }}
+        method: chat.postMessage
+        token: ${{ inputs.SLACK_BOT_TOKEN }}
         payload: |
           {
+            "channel": "${{ inputs.SLACK_FAILURE_CHANNEL_ID }}",
             "text": "EKS Deployment Failed",
             "blocks": [
               {
