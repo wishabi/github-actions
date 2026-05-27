@@ -36,6 +36,14 @@ inputs:
     description: Whether to clean the workspace before deploying (true or false)
     required: false
     default: "true"
+  MULTI_ARCH_BUILD:
+    description: |
+      Multi-architecture build opt-in for build.sh. When set, the action installs QEMU + Buildx and exports DOCKER_PLATFORMS to the environment so `platform_deploy` (from `platform-infrastructure`) takes the `docker buildx build --push` path. Accepts:
+        - "false" or empty (default): single-arch, no buildx setup
+        - "true": shorthand for "linux/amd64,linux/arm64"
+        - any comma-separated platform list (e.g. "linux/arm64"): used verbatim
+    required: false
+    default: "false"
 
 runs:
   using: "composite"
@@ -74,6 +82,34 @@ runs:
       run: shopt -s dotglob && rm -rf "$GITHUB_WORKSPACE"/*
     - name: Restoring workspace from cache
       uses: wishabi/github-actions/cache@v0
+    - name: Resolve multi-arch platforms
+      id: multi-arch
+      shell: bash
+      env:
+        MULTI_ARCH_INPUT: ${{ inputs.MULTI_ARCH_BUILD }}
+      run: |
+        case "$MULTI_ARCH_INPUT" in
+          ""|"false")
+            platforms=""
+            ;;
+          "true")
+            platforms="linux/amd64,linux/arm64"
+            ;;
+          *)
+            platforms="$MULTI_ARCH_INPUT"
+            ;;
+        esac
+        echo "platforms=$platforms" >> "$GITHUB_OUTPUT"
+        if [ -n "$platforms" ]; then
+          echo "DOCKER_PLATFORMS=$platforms" >> "$GITHUB_ENV"
+          echo "Multi-arch build enabled for platforms: $platforms"
+        fi
+    - name: Set up QEMU
+      if: ${{ steps.multi-arch.outputs.platforms != '' }}
+      uses: docker/setup-qemu-action@v4
+    - name: Set up Docker Buildx
+      if: ${{ steps.multi-arch.outputs.platforms != '' }}
+      uses: docker/setup-buildx-action@v4
     - name: Deploying to EKS via Helm release
       shell: bash
       env:
