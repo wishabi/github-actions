@@ -64,11 +64,31 @@ runs:
         aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ inputs.AWS_REGION }}
     - uses: actions/checkout@v6
+    # Probe for a workspace cache from an earlier job in this workflow run.
+    # The original design assumes a prior "build" job populated the cache,
+    # so the deploy job can wipe the fresh checkout and restore the pre-built
+    # workspace. For single-job workflows there is no such prior cache, and
+    # wiping the workspace would leave `./deploy/build.sh` missing. Probing
+    # via lookup-only lets us skip both the wipe and the restore on a cache
+    # miss, preserving the checkout-populated workspace.
+    # NOTE: path/key must mirror wishabi/github-actions/cache defaults.
+    - name: Probe workspace cache
+      id: cache-probe
+      uses: actions/cache/restore@v5
+      with:
+        path: ./*
+        key: workspace-cache-${{ github.run_id }}
+        lookup-only: true
     - name: Cleaning workspace
-      if: ${{ inputs.CLEAN_WORKSPACE == 'true' }}
+      if: ${{ inputs.CLEAN_WORKSPACE == 'true' && steps.cache-probe.outputs.cache-hit == 'true' }}
       shell: bash
       run: shopt -s dotglob && rm -rf "${{ github.workspace }}"/*
+    - name: Workspace cache miss — keeping fresh checkout
+      if: ${{ inputs.CLEAN_WORKSPACE == 'true' && steps.cache-probe.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: echo "::notice::No workspace cache found for key 'workspace-cache-${{ github.run_id }}'. Skipping workspace clean and restore; using the freshly checked-out source instead. (This is expected for single-job deploy workflows; multi-job workflows where an earlier job runs wishabi/github-actions/cache@v0 to save the workspace will still hit the clean + restore path.)"
     - name: Restoring workspace from cache
+      if: ${{ steps.cache-probe.outputs.cache-hit == 'true' }}
       uses: wishabi/github-actions/cache@v0
     - name: Deploying to EKS via Helm release
       shell: bash
