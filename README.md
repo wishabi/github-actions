@@ -83,11 +83,43 @@ This repo also contains reusable composite actions for CI/CD pipelines:
 | Action | Description |
 |--------|-------------|
 | `deploy/eks` | Deploy to EKS (staging/production) with Slack notifications |
-| `slack` | Send Slack notifications on job failure/success |
+| `slack` | Send Slack notifications on job failure/success (legacy) |
+| `common/slack` | Slack notification that resolves the triggering person to a Slack `@mention` via their email |
+| `common/buf-generate` | Cache + generate protobufs (`buf generate`) |
+| `common/deploy-staging` | Deploy a Rails service to a staging EKS env via `deploy/build.sh` (frontend/delayed-jobs not included) |
 | `cache` | Cache/restore workspace between jobs |
 | `common/branch-info` | Extract branch name and short SHA for use in other steps |
 
 Each action's inputs are documented in its `action.yml` file. Use `@v0` to track the latest stable version.
+
+## Reusable Workflows
+
+These are full [reusable workflows](https://docs.github.com/en/actions/using-workflows/reusing-workflows)
+(`on: workflow_call`). GitHub requires them to live flat in `.github/workflows/`, so consumers
+reference them by path. Each is generic — `buf`/protobuf and the cached base-image build are
+optional inputs, so apps that don't use them simply leave the flag off.
+
+| Workflow | Description |
+|----------|-------------|
+| `.github/workflows/buf-push.yml` | Lint, breaking-check and push protobufs to the Buf registry. Ruby is set up only when `GENERATE_KEY_PROTOS: true`. |
+| `.github/workflows/database-schema-check.yml` | Replay a PR's new migrations on the base-branch schema and fail if `db/schema.rb` drifts. Requires a `testing:unload_migrations` rake task in the consumer (see the file header). `USE_BUF` and `SQL_MODE` are optional. |
+| `.github/workflows/deploy-comment.yml` | Deploy a PR to staging from a `@deploy` PR comment (via `github/branch-deploy`). Composes `common/buf-generate` + `common/deploy-staging`; `USE_BUF` and `MULTI_STEP_BUILD` are optional. |
+
+Example consumer (`deploy-comment`):
+
+```yaml
+on:
+  issue_comment:
+    types: [created]
+jobs:
+  deploy:
+    uses: wishabi/github-actions/.github/workflows/deploy-comment.yml@v0
+    with:
+      USE_BUF: true
+      MULTI_STEP_BUILD: true
+      BUILD_ARGS: "--build-arg=KARAFKA_PRO_USERNAME --build-arg=KARAFKA_PRO_PASSWORD"
+    secrets: inherit
+```
 
 ## Contributing
 

@@ -1,0 +1,119 @@
+# Reusable workflow: deploy a PR to staging from a `@deploy` PR comment, via
+# github/branch-deploy. Composes common/buf-generate and common/deploy-staging.
+#
+# The caller supplies the trigger and forwards secrets, e.g.:
+#   on:
+#     issue_comment:
+#       types: [created]
+#   jobs:
+#     deploy:
+#       uses: wishabi/github-actions/.github/workflows/deploy-comment.yml@v0
+#       with:
+#         USE_BUF: true
+#         MULTI_STEP_BUILD: true
+#       secrets: inherit
+name: deploy-comment
+
+on:
+  workflow_call:
+    inputs:
+      USE_BUF:
+        description: 'Generate protobufs before deploying'
+        type: boolean
+        default: false
+      MULTI_STEP_BUILD:
+        description: 'Repo uses the cached base-image build (runs deploy/build-image.sh + prepare-build.sh)'
+        type: boolean
+        default: false
+      ENVIRONMENT:
+        type: string
+        default: 'staging'
+      RUNNER:
+        description: 'Runner label for the deploy job'
+        type: string
+        default: 'runner-fleet-v2'
+      TIMEOUT:
+        type: string
+        default: '30m'
+      ATOMIC:
+        type: boolean
+        default: true
+      BUILD_ARGS:
+        description: 'Extra flags for the deploy command, e.g. "--build-arg=KARAFKA_PRO_USERNAME --build-arg=KARAFKA_PRO_PASSWORD"'
+        type: string
+        default: ''
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_REGION:
+        required: true
+      BUF_BUILD_API_TOKEN:
+        required: false
+      KARAFKA_PRO_USERNAME:
+        required: false
+      KARAFKA_PRO_PASSWORD:
+        required: false
+
+jobs:
+  deploy:
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ${{ inputs.RUNNER }}
+    permissions:
+      pull-requests: write
+      deployments: write
+      contents: write
+      checks: read
+    env:
+      HOME: /home/runner
+      # Values for any --build-arg flags passed via BUILD_ARGS (read by deploy/build.sh)
+      KARAFKA_PRO_USERNAME: ${{ secrets.KARAFKA_PRO_USERNAME }}
+      KARAFKA_PRO_PASSWORD: ${{ secrets.KARAFKA_PRO_PASSWORD }}
+    steps:
+      - uses: github/branch-deploy@v10
+        id: branch-deploy
+        with:
+          trigger: "@deploy"
+          environment: ${{ inputs.ENVIRONMENT }}
+          environment_targets: ${{ inputs.ENVIRONMENT }}
+          permissions: "write,admin"
+          update_branch: "disabled"
+          skip_ci: ${{ inputs.ENVIRONMENT }}
+          skip_reviews: ${{ inputs.ENVIRONMENT }}
+
+      - name: Checkout code
+        if: steps.branch-deploy.outputs.continue == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.branch-deploy.outputs.ref }}
+
+      - name: Generate protobufs
+        if: ${{ steps.branch-deploy.outputs.continue == 'true' && inputs.USE_BUF }}
+        uses: wishabi/github-actions/common/buf-generate@v0
+        with:
+          BUF_TOKEN: ${{ secrets.BUF_BUILD_API_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Set image tag
+        if: ${{ steps.branch-deploy.outputs.continue == 'true' && inputs.MULTI_STEP_BUILD }}
+        run: echo "IMAGE_TAG=inter-${{ hashFiles('Gemfile.lock', 'deploy/Dockerfile') }}" >> "$GITHUB_ENV"
+
+      - name: Build image
+        if: ${{ steps.branch-deploy.outputs.continue == 'true' && inputs.MULTI_STEP_BUILD }}
+        run: pushd deploy; ./build-image.sh "$IMAGE_TAG"; popd
+
+      - name: Deploy to staging
+        if: steps.branch-deploy.outputs.continue == 'true'
+        uses: wishabi/github-actions/common/deploy-staging@v0
+        with:
+          ENVIRONMENT: ${{ steps.branch-deploy.outputs.environment }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          MULTI_STEP_BUILD: ${{ inputs.MULTI_STEP_BUILD }}
+          USE_BUF: ${{ inputs.USE_BUF }}
+          TIMEOUT: ${{ inputs.TIMEOUT }}
+          ATOMIC: ${{ inputs.ATOMIC }}
+          BUILD_ARGS: ${{ inputs.BUILD_ARGS }}
+          REF_NAME: ${{ steps.branch-deploy.outputs.ref }}

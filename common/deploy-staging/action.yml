@@ -1,0 +1,86 @@
+name: 'Deploy to Staging'
+description: 'Deploy a service to a staging EKS environment via deploy/build.sh. Generic — frontend build and delayed-jobs are not included.'
+
+inputs:
+  ENVIRONMENT:
+    description: 'Target environment passed to deploy_eks --env'
+    required: false
+    default: 'staging'
+  AWS_ACCESS_KEY_ID:
+    required: true
+  AWS_SECRET_ACCESS_KEY:
+    required: true
+  AWS_REGION:
+    required: true
+  MULTI_STEP_BUILD:
+    description: 'Set to "true" if the repo uses the cached base-image build (runs deploy/prepare-build.sh to pin the FROM tag). Repos with a single-stage Dockerfile leave this false.'
+    required: false
+    default: 'false'
+  USE_BUF:
+    description: 'Set to "true" to restore the buf-generated (app/gen) cache before deploying.'
+    required: false
+    default: 'false'
+  TIMEOUT:
+    description: 'Helm deploy timeout'
+    required: false
+    default: '30m'
+  ATOMIC:
+    description: 'Set to "false" to pass --atomic=false to the deploy.'
+    required: false
+    default: 'true'
+  BUILD_ARGS:
+    description: 'Extra flags appended to the deploy command, e.g. "--build-arg=KARAFKA_PRO_USERNAME --build-arg=KARAFKA_PRO_PASSWORD". Their values come from job-level env set by the caller.'
+    required: false
+    default: ''
+  REF_NAME:
+    description: 'Branch name for image tagging (overrides GITHUB_HEAD_REF for issue_comment triggers).'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Prepare deploy (multi-step build)
+      if: ${{ inputs.MULTI_STEP_BUILD == 'true' }}
+      shell: bash
+      env:
+        REF_NAME: ${{ inputs.REF_NAME }}
+      run: |
+        if [ -n "$REF_NAME" ]; then
+          export GITHUB_REF="refs/heads/$REF_NAME"
+          export GITHUB_HEAD_REF="$REF_NAME"
+          export GITHUB_REF_NAME="$REF_NAME"
+          export GITHUB_SHA="$(git rev-parse HEAD)"
+        fi
+        HASH_FILES=${{ hashFiles('Gemfile.lock', 'deploy/Dockerfile') }} deploy/prepare-build.sh
+    - name: Configuring AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ inputs.AWS_REGION }}
+    - name: Buf cache
+      if: ${{ inputs.USE_BUF == 'true' }}
+      uses: wishabi/github-actions/cache@v0
+      with:
+        DEPLOY_CACHE_PATH: app/gen
+        DEPLOY_CACHE_KEY: buf-${{ github.run_id }}-${{ github.run_number }}
+    - name: Deploying to EKS via Helm release
+      shell: bash
+      env:
+        ENVIRONMENT: ${{ inputs.ENVIRONMENT }}
+        REF_NAME: ${{ inputs.REF_NAME }}
+        TIMEOUT: ${{ inputs.TIMEOUT }}
+        ATOMIC: ${{ inputs.ATOMIC }}
+        BUILD_ARGS: ${{ inputs.BUILD_ARGS }}
+      run: |
+        if [ -n "$REF_NAME" ]; then
+          export GITHUB_REF="refs/heads/$REF_NAME"
+          export GITHUB_HEAD_REF="$REF_NAME"
+          export GITHUB_REF_NAME="$REF_NAME"
+          export GITHUB_SHA="$(git rev-parse HEAD)"
+        fi
+        ATOMIC_FLAG=""
+        if [ "$ATOMIC" = "false" ]; then ATOMIC_FLAG="--atomic=false"; fi
+        chmod +x ./deploy/build.sh
+        ./deploy/build.sh service deploy_eks --env="$ENVIRONMENT" $BUILD_ARGS --timeout="$TIMEOUT" $ATOMIC_FLAG
