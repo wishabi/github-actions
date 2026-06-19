@@ -82,11 +82,10 @@ This repo also contains reusable composite actions for CI/CD pipelines:
 ### Shared
 | Action | Description |
 |--------|-------------|
-| `deploy/eks` | Deploy to EKS (staging/production) with Slack notifications |
+| `deploy/eks` | Deploy to EKS (staging/production): static or OIDC AWS auth, multi-arch, Slack, plus optional `USE_BUF` (restore the `app/gen` cache), `MULTI_STEP_BUILD` (run `deploy/prepare-build.sh`), `BUILD_ARGS`, and `REF_NAME` for comment-triggered deploys |
 | `slack` | Send Slack notifications on job failure/success (legacy) |
 | `common/slack` | Slack notification that resolves the triggering person to a Slack `@mention` via their email |
 | `common/buf-generate` | Cache + generate protobufs (`buf generate`) |
-| `common/deploy-staging` | Deploy a Rails service to a staging EKS env via `deploy/build.sh` (frontend/delayed-jobs not included) |
 | `cache` | Cache/restore workspace between jobs |
 | `common/branch-info` | Extract branch name and short SHA for use in other steps |
 
@@ -102,8 +101,8 @@ optional inputs, so apps that don't use them simply leave the flag off.
 | Workflow | Description |
 |----------|-------------|
 | `.github/workflows/buf-push.yml` | Lint, breaking-check and push protobufs to the Buf registry. Ruby is set up only when `GENERATE_KEY_PROTOS: true`. |
-| `.github/workflows/database-schema-check.yml` | Replay a PR's new migrations on the base-branch schema and fail if `db/schema.rb` drifts. Requires a `testing:unload_migrations` rake task in the consumer (see the file header). `USE_BUF` and `SQL_MODE` are optional. |
-| `.github/workflows/deploy-comment.yml` | Deploy a PR to staging from a `@deploy` PR comment (via `github/branch-deploy`). Composes `common/buf-generate` + `common/deploy-staging`; `USE_BUF` and `MULTI_STEP_BUILD` are optional. |
+| `.github/workflows/ruby-database-schema-check.yml` | Replay a PR's new migrations on the base-branch schema and fail if `db/schema.rb` drifts. Requires a `testing:unload_migrations` rake task in the consumer (see the file header). `USE_BUF` and `SQL_MODE` are optional. |
+| `.github/workflows/deploy-comment.yml` | Deploy a PR to staging from a `@deploy` PR comment (via `github/branch-deploy`). Composes `common/buf-generate` + `deploy/eks`; `USE_BUF` and `MULTI_STEP_BUILD` are optional. |
 
 Example consumer (`deploy-comment`):
 

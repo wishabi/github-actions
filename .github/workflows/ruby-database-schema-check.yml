@@ -31,7 +31,7 @@ on:
     secrets:
       BUF_BUILD_API_TOKEN:
         required: false
-      ARTIFACTORY_RUBY_TOKEN:
+      BUNDLE_TOKEN:
         required: false
 
 jobs:
@@ -41,7 +41,7 @@ jobs:
     env:
       # Rails verifies the time zone in DB is the same as the time zone of the Rails app
       TZ: "America/New_York"
-      BUNDLE_FLIPPLIB__JFROG__IO: "flippcircleci:${{ secrets.ARTIFACTORY_RUBY_TOKEN }}"
+      "BUNDLE_HTTPS://FLIPPLIB__JFROG__IO/FLIPPLIB/API/GEMS/FLIPP___GEMS/": ${{ secrets.BUNDLE_TOKEN }}
 
     services:
       mysql:
@@ -56,7 +56,7 @@ jobs:
     steps:
       # Triggered by PR events, so check out the PR head to get the actual PR code
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # fetch all history for all branches and tags
           ref: ${{ github.event.pull_request.head.sha }}
@@ -69,7 +69,7 @@ jobs:
       - name: Buf cache
         id: buf-cache
         if: ${{ inputs.USE_BUF }}
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: app/gen
           key: buf-${{ hashFiles('**/*.proto', 'buf.gen.ci.yaml') }}

@@ -44,6 +44,22 @@ inputs:
         - any comma-separated platform list (e.g. "linux/arm64"): used verbatim
     required: false
     default: "false"
+  USE_BUF:
+    description: Restore the buf-generated (app/gen) cache before deploying (for protobuf repos)
+    required: false
+    default: "false"
+  MULTI_STEP_BUILD:
+    description: Run deploy/prepare-build.sh to pin the cached base-image FROM tag (repos using the double-step build)
+    required: false
+    default: "false"
+  BUILD_ARGS:
+    description: 'Extra flags appended to the deploy command, e.g. "--build-arg=KARAFKA_PRO_USERNAME --build-arg=KARAFKA_PRO_PASSWORD". Values come from job-level env set by the caller.'
+    required: false
+    default: ""
+  REF_NAME:
+    description: Branch/ref to check out and tag the image from (e.g. for issue_comment-triggered deploys). Empty = default event ref.
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -76,12 +92,20 @@ runs:
         aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ inputs.AWS_REGION }}
     - uses: actions/checkout@v6
+      with:
+        ref: ${{ inputs.REF_NAME }}
     - name: Cleaning workspace
       if: ${{ inputs.CLEAN_WORKSPACE == 'true' }}
       shell: bash
       run: shopt -s dotglob && rm -rf "$GITHUB_WORKSPACE"/*
     - name: Restoring workspace from cache
       uses: wishabi/github-actions/cache@v0
+    - name: Restore buf cache
+      if: ${{ inputs.USE_BUF == 'true' }}
+      uses: wishabi/github-actions/cache@v0
+      with:
+        DEPLOY_CACHE_PATH: app/gen
+        DEPLOY_CACHE_KEY: buf-${{ github.run_id }}-${{ github.run_number }}
     - name: Resolve multi-arch platforms
       id: multi-arch
       shell: bash
@@ -110,15 +134,42 @@ runs:
     - name: Set up Docker Buildx
       if: ${{ steps.multi-arch.outputs.platforms != '' }}
       uses: docker/setup-buildx-action@v4
+    - name: Prepare deploy (multi-step build)
+      if: ${{ inputs.MULTI_STEP_BUILD == 'true' }}
+      shell: bash
+      env:
+        REF_NAME: ${{ inputs.REF_NAME }}
+      run: |
+        if [ -n "$REF_NAME" ]; then
+          export GITHUB_REF="refs/heads/$REF_NAME"
+          export GITHUB_HEAD_REF="$REF_NAME"
+          export GITHUB_REF_NAME="$REF_NAME"
+          export GITHUB_SHA="$(git rev-parse HEAD)"
+        fi
+        HASH_FILES=${{ hashFiles('Gemfile.lock', 'deploy/Dockerfile') }} deploy/prepare-build.sh
     - name: Deploying to EKS via Helm release
       shell: bash
       env:
         DEPLOY_ENV: ${{ inputs.ENV }}
         DEPLOY_TIMEOUT: ${{ inputs.TIMEOUT }}
         DEPLOY_ATOMIC: ${{ inputs.ATOMIC }}
+        DEPLOY_BUILD_ARGS: ${{ inputs.BUILD_ARGS }}
+        REF_NAME: ${{ inputs.REF_NAME }}
       run: |
+        if [ -n "$REF_NAME" ]; then
+          export GITHUB_REF="refs/heads/$REF_NAME"
+          export GITHUB_HEAD_REF="$REF_NAME"
+          export GITHUB_REF_NAME="$REF_NAME"
+          export GITHUB_SHA="$(git rev-parse HEAD)"
+        fi
         chmod +x ./deploy/build.sh
         cmd=(./deploy/build.sh service deploy_eks --env="$DEPLOY_ENV")
+
+        # Append any caller-provided build args (e.g. --build-arg=KARAFKA_PRO_USERNAME)
+        if [ -n "$DEPLOY_BUILD_ARGS" ]; then
+          read -ra extra_args <<< "$DEPLOY_BUILD_ARGS"
+          cmd+=("${extra_args[@]}")
+        fi
 
         # Check if TIMEOUT is set and provide it as a flag
         if [ -n "$DEPLOY_TIMEOUT" ]; then

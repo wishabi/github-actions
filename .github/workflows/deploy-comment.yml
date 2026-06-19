@@ -1,5 +1,5 @@
 # Reusable workflow: deploy a PR to staging from a `@deploy` PR comment, via
-# github/branch-deploy. Composes common/buf-generate and common/deploy-staging.
+# github/branch-deploy. Composes common/buf-generate and deploy/eks.
 #
 # The caller supplies the trigger and forwards secrets, e.g.:
 #   on:
@@ -84,7 +84,7 @@ jobs:
 
       - name: Checkout code
         if: steps.branch-deploy.outputs.continue == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ steps.branch-deploy.outputs.ref }}
 
@@ -105,12 +105,13 @@ jobs:
 
       - name: Deploy to staging
         if: steps.branch-deploy.outputs.continue == 'true'
-        uses: wishabi/github-actions/common/deploy-staging@v0
+        uses: wishabi/github-actions/deploy/eks@v0
         with:
-          ENVIRONMENT: ${{ steps.branch-deploy.outputs.environment }}
+          ENV: ${{ steps.branch-deploy.outputs.environment }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
+          CLEAN_WORKSPACE: "false"
           MULTI_STEP_BUILD: ${{ inputs.MULTI_STEP_BUILD }}
           USE_BUF: ${{ inputs.USE_BUF }}
           TIMEOUT: ${{ inputs.TIMEOUT }}
