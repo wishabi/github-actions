@@ -1,0 +1,36 @@
+name: 'Buf Generate'
+description: 'Generate protobufs and cache the output'
+
+inputs:
+  BUF_TOKEN:
+    description: 'Buf Build API token'
+    required: true
+  GITHUB_TOKEN:
+    description: 'GitHub token for the Buf action'
+    required: true
+  CACHE_PATH:
+    description: 'Path to cache the generated protobufs'
+    required: false
+    default: 'app/gen'
+  TEMPLATE:
+    description: 'buf generate template file'
+    required: false
+    default: 'buf.gen.ci.yaml'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Buf cache
+      uses: actions/cache@v5
+      with:
+        path: ${{ inputs.CACHE_PATH }}
+        key: buf-${{ github.run_id }}-${{ github.run_number }}
+    - name: Setup buf
+      uses: bufbuild/buf-action@v1
+      with:
+        setup_only: true
+        token: ${{ inputs.BUF_TOKEN }}
+        github_token: ${{ inputs.GITHUB_TOKEN }}
+    - name: Generate protobufs
+      shell: bash
+      run: buf generate --template ${{ inputs.TEMPLATE }} --include-imports

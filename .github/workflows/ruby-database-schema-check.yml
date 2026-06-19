@@ -1,0 +1,127 @@
+# Reusable workflow: verify db/schema.rb is up to date by replaying a PR's new
+# migrations on top of the base-branch schema.
+#
+# REQUIREMENT: the consuming repo must define a `testing:unload_migrations` rake
+# task that reads the changed-migration file list from the $FILE env var (JSON
+# produced by tj-actions/changed-files) and removes already-applied migrations so
+# only the PR's migrations run. See fadmin's lib/tasks for a reference implementation.
+#
+# The caller supplies the trigger, e.g.:
+#   on:
+#     pull_request:
+#       branches: [main]
+#       paths: ["**/migrate/**/*.rb", "db/schema.rb"]
+name: Database Schema Check
+
+on:
+  workflow_call:
+    inputs:
+      USE_BUF:
+        description: 'Generate protobufs before loading the schema'
+        type: boolean
+        default: false
+      DEFAULT_BRANCH:
+        description: 'Branch to restore the baseline db/schema.rb from'
+        type: string
+        default: 'main'
+      SQL_MODE:
+        description: 'If set, applies SET GLOBAL sql_mode = "<value>" before loading the schema (e.g. NO_ENGINE_SUBSTITUTION). Empty = skip.'
+        type: string
+        default: ''
+    secrets:
+      BUF_BUILD_API_TOKEN:
+        required: false
+      BUNDLE_TOKEN:
+        required: false
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    env:
+      # Rails verifies the time zone in DB is the same as the time zone of the Rails app
+      TZ: "America/New_York"
+      "BUNDLE_HTTPS://FLIPPLIB__JFROG__IO/FLIPPLIB/API/GEMS/FLIPP___GEMS/": ${{ secrets.BUNDLE_TOKEN }}
+
+    services:
+      mysql:
+        image: mysql:8.0
+        ports:
+        - 3306:3306
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+        options: --health-cmd="mysqladmin ping --protocol=tcp -h 127.0.0.1" --health-interval=10s --health-timeout=5s
+          --health-retries=3 --name=localmysql
+
+    steps:
+      # Triggered by PR events, so check out the PR head to get the actual PR code
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # fetch all history for all branches and tags
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Buf cache
+        id: buf-cache
+        if: ${{ inputs.USE_BUF }}
+        uses: actions/cache@v5
+        with:
+          path: app/gen
+          key: buf-${{ hashFiles('**/*.proto', 'buf.gen.ci.yaml') }}
+
+      - name: Setup buf
+        if: ${{ inputs.USE_BUF && steps.buf-cache.outputs.cache-hit != 'true' }}
+        uses: bufbuild/buf-action@v1
+        with:
+          setup_only: true
+          token: ${{ secrets.BUF_BUILD_API_TOKEN }}
+          github_token: ${{ github.token }}
+      - name: Generate protobufs
+        if: ${{ inputs.USE_BUF && steps.buf-cache.outputs.cache-hit != 'true' }}
+        run: buf generate --template buf.gen.ci.yaml --include-imports
+
+      - name: Set SQL mode
+        if: ${{ inputs.SQL_MODE != '' }}
+        run: docker exec localmysql mysql -u root -e "SET GLOBAL sql_mode = '${{ inputs.SQL_MODE }}';"
+
+      # TLDR: checkout schema from up to date target branch, feed into DB, run migrations on top of it, compare schema
+      - name: Checkout schema from base branch
+        run: git restore --source=origin/${{ inputs.DEFAULT_BRANCH }} --worktree db/schema.rb
+
+      - name: Prepare DB
+        run: bundle exec rake db:create db:schema:load
+
+        # We need to run only migrations from this PR against the schema from the base branch
+      - name: Get all changed migration files
+        id: changed-migrations
+        uses: tj-actions/changed-files@v46
+        with:
+          files: "**/migrate/**/*.rb"
+          json: true
+          write_output_files: true
+
+      - name: Unload migrations
+        run: bundle exec rake testing:unload_migrations
+        env:
+          FILE: '.github/outputs/all_changed_files.json'
+
+      - name: Run migrations
+        run: bundle exec rake db:migrate
+
+      - name: Validate Database Schema
+        run: git diff --exit-code -- db/schema.rb
+
+      - name: Print Solution
+        if: failure()
+        # Outputs schema diff and instructions on how to solve it in the PR summary
+        run: |
+          {
+            echo '### Schema diff for this pull request'
+            echo '```patch'
+            git diff -- db/schema.rb
+          } >> "$GITHUB_STEP_SUMMARY"

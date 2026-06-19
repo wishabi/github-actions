@@ -1,0 +1,141 @@
+name: slack
+description: 'Send a Slack notification for a job, resolving the triggering person to a Slack @mention via their email.'
+inputs:
+  SLACK_CHANNEL_ID:
+    description: 'Slack Channel ID'
+    required: true
+  SLACK_BOT_TOKEN:
+    description: 'Slack Bot Token'
+    required: true
+  FAILURE:
+    description: 'Is this a failure notification? ("true" for danger styling / "failed" text)'
+    required: false
+  FAILED_JOBS:
+    description: 'Comma-separated list of failed job names'
+    required: false
+    default: ''
+runs:
+  using: "composite"
+  steps:
+    - name: Set BRANCH variable
+      id: set-branch
+      shell: bash
+      run: |
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+        else
+          BRANCH="${{ github.ref }}"
+          BRANCH="${BRANCH#refs/heads/}"
+        fi
+        echo "BRANCH=${BRANCH}" >> $GITHUB_ENV
+    - name: Resolve person and Slack user
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        SLACK_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
+      run: |
+        # Determine GitHub username and try to get their email
+        echo "::group::Resolve GitHub user email"
+        echo "Event type: ${{ github.event_name }}"
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          PERSON="${{ github.event.pull_request.user.login }}"
+          echo "PR author: $PERSON"
+          COMMIT_RESPONSE=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }}")
+          echo "GitHub commit API response: $COMMIT_RESPONSE"
+          EMAIL=$(echo "$COMMIT_RESPONSE" | jq -r '.commit.author.email // empty') || true
+        elif [ "${{ github.event_name }}" == "push" ]; then
+          PERSON="${{ github.actor }}"
+          EMAIL="${{ github.event.head_commit.author.email }}"
+          echo "Push actor: $PERSON"
+        else
+          PERSON="${{ github.actor }}"
+          echo "Actor: $PERSON"
+          USER_RESPONSE=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/users/${{ github.actor }}")
+          echo "GitHub user API response: $USER_RESPONSE"
+          EMAIL=$(echo "$USER_RESPONSE" | jq -r '.email // empty') || true
+        fi
+        echo "Resolved email: '$EMAIL'"
+        echo "::endgroup::"
+
+        # Try to look up Slack user by email
+        echo "::group::Slack user lookup"
+        SLACK_USER_ID=""
+        if [[ -n "$EMAIL" && ! "$EMAIL" =~ noreply ]]; then
+          echo "Looking up Slack user for email: $EMAIL"
+          LOOKUP_RESPONSE=$(curl -s -H "Authorization: Bearer $SLACK_TOKEN" \
+            "https://slack.com/api/users.lookupByEmail?email=${EMAIL}")
+          echo "Slack API response: $LOOKUP_RESPONSE"
+          if echo "$LOOKUP_RESPONSE" | jq -e '.ok == true' > /dev/null 2>&1; then
+            SLACK_USER_ID=$(echo "$LOOKUP_RESPONSE" | jq -r '.user.id')
+            echo "Found Slack user ID: $SLACK_USER_ID"
+          else
+            echo "Slack lookup failed or user not found"
+          fi
+        else
+          echo "Skipping Slack lookup (email empty or noreply): '$EMAIL'"
+        fi
+        echo "::endgroup::"
+
+        # Set mention: @slack-user if found, otherwise GitHub profile link
+        if [ -n "$SLACK_USER_ID" ]; then
+          echo "SLACK_MENTION=<@${SLACK_USER_ID}>" >> $GITHUB_ENV
+        else
+          echo "SLACK_MENTION=<https://github.com/${PERSON} | ${PERSON}>" >> $GITHUB_ENV
+        fi
+        echo "PERSON=${PERSON}" >> $GITHUB_ENV
+        echo "Final SLACK_MENTION: $(grep SLACK_MENTION $GITHUB_ENV | tail -1)"
+    - name: Get Unix Timestamp
+      id: timestamp-step
+      shell: bash
+      run: echo "timestamp=$(date +%s)" >> "$GITHUB_OUTPUT"
+    - uses: slackapi/slack-github-action@v2.1.1
+      with:
+        method: chat.postMessage
+        token: ${{ inputs.SLACK_BOT_TOKEN }}
+        payload: |
+          {
+            "channel": "${{ inputs.SLACK_CHANNEL_ID }}",
+            "text": "GitHub Action build ${{ inputs.FAILURE == 'true' && 'failed' || 'succeeded' }} (${{ env.SLACK_MENTION }})",
+            "attachments": [
+              {
+                "color": "${{ inputs.FAILURE == 'true' && 'danger' || 'good' }}",
+                "fields": [
+                  {
+                    "title": "Workflow",
+                    "value": "<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} | ${{ github.workflow }}>",
+                    "short": true
+                  },
+                  {
+                    "title": "Repo",
+                    "value": "<https://github.com/${{ github.repository }} | ${{ github.repository }}>",
+                    "short": true
+                  },
+                  {
+                    "title": "${{ github.event_name == 'pull_request' && 'Pull Request' || 'Branch' }}",
+                    "value": "${{ github.event_name == 'pull_request' && format('<{0} | {1}>', github.event.pull_request.html_url, github.event.pull_request.title) || format('<https://github.com/{0}/commit/{1} | {2}>', github.repository, github.sha, env.BRANCH) }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Event",
+                    "value": "${{ github.event_name }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Failed Jobs",
+                    "value": "${{ inputs.FAILED_JOBS || 'none' }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Triggered by",
+                    "value": "${{ env.SLACK_MENTION }}",
+                    "short": true
+                  }
+                ],
+                "footer_icon": "https://github.githubassets.com/favicon.ico",
+                "footer": "<https://github.com/${{ github.repository }} | ${{ github.repository }}>",
+                "ts": ${{ steps.timestamp-step.outputs.timestamp }}
+              }
+            ]
+          }

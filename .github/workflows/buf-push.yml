@@ -1,0 +1,72 @@
+# Reusable workflow: lint, breaking-check and push protobufs to the Buf registry.
+# Ruby is only set up when GENERATE_KEY_PROTOS is true (for deimos:generate_key_protos).
+name: buf-push
+
+on:
+  workflow_call:
+    inputs:
+      PROTOS_DIR:
+        description: 'Directory containing the protos'
+        type: string
+        default: 'protos'
+      TEMPLATE:
+        description: 'buf generate template file'
+        type: string
+        default: 'buf.gen.ci.yaml'
+      DEFAULT_BRANCH:
+        description: 'Branch to compare against for breaking changes and to gate non-draft pushes'
+        type: string
+        default: 'main'
+      GENERATE_KEY_PROTOS:
+        description: 'Set up Ruby and run `rake deimos:generate_key_protos` before pushing'
+        type: boolean
+        default: false
+      PUBLISH_DRAFT:
+        description: 'Push a draft even when not on the default branch'
+        type: boolean
+        default: false
+      FORCE_PUSH:
+        description: 'Skip the breaking-change check'
+        type: boolean
+        default: false
+    secrets:
+      BUF_BUILD_USER:
+        required: true
+      BUF_BUILD_API_TOKEN:
+        required: true
+      BUNDLE_TOKEN:
+        required: false
+
+jobs:
+  build:
+    runs-on: [ ubuntu-latest ]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: bufbuild/buf-setup-action@v1
+        with:
+          buf_user: ${{ secrets.BUF_BUILD_USER }}
+          buf_api_token: ${{ secrets.BUF_BUILD_API_TOKEN }}
+      - name: Setup Ruby
+        if: ${{ inputs.GENERATE_KEY_PROTOS }}
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+        env:
+          "BUNDLE_HTTPS://FLIPPLIB__JFROG__IO/FLIPPLIB/API/GEMS/FLIPP___GEMS/": ${{ secrets.BUNDLE_TOKEN }}
+      - name: Generate protobufs
+        run: buf generate --template ${{ inputs.TEMPLATE }} --include-imports
+      - name: Generate key protos
+        if: ${{ inputs.GENERATE_KEY_PROTOS }}
+        run: bundle exec rake deimos:generate_key_protos
+      - uses: bufbuild/buf-lint-action@v1
+      - uses: bufbuild/buf-breaking-action@v1
+        if: ${{ !inputs.FORCE_PUSH }}
+        with:
+          input: ${{ inputs.PROTOS_DIR }}
+          against: 'https://github.com/${{ github.repository }}.git#branch=${{ inputs.DEFAULT_BRANCH }},subdir=${{ inputs.PROTOS_DIR }}'
+      - uses: bufbuild/buf-push-action@v1
+        if: ${{ github.ref_name == inputs.DEFAULT_BRANCH || inputs.PUBLISH_DRAFT }}
+        with:
+          input: ${{ inputs.PROTOS_DIR }}
+          draft: ${{ github.ref_name != inputs.DEFAULT_BRANCH }}
+          buf_token: ${{ secrets.BUF_BUILD_API_TOKEN }}
