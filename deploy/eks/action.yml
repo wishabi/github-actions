@@ -137,6 +137,12 @@ runs:
     - name: Set up QEMU
       if: ${{ steps.multi-arch.outputs.platforms != '' }}
       uses: docker/setup-qemu-action@v4
+      with:
+        # We cross-compile (the build runs on the native builder arch), so QEMU
+        # only handles trivial target-arch RUN steps. Skip the binfmt image cache
+        # to avoid the noisy "Unable to reserve cache" warning when concurrent
+        # jobs race the same cache key — the cache buys ~nothing here.
+        cache-image: false
     - name: Set up Docker Buildx
       if: ${{ steps.multi-arch.outputs.platforms != '' }}
       uses: docker/setup-buildx-action@v4
