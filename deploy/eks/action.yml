@@ -32,10 +32,18 @@ inputs:
   ATOMIC:
     description: EKS Atomic Deployment Flag (true or false) - default is true
     required: false
-  CLEAN_WORKSPACE:
-    description: Whether to clean the workspace before deploying (true or false)
+  DEPLOY_CACHE_KEY:
+    description: |
+      Key used to probe for and restore a pre-built workspace cache saved by an
+      earlier job in this run (via wishabi/github-actions/cache). Must match the
+      key the prior build job saved with. Single-job deploy workflows have no such
+      cache, so the freshly checked-out source is kept as-is.
     required: false
-    default: "true"
+    default: workspace-cache-${{ github.run_id }}
+  DEPLOY_CACHE_PATH:
+    description: Path the workspace cache restores to (must match the prior build job's save path).
+    required: false
+    default: ./*
   MULTI_ARCH_BUILD:
     description: |
       Multi-architecture build opt-in for build.sh. When set, the action installs QEMU + Buildx and exports DOCKER_PLATFORMS to the environment so `platform_deploy` (from `platform-infrastructure`) takes the `docker buildx build --push` path. Accepts:
@@ -75,33 +83,35 @@ runs:
         aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ inputs.AWS_REGION }}
-    - uses: actions/checkout@v6
-    # Probe for a workspace cache from an earlier job in this workflow run.
-    # The original design assumes a prior "build" job populated the cache,
-    # so the deploy job can wipe the fresh checkout and restore the pre-built
-    # workspace. For single-job workflows there is no such prior cache, and
-    # wiping the workspace would leave `./deploy/build.sh` missing. Probing
-    # via lookup-only lets us skip both the wipe and the restore on a cache
-    # miss, preserving the checkout-populated workspace.
-    # NOTE: path/key must mirror wishabi/github-actions/cache defaults.
+    - uses: actions/checkout@v7
+    # Probe for a workspace cache saved by an earlier job in this run (a build
+    # job that ran wishabi/github-actions/cache to save the pre-built workspace).
+    # On a hit we wipe the fresh checkout and restore the cached workspace; on a
+    # miss (e.g. single-job deploy workflows) we keep the fresh checkout so
+    # `./deploy/build.sh` is preserved. The probe and the restore share the same
+    # DEPLOY_CACHE_KEY/PATH inputs, so the lookup can never diverge from what the
+    # restore actually fetches.
     - name: Probe workspace cache
       id: cache-probe
-      uses: actions/cache/restore@v5
+      uses: actions/cache/restore@v6
       with:
-        path: ./*
-        key: workspace-cache-${{ github.run_id }}
+        path: ${{ inputs.DEPLOY_CACHE_PATH }}
+        key: ${{ inputs.DEPLOY_CACHE_KEY }}
         lookup-only: true
     - name: Cleaning workspace
-      if: ${{ inputs.CLEAN_WORKSPACE == 'true' && steps.cache-probe.outputs.cache-hit == 'true' }}
+      if: ${{ steps.cache-probe.outputs.cache-hit == 'true' }}
       shell: bash
       run: shopt -s dotglob && rm -rf "$GITHUB_WORKSPACE"/*
     - name: Workspace cache miss — keeping fresh checkout
-      if: ${{ inputs.CLEAN_WORKSPACE == 'true' && steps.cache-probe.outputs.cache-hit != 'true' }}
+      if: ${{ steps.cache-probe.outputs.cache-hit != 'true' }}
       shell: bash
-      run: echo "::notice::No workspace cache found for key 'workspace-cache-${{ github.run_id }}'. Skipping workspace clean and restore; using the freshly checked-out source instead. (This is expected for single-job deploy workflows; multi-job workflows where an earlier job runs wishabi/github-actions/cache@v0 to save the workspace will still hit the clean + restore path.)"
+      run: echo "::notice::No workspace cache found for key '${{ inputs.DEPLOY_CACHE_KEY }}'. Skipping workspace clean and restore; using the freshly checked-out source instead. (Expected for single-job deploy workflows; multi-job workflows where an earlier job runs wishabi/github-actions/cache to save the workspace still hit the clean + restore path.)"
     - name: Restoring workspace from cache
       if: ${{ steps.cache-probe.outputs.cache-hit == 'true' }}
       uses: wishabi/github-actions/cache@v0
+      with:
+        DEPLOY_CACHE_KEY: ${{ inputs.DEPLOY_CACHE_KEY }}
+        DEPLOY_CACHE_PATH: ${{ inputs.DEPLOY_CACHE_PATH }}
     - name: Resolve multi-arch platforms
       id: multi-arch
       shell: bash
@@ -127,6 +137,12 @@ runs:
     - name: Set up QEMU
       if: ${{ steps.multi-arch.outputs.platforms != '' }}
       uses: docker/setup-qemu-action@v4
+      with:
+        # We cross-compile (the build runs on the native builder arch), so QEMU
+        # only handles trivial target-arch RUN steps. Skip the binfmt image cache
+        # to avoid the noisy "Unable to reserve cache" warning when concurrent
+        # jobs race the same cache key — the cache buys ~nothing here.
+        cache-image: false
     - name: Set up Docker Buildx
       if: ${{ steps.multi-arch.outputs.platforms != '' }}
       uses: docker/setup-buildx-action@v4
