@@ -25,7 +25,20 @@ runs:
         if id "3434" >/dev/null 2>&1; then
             sudo chown circleci:circleci /var/run/docker.sock
         fi
-        chmod +x ./deploy/build.sh && ./deploy/build.sh service topic_validation --env="$VALIDATION_ENV" --config-file=./platform.yml --config-file=./topic_validation.yaml
+        chmod +x ./deploy/build.sh
+
+        max_retries=3
+        for attempt in $(seq 1 $max_retries); do
+          if ./deploy/build.sh service topic_validation --env="$VALIDATION_ENV" --config-file=./platform.yml --config-file=./topic_validation.yaml; then
+            exit 0
+          fi
+          if [ "$attempt" -lt "$max_retries" ]; then
+            echo "Attempt $attempt failed. Retrying in 15 seconds..."
+            sleep 15
+          fi
+        done
+        echo "All $max_retries attempts failed."
+        exit 1
       env: 
         BUNDLE_DEPLOYMENT: true
         PRODUCER_SERVICE: ${{ inputs.PRODUCER_SERVICE }}
