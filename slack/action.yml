@@ -2,7 +2,7 @@ name: 'Send Github Action data to Slack workflow'
 description: 'custom GitHub action that runs to send data to a Slack workflow'
 inputs:
   SLACK_CHANNEL_ID:
-    description: The Slack channel ID(s) to send the data to
+    description: The Slack channel ID to send the data to
     required: true
   SLACK_BOT_TOKEN:
     description: The Slack bot token to pass the data to
@@ -18,13 +18,13 @@ runs:
       id: timestamp-step
       shell: bash
       run: echo "timestamp=$(date +%s)" >> $GITHUB_OUTPUT
-    - uses: slackapi/slack-github-action@v1.27.1
-      env:
-        SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
+    - uses: slackapi/slack-github-action@v3.0.3
       with:
-        channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+        method: chat.postMessage
+        token: ${{ inputs.SLACK_BOT_TOKEN }}
         payload: |
           {
+            "channel": "${{ inputs.SLACK_CHANNEL_ID }}",
             "text": "GitHub Action build",
             "attachments": [
               {

@@ -21,10 +21,10 @@ inputs:
     description: AWS region to deploy to
     required: true
   SLACK_SUCCESS_CHANNEL_ID:
-    description: The Slack channel ID(s) to send successful deployment notifications
+    description: The Slack channel ID to send successful deployment notifications
     required: false
   SLACK_FAILURE_CHANNEL_ID:
-    description: The Slack channel ID(s) to send failed deployment notifications
+    description: The Slack channel ID to send failed deployment notifications
     required: false
   SLACK_BOT_TOKEN:
     description: The Slack bot token to pass the data to
@@ -134,13 +134,13 @@ runs:
         "${cmd[@]}"
     - name: Notify slack channel on success
       if: success() && inputs.SLACK_SUCCESS_CHANNEL_ID != ''
-      uses: slackapi/slack-github-action@v1.27.1
-      env:
-        SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
+      uses: slackapi/slack-github-action@v3.0.3
       with:
-        channel-id: ${{ inputs.SLACK_SUCCESS_CHANNEL_ID }}
+        method: chat.postMessage
+        token: ${{ inputs.SLACK_BOT_TOKEN }}
         payload: |
           {
+            "channel": "${{ inputs.SLACK_SUCCESS_CHANNEL_ID }}",
             "text": "EKS Deployment Succeeded",
             "blocks": [
               {
@@ -206,13 +206,13 @@ runs:
           }
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_FAILURE_CHANNEL_ID != ''
-      uses: slackapi/slack-github-action@v1.27.1
-      env:
-        SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
+      uses: slackapi/slack-github-action@v3.0.3
       with:
-        channel-id: ${{ inputs.SLACK_FAILURE_CHANNEL_ID }}
+        method: chat.postMessage
+        token: ${{ inputs.SLACK_BOT_TOKEN }}
         payload: |
           {
+            "channel": "${{ inputs.SLACK_FAILURE_CHANNEL_ID }}",
             "text": "EKS Deployment Failed",
             "blocks": [
               {

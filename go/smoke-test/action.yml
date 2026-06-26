@@ -2,7 +2,7 @@ name: 'Smoke Test'
 description: 'Runs Go smoke tests'
 inputs:
   SLACK_CHANNEL_ID:
-    description: The Slack channel ID(s) to send the data to
+    description: The Slack channel ID to send the data to
     required: false
   SLACK_BOT_TOKEN:
     description: The Slack bot token to pass the data to
@@ -85,13 +85,13 @@ runs:
       shell: bash
     - name: Notify slack channel on failure
       if: failure() && inputs.SLACK_CHANNEL_ID != ''
-      uses: slackapi/slack-github-action@v1.27.1
-      env:
-        SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
+      uses: slackapi/slack-github-action@v3.0.3
       with:
-        channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+        method: chat.postMessage
+        token: ${{ inputs.SLACK_BOT_TOKEN }}
         payload: |
           {
+            "channel": "${{ inputs.SLACK_CHANNEL_ID }}",
             "text": "Smoke Test Failed",
             "blocks": [
               {
